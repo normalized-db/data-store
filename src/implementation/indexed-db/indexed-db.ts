@@ -1,14 +1,14 @@
 import {
+  Depth,
   ISchema,
   isNull,
   IStore,
   IStoreTargetItem,
   NormalizedData,
   Parent,
-  Range,
   ValidKey
 } from '@normalized-db/core';
-import { DenormalizerBuilder, Depth } from '@normalized-db/denormalizer';
+import { DenormalizerBuilder } from '@normalized-db/denormalizer';
 import { Normalizer, NormalizerBuilder } from '@normalized-db/normalizer';
 import { Cursor, DB, default as DBFactory, ObjectStore, Transaction, UpgradeDB } from 'idb';
 import { LoggingConfig } from '../../builder/model/logging-config';
@@ -16,6 +16,7 @@ import { IDataStore } from '../../data-store-interface';
 import { HistoryRange } from '../../model/history-range';
 import { LogEntry, NestedValue } from '../../model/log-entry';
 import { LogHistory } from '../../model/log-history';
+import { Range } from '../../model/range';
 
 export class IndexedDb implements IDataStore {
 

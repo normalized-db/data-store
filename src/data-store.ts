@@ -1,8 +1,8 @@
-import { ISchema, NormalizedData, Range, ValidKey } from '@normalized-db/core';
-import { Depth } from '@normalized-db/denormalizer';
+import { Depth, ISchema, NormalizedData, ValidKey } from '@normalized-db/core';
 import { IDataStore } from './data-store-interface';
 import { HistoryRange } from './model/history-range';
 import { LogHistory } from './model/log-history';
+import { Range } from './model/range';
 
 export class DataStore implements IDataStore {
 

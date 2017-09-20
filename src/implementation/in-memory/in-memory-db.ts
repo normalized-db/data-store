@@ -1,5 +1,6 @@
 import {
   deepClone,
+  Depth,
   ISchema,
   isNull,
   IStoreTargetItem,
@@ -7,15 +8,15 @@ import {
   NormalizedData,
   Parent,
   Queue,
-  Range,
   UniqueKeyCallback,
   ValidKey
 } from '@normalized-db/core';
-import { Denormalizer, DenormalizerBuilder, Depth } from '@normalized-db/denormalizer';
+import { Denormalizer, DenormalizerBuilder } from '@normalized-db/denormalizer';
 import { Normalizer, NormalizerBuilder } from '@normalized-db/normalizer';
 import { IDataStore } from '../../data-store-interface';
 import { HistoryRange } from '../../model/history-range';
 import { LogHistory } from '../../model/log-history';
+import { Range } from '../../model/range';
 
 export class InMemoryDb implements IDataStore {
 
