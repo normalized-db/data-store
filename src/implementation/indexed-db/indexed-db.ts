@@ -578,6 +578,10 @@ export class IndexedDb implements IDataStore {
   }
 
   private async fetchCallback(keys: ValidKey, type: string): Promise<any | any[]> {
+    if (isNull(keys)) {
+      return null;
+    }
+
     if (Array.isArray(keys)) {
       const objectStore = this.read(type).objectStore(type);
       return Promise.all(keys.map(async key => await objectStore.getKey(key)));
