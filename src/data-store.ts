@@ -116,7 +116,7 @@ export class DataStore implements IDataStore {
     return this.implementation.getNestedInverted<Key, T>(key, type, field, depth, range);
   }
 
-  public addNested<Key extends ValidKey, T>(key: Key, type: string, item: T, field: string): Promise<void> {
+  public addNested<Key extends ValidKey, T>(key: Key, type: string, item: T, field: string): Promise<boolean> {
     return this.implementation.addNested<Key, T>(key, type, item, field);
   }
 

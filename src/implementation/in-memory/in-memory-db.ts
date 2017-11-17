@@ -250,8 +250,8 @@ export class InMemoryDb implements IDataStore {
     return [];
   }
 
-  public async addNested<Key extends ValidKey, T>(key: Key, type: string, item: T, field: string): Promise<void> {
-    return null;
+  public async addNested<Key extends ValidKey, T>(key: Key, type: string, item: T, field: string): Promise<boolean> {
+    return false;
   }
 
   public async removeNested<Key extends ValidKey, T>(key: Key,

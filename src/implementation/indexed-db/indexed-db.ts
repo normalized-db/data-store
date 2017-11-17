@@ -371,83 +371,96 @@ export class IndexedDb implements IDataStore {
     }
   }
 
-  public async addNested<Key extends ValidKey, T>(key: Key, type: string, nestedItem: T, field: string): Promise<void> {
-    const targetConfig = this.schema.getTargetConfig(type, field);
-    await this.put<T>(nestedItem, targetConfig.type);
+  public async addNested<Key extends ValidKey, T>(key: Key,
+                                                  type: string,
+                                                  nestedItem: T,
+                                                  field: string): Promise<boolean> {
+    try {
+      const targetConfig = this.schema.getTargetConfig(type, field);
+      await this.put<T>(nestedItem, targetConfig.type);
 
-    let nestedKey = nestedItem[targetConfig.key];
-    if (isNull(nestedKey)) {
-      nestedItem[targetConfig.key] = nestedKey = await this.getLatestKey(targetConfig.type);
-    }
+      let nestedKey = nestedItem[targetConfig.key];
+      if (isNull(nestedKey)) {
+        nestedItem[targetConfig.key] = nestedKey = await this.getLatestKey(targetConfig.type);
+      }
 
-    const transaction = await this.write(type);
-    const cursor = await transaction.objectStore(type).openCursor(key);
-    if (cursor) {
-      const item = cursor.value;
-      const targetItem = this.schema.getTargetItem(type, field);
-      if (targetItem.isArray) {
-        if (field in item) {
-          item[field].push(nestedItem[targetConfig.key]);
+      const transaction = await this.write(type);
+      const cursor = await transaction.objectStore(type).openCursor(key);
+      if (cursor) {
+        const item = cursor.value;
+        const targetItem = this.schema.getTargetItem(type, field);
+        if (targetItem.isArray) {
+          if (field in item) {
+            item[field].push(nestedItem[targetConfig.key]);
+          } else {
+            item[field] = [];
+          }
         } else {
-          item[field] = [];
+          item[field] = nestedItem[targetConfig.key];
         }
-      } else {
-        item[field] = nestedItem[targetConfig.key];
-      }
 
-      await cursor.update(item);
+        await cursor.update(item);
 
-      if (this.isLoggingActive) {
-        const nestedValue = new NestedValue<Key>(key, nestedKey, field, targetConfig.type);
-        const logEntry = new LogEntry(type, 'addNested', key, nestedValue);
-        await transaction.objectStore(this.getLoggingStore(type)).add(logEntry);
+        if (this.isLoggingActive) {
+          const nestedValue = new NestedValue<Key>(key, nestedKey, field, targetConfig.type);
+          const logEntry = new LogEntry(type, 'addNested', key, nestedValue);
+          await transaction.objectStore(this.getLoggingStore(type)).add(logEntry);
+        }
       }
+    } catch (e) {
+      return false;
     }
+
+    return true;
   }
 
   public async removeNested<Key extends ValidKey, T>(key: Key,
                                                      type: string,
                                                      nestedItem: T,
                                                      field: string): Promise<boolean> {
-    const targetConfig = this.schema.getTargetConfig(type, field);
-    const nestedKey = nestedItem[targetConfig.key];
+    try {
+      const targetConfig = this.schema.getTargetConfig(type, field);
+      const nestedKey = nestedItem[targetConfig.key];
 
-    const targetItem = this.schema.getTargetItem(type, field);
-    if (targetItem.cascadeRemoval) {
-      const removedKeys = await this.remove(nestedKey, targetItem.type);
-      if (removedKeys.length !== 1) {
-        return false;
+      const targetItem = this.schema.getTargetItem(type, field);
+      if (targetItem.cascadeRemoval) {
+        const removedKeys = await this.remove(nestedKey, targetItem.type);
+        if (removedKeys.length !== 1) {
+          return false;
+        }
+      } else {
+        await this.persistRemoveNested(nestedKey, targetItem.type, new Parent(key, type));
       }
-    } else {
-      await this.persistRemoveNested(nestedKey, targetItem.type, new Parent(key, type));
-    }
 
-    const transaction = this.write(type);
-    const cursor = await transaction.objectStore(type).openCursor(key);
-    if (cursor) {
-      const item = cursor.value;
-      if (field in item) {
-        const log = async () => {
-          if (this.isLoggingActive) {
-            const nestedValue = new NestedValue<Key>(key, nestedKey, field, targetItem.type);
-            const logEntry = new LogEntry(type, 'removedNested', key, nestedValue);
-            await transaction.objectStore(this.getLoggingStore(type)).add(logEntry);
-          }
-        };
+      const transaction = this.write(type);
+      const cursor = await transaction.objectStore(type).openCursor(key);
+      if (cursor) {
+        const item = cursor.value;
+        if (field in item) {
+          const log = async () => {
+            if (this.isLoggingActive) {
+              const nestedValue = new NestedValue<Key>(key, nestedKey, field, targetItem.type);
+              const logEntry = new LogEntry(type, 'removedNested', key, nestedValue);
+              await transaction.objectStore(this.getLoggingStore(type)).add(logEntry);
+            }
+          };
 
-        if (targetItem.isArray) {
-          const index = item[field].findIndex(nk => nk === nestedKey);
-          if (index >= 0) {
-            item[field].splice(index, 1);
+          if (targetItem.isArray) {
+            const index = item[field].findIndex(nk => nk === nestedKey);
+            if (index >= 0) {
+              item[field].splice(index, 1);
+              await cursor.update(item);
+              await log();
+            }
+          } else {
+            item[field] = null;
             await cursor.update(item);
             await log();
           }
-        } else {
-          item[field] = null;
-          await cursor.update(item);
-          await log();
         }
       }
+    } catch (e) {
+      return false;
     }
 
     return true;
