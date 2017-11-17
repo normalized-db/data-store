@@ -6,7 +6,10 @@ import { IndexedDb } from './indexed-db';
 
 export class IndexedDbRr extends IndexedDb {
 
-  public async addNested<Key extends ValidKey, T>(key: Key, type: string, nestedItem: T, field: string): Promise<void> {
+  public async addNested<Key extends ValidKey, T>(key: Key,
+                                                  type: string,
+                                                  nestedItem: T,
+                                                  field: string): Promise<boolean> {
     if ('_refs' in nestedItem) {
       if (type in nestedItem['_refs']) {
         nestedItem['_refs'][type].add(key);

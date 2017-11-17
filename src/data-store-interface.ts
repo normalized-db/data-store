@@ -62,7 +62,7 @@ export interface IDataStore {
                                              depth?: number | Depth,
                                              range?: Range): Promise<T[]>;
 
-  addNested<Key extends ValidKey, T>(key: Key, type: string, item: T, field: string): Promise<void>;
+  addNested<Key extends ValidKey, T>(key: Key, type: string, item: T, field: string): Promise<boolean>;
 
   removeNested<Key extends ValidKey, T>(key: Key, type: string, nestedItem: T, field: string): Promise<boolean>;
 
