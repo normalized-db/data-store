@@ -4,7 +4,7 @@ import * as Blog from '../../data/blog-post';
 import * as User from '../../data/user';
 import { assertThrowsAsync } from '../../utilities/async-throws';
 
-describe('In-Memory Data-Store', async function () {
+describe('Input-Memory Data-Store', async function () {
 
   it('Save', async function () {
     const ds = await new DataStoreBuilder()

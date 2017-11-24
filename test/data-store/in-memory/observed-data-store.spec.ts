@@ -3,7 +3,7 @@ import { Subscription } from 'rxjs/Subscription';
 import { DataStoreBuilder, ObservedDataStore } from '../../../lib/index';
 import * as User from '../../data/user';
 
-describe('In-Memory Data-Store (observed)', function () {
+describe('Input-Memory Data-Store (observed)', function () {
 
   let ds: ObservedDataStore;
   let subscription: Subscription;
