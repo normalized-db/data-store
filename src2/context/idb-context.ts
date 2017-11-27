@@ -2,6 +2,8 @@ import { ISchema } from '@normalized-db/core';
 import { IDenormalizer } from '@normalized-db/denormalizer';
 import { INormalizer } from '@normalized-db/normalizer';
 import { DB, default as DBFactory, Transaction, UpgradeDB } from 'idb';
+import { CommandFactory } from '../command/command-factory';
+import { IdbCommandFactory } from '../command/idb-command/idb-command-factory';
 import { QueryConfig } from '../query/query-config';
 import { IdbQueryRunner } from '../query/runner/idb-query-runner';
 import { QueryRunner } from '../query/runner/query-runner';
@@ -40,6 +42,10 @@ export class IdbContext extends Context {
 
   public queryRunner<Result>(config: QueryConfig): QueryRunner<Result> {
     return new IdbQueryRunner<Result>(this, config);
+  }
+
+  public commandFactory(): CommandFactory {
+    return IdbCommandFactory.instance(this);
   }
 
   public read(stores: string | string[] = this._schema.getTypes()): Transaction {

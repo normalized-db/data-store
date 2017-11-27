@@ -1,12 +1,15 @@
-import { ISchema } from '@normalized-db/core';
+import { ISchema, UniqueKeyCallback } from '@normalized-db/core';
 import { IDenormalizer } from '@normalized-db/denormalizer';
 import { INormalizer } from '@normalized-db/normalizer';
+import { CommandFactory } from '../command/command-factory';
 import { QueryConfig } from '../query/query-config';
 import { QueryRunner } from '../query/runner/query-runner';
 
 export abstract class Context {
 
   protected abstract _isReady: boolean;
+
+  protected _keyGenerator: UniqueKeyCallback;
 
   constructor(protected readonly _schema: ISchema,
               protected readonly _normalizer: INormalizer,
@@ -33,5 +36,12 @@ export abstract class Context {
     return this._denormalizer;
   }
 
+  public withKeyGenerator(keyGenerator: UniqueKeyCallback) {
+    this._keyGenerator = keyGenerator;
+    return this;
+  }
+
   public abstract queryRunner<Result>(config: QueryConfig): QueryRunner<Result>;
+
+  public abstract commandFactory(): CommandFactory;
 }
