@@ -8,7 +8,7 @@ export class Mapper<QueryResult, Result> implements Queryable<Result[]> {
 
   private _cachedResult?: Result[];
 
-  constructor(private readonly _query: Query<QueryResult>,
+  constructor(public readonly query: Query<QueryResult>,
               private readonly _callback: MapFunc<QueryResult, Result>) {
   }
 
@@ -20,7 +20,7 @@ export class Mapper<QueryResult, Result> implements Queryable<Result[]> {
    * @returns {Reducer<Result, ReducerResult>}
    */
   public reduce<ReducerResult>(callback: ReducerFunc<Result, ReducerResult>, initialValue?: ReducerResult) {
-    return new Reducer<QueryResult, Result, ReducerResult>(this._query, this, callback, initialValue);
+    return new Reducer<QueryResult, Result, ReducerResult>(this.query, this, callback, initialValue);
   }
 
   /**
@@ -33,7 +33,7 @@ export class Mapper<QueryResult, Result> implements Queryable<Result[]> {
       return this._cachedResult;
     }
 
-    const parentResult = await this._query.result(noCache);
+    const parentResult = await this.query.result(noCache);
     return this._cachedResult = parentResult.map(this._callback);
   }
 
@@ -43,7 +43,7 @@ export class Mapper<QueryResult, Result> implements Queryable<Result[]> {
    * @returns {Promise<void>}
    */
   public async invalidateCachedResult(): Promise<void> {
-    await this._query.invalidateCachedResult();
+    await this.query.invalidateCachedResult();
     this._cachedResult = null;
   }
 
@@ -54,6 +54,6 @@ export class Mapper<QueryResult, Result> implements Queryable<Result[]> {
    * @returns {Promise<any[]>}
    */
   public queryResult(noCache = false): Promise<QueryResult[]> {
-    return this._query.result(noCache);
+    return this.query.result(noCache);
   }
 }
