@@ -31,4 +31,23 @@ export class DataStore<Types extends DataStoreTypes> {
   public findByKey<Result>(type: Types, key: ValidKey): SingleItemQuery<Result> {
     return new SingleItemQuery<Result>(this._context, type, key);
   }
+
+  // TODO add js-docs, apply normalization, save normalized items to their tables as well
+  // TODO add `Parent`
+  // TODO add event-based `Logger`
+
+  public create<Item>(type: Types, item: Item): Promise<boolean> {
+    const cmd = this._context.commandFactory().createCommand<Item>(type);
+    return cmd.execute(item);
+  }
+
+  public update<Item>(type: Types, item: Item): Promise<boolean> {
+    const cmd = this._context.commandFactory().updateCommand<Item>(type);
+    return cmd.execute(item);
+  }
+
+  public remove<Item>(type: Types, item: Item): Promise<boolean> {
+    const cmd = this._context.commandFactory().removeCommand<Item>(type);
+    return cmd.execute(item);
+  }
 }
