@@ -7,8 +7,8 @@ export class Reducer<QueryResult, MapperResult, Result> implements Queryable<Res
 
   private _cachedResult?: Result;
 
-  constructor(public readonly _query: Query<QueryResult>,
-              public readonly _mapper: Mapper<QueryResult, MapperResult>,
+  constructor(public readonly query: Query<QueryResult>,
+              public readonly mapper: Mapper<QueryResult, MapperResult>,
               private readonly _callback: ReducerFunc<MapperResult, Result>,
               private readonly _initialValue: Result = null) {
   }
@@ -42,7 +42,7 @@ export class Reducer<QueryResult, MapperResult, Result> implements Queryable<Res
   }
 
   public get parent(): Queryable<any[]> {
-    return this._mapper || this._query;
+    return this.mapper || this.query;
   }
 
   /**
@@ -52,7 +52,7 @@ export class Reducer<QueryResult, MapperResult, Result> implements Queryable<Res
    * @returns {Promise<any[]>}
    */
   public queryResult(noCache = false): Promise<any[]> {
-    return this._query.result(noCache);
+    return this.query.result(noCache);
   }
 
   /**
@@ -63,6 +63,6 @@ export class Reducer<QueryResult, MapperResult, Result> implements Queryable<Res
    * @returns {Promise<MapperResult[]>}
    */
   public mapResult(noCache = false): Promise<MapperResult[]> {
-    return this._mapper ? this._mapper.result(noCache) : this.queryResult(noCache);
+    return this.mapper ? this.mapper.result(noCache) : this.queryResult(noCache);
   }
 }
