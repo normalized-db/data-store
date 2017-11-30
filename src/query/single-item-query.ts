@@ -1,7 +1,6 @@
-import { Depth, isNull, ValidKey } from '@normalized-db/core';
+import { Depth, isNull, NotFoundError, ValidKey } from '@normalized-db/core';
 import { Context } from '../context/context';
 import { ChildNotFoundError } from '../error/child-not-found-error';
-import { NotFoundError } from '../error/not-found-error';
 import { Parent } from '../model/parent';
 import { BaseQuery } from './base-query';
 import { QueryConfig } from './query-config';

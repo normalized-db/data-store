@@ -1,6 +1,5 @@
-import { ISchema, isNull, IStore, IStoreConfig, NormalizedData, ValidKey } from '@normalized-db/core';
+import { InvalidTypeError, ISchema, isNull, IStore, IStoreConfig, NormalizedData, ValidKey } from '@normalized-db/core';
 import { IdbContext } from '../context/idb-context/idb-context';
-import { InvalidTypeError } from '../error/invalid-type-error';
 import { MissingKeyError } from '../error/missing-key-error';
 import { Command } from './command';
 
@@ -27,7 +26,7 @@ export abstract class BaseCommand<T> implements Command<T> {
   }
 
   protected getKey(item: any, config: IStoreConfig = this._typeConfig): ValidKey {
-    if (!this.hasKey(item)) {
+    if (!this.hasKey(item, config)) {
       throw new MissingKeyError(this._type, config.key);
     }
 

@@ -1,8 +1,9 @@
-import { ISchema, isNull, ValidKey } from '@normalized-db/core';
+import { ISchema, isNull, NotFoundError, ValidKey } from '@normalized-db/core';
+import { IDenormalizer } from '@normalized-db/denormalizer';
 import { Transaction } from 'idb';
 import { IdbContext } from '../../context/idb-context/idb-context';
 import { InvalidQueryConfigError } from '../../error/invalid-query-config-error';
-import { NotFoundError } from '../../error/not-found-error';
+import { InvalidQueryRunnerStatusError } from '../../error/invalid-query-runner-status-error';
 import { ListResult } from '../list-result/list-result';
 import { ListResultBuilder } from '../list-result/list-result.builder';
 import { QueryConfig } from '../query-config';
@@ -12,8 +13,13 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
 
   private readonly _schema: ISchema;
 
+  private isRunning = false;
+  private transaction: Transaction;
+  private denormalizer: IDenormalizer;
+
   constructor(private readonly _context: IdbContext,
               private readonly _config: QueryConfig) {
+    this.fetchCallback = this.fetchCallback.bind(this);
     this._schema = this._context.schema();
   }
 
@@ -21,63 +27,82 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
    * @inheritDoc
    *
    * @returns {Promise<number>}
+   * @throws {InvalidQueryRunnerStatusError}
    */
-  public count(): Promise<number> {
-    return this._context.read(this._config.type).objectStore(this._config.type).count();
+  public async count(): Promise<number> {
+    this.start();
+    const result = await this._context.read(this._config.type).objectStore(this._config.type).count();
+    this.stop();
+    return result;
   }
 
   /**
    * @inheritDoc
    *
    * @returns {Promise<ListResult<Result>>}
+   * @throws {InvalidQueryRunnerStatusError}
    */
   public async execute(): Promise<ListResult<Result>> {
+    this.start();
+    let result: ListResult<Result>;
     if (this._config.parent) {
-      return (await this.findInParent()) as ListResult<Result>;
+      result = (await this.findInParent()) as ListResult<Result>;
     } else if (this._config.keys && this._config.keys.length > 0) {
-      return await this.findAllByKeys(this._config.keys);
+      result = await this.findAllByKeys(this._config.keys);
     } else {
       if (this._config.singleItem) {
         console.warn(
           'The query configuration has a key for a single-item-query but is run as list-query. The key will be ignored');
       }
 
-      return await this.findAll();
+      result = await this.findAll();
     }
+
+    this.stop();
+    return result;
   }
 
   /**
    * @inheritDoc
    *
    * @returns {Promise<Result>}
+   * @throws {InvalidQueryRunnerStatusError}
    */
   public async singleExecute(): Promise<Result> {
+    this.start();
     if (!this._config.singleItem) {
       throw new InvalidQueryConfigError('Primary key for `singleExecute` is missing');
     }
 
+    let result: Result;
     if (this._config.parent) {
-      return (await this.findInParent()) as Result;
+      result = (await this.findInParent()) as Result;
     } else {
-      return await this.findByKey();
+      result = await this.findByKey();
     }
+
+    this.stop();
+    return result;
   }
 
   /**
    * Find all items of a given type. Paging and filter will be applied as defined in the query-config.
    *
    * @param {string} type
-   * @param {Transaction} transaction
    * @returns {Promise<ListResult<Result>>}
    */
-  private async findAll(type = this._config.type, transaction?: Transaction): Promise<ListResult<Result>> {
-    const objectStore = (transaction || this._context.read(type)).objectStore(type);
+  private async findAll(type = this._config.type): Promise<ListResult<Result>> {
+    if (!this.transaction) {
+      this.transaction = this._context.read(type);
+    }
+
+    const objectStore = this.transaction.objectStore(type);
     const hasRange = this._config.offset > 0 || this._config.limit < Infinity;
     const hasFilter = !!this._config.filter;
 
     if (!hasRange && !hasFilter) {
       const data = await objectStore.getAll();
-      const denormalizedData = await this._context.denormalizer().applyAll<Result>(data, type, this._config.depth);
+      const denormalizedData = await this.denormalizer.applyAll<Result>(type, data, this._config.depth);
       return this.listResponse(denormalizedData, data.length);
     } else {
       const items = [];
@@ -95,7 +120,7 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
         let denormalizedData, isValid = true;
         if (hasFilter) {
           if (this._config.filter.requiresNormalization) {
-            denormalizedData = await this._context.denormalizer().apply<Result>(cursor.value, type, this._config.depth);
+            denormalizedData = await this.denormalizer.apply<Result>(type, cursor.value, this._config.depth);
             isValid = this._config.filter.test(denormalizedData);
           } else {
             isValid = this._config.filter.test(cursor.value);
@@ -105,8 +130,7 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
         if (isValid) {
           if (index >= this._config.offset && items.length < this._config.limit) {
             if (!denormalizedData) {
-              denormalizedData = await this._context.denormalizer()
-                .apply<Result>(cursor.value, type, this._config.depth);
+              denormalizedData = await this.denormalizer.apply<Result>(type, cursor.value, this._config.depth);
             }
 
             items.push(denormalizedData);
@@ -128,14 +152,14 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
    *
    * @param {ValidKey[]} keys
    * @param {string} type
-   * @param {Transaction} transaction
    * @returns {Promise<ListResult<Result>>}
    */
-  private async findAllByKeys(keys: ValidKey[],
-                              type = this._config.type,
-                              transaction?: Transaction): Promise<ListResult<Result>> {
-    const objectStore = (transaction || this._context.read(type)).objectStore(type);
+  private async findAllByKeys(keys: ValidKey[], type = this._config.type): Promise<ListResult<Result>> {
+    if (!this.transaction) {
+      this.transaction = this._context.read(type);
+    }
 
+    const objectStore = this.transaction.objectStore(type);
     const items = [];
     let keyIndex = 0, resultIndex = 0;
     while (keyIndex < keys.length && items.length < this._config.limit) {
@@ -154,7 +178,7 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
       let denormalizedData, isValid = true;
       if (this._config.filter) {
         if (this._config.filter.requiresNormalization) {
-          denormalizedData = await this._context.denormalizer().apply<Result>(item, type, this._config.depth);
+          denormalizedData = await this.denormalizer.apply<Result>(type, item, this._config.depth);
           isValid = this._config.filter.test(denormalizedData);
         } else {
           isValid = this._config.filter.test(item);
@@ -164,7 +188,7 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
       if (isValid) {
         if (resultIndex >= this._config.offset && items.length < this._config.limit) {
           if (!denormalizedData) {
-            denormalizedData = await this._context.denormalizer().apply<Result>(item, type, this._config.depth);
+            denormalizedData = await this.denormalizer.apply<Result>(type, item, this._config.depth);
           }
 
           items.push(denormalizedData);
@@ -179,15 +203,13 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
     return this.listResponse(items, items.length);
   }
 
-  private async findByKey(type = this._config.type,
-                          key = this._config.singleItem,
-                          transaction?: Transaction): Promise<Result> {
-    if (!transaction) {
-      transaction = this._context.read(type);
+  private async findByKey(type = this._config.type, key = this._config.singleItem): Promise<Result> {
+    if (!this.transaction) {
+      this.transaction = this._context.read(type);
     }
 
-    const item = await transaction.objectStore(type).get(key);
-    return item ? await this._context.denormalizer().apply<Result>(item, type, this._config.depth) : null;
+    const item = await this.transaction.objectStore(type).get(key);
+    return item ? await this.denormalizer.apply<Result>(type, item, this._config.depth) : null;
   }
 
   /**
@@ -199,8 +221,8 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
     const { parent, keys, singleItem: key } = this._config;
     const childConfig = this._schema.getTargetConfig(parent.type, parent.field);
 
-    const transaction = this._context.read([parent.type, childConfig.type]);
-    const parentObj = transaction.objectStore(parent.type).get(parent.key);
+    this.transaction = this._context.read([parent.type, childConfig.type]);
+    const parentObj = this.transaction.objectStore(parent.type).get(parent.key);
     if (!parentObj) {
       throw new NotFoundError(parent.type, parent.key);
     }
@@ -213,23 +235,40 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
         if (keys) {
           if (fieldIsArray) {
             const filteredChildKeys = fieldValue.filter(k => keys.findIndex(filterKey => filterKey === k) >= 0);
-            return await this.findAllByKeys(filteredChildKeys, childConfig.type, transaction);
+            return await this.findAllByKeys(filteredChildKeys, childConfig.type);
           } else if (keys.findIndex(filterKey => filterKey === fieldValue) >= 0) {
             return await this.findByKey(childConfig.type, fieldValue);
           }
         } else {
           return await fieldIsArray
-            ? this.findAllByKeys(fieldValue, childConfig.type, transaction)
+            ? this.findAllByKeys(fieldValue, childConfig.type)
             : this.findByKey(childConfig.type, key);
         }
       } else {
         if ((!fieldIsArray && fieldValue === key) || (fieldIsArray && fieldValue.indexOf(k => k === key) >= 0)) {
-          return await this.findByKey(childConfig.type, key, transaction);
+          return await this.findByKey(childConfig.type, key);
         }
       }
     }
 
     return null;
+  }
+
+  private start() {
+    if (this.isRunning) {
+      throw new InvalidQueryRunnerStatusError('Query is already running');
+    }
+
+    this.isRunning = true;
+    this.denormalizer = this._context.denormalizerBuilder()
+      .fetchCallback(this.fetchCallback)
+      .build();
+  }
+
+  private stop() {
+    this.isRunning = false;
+    this.transaction = null;
+    this.denormalizer = null;
   }
 
   private listResponse(items: Result[], total: number): ListResult<Result> {
@@ -239,5 +278,12 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
       .offset(this._config.offset)
       .limit(this._config.limit)
       .build();
+  }
+
+  private fetchCallback(type: string, keys: ValidKey | ValidKey[]): Promise<any | any[]> {
+    const objectStore = this.transaction.objectStore(type);
+    return Array.isArray(keys)
+      ? Promise.all(keys.map(async key => await objectStore.get(key)))
+      : this.transaction.objectStore(type).get(keys);
   }
 }

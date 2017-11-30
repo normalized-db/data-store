@@ -1,6 +1,6 @@
+import { NotFoundError } from '@normalized-db/core';
 import { Transaction } from 'idb';
 import { IdbContext } from '../../context/idb-context/idb-context';
-import { NotFoundError } from '../../error/not-found-error';
 import { ClearCommand } from '../clear-command';
 
 export class IdbClearCommand implements ClearCommand {
