@@ -78,4 +78,13 @@ export interface IDataStore<Types extends DataStoreTypes> {
    * @throws {NotFoundError}
    */
   remove<Item>(type: Types, item: Item | ValidKey): Promise<boolean> ;
+
+  /**
+   * Clear all items, optionally only these from a given type / some types. Note that references will not be updated
+   * and hence could get into an invalid state!
+   *
+   * @param {string|string[]} type
+   * @returns {Promise<boolean>}
+   */
+  clear(type: string | string[]): Promise<boolean>;
 }

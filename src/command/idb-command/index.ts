@@ -1,4 +1,5 @@
 import { IdbBaseWriteCommand } from './idb-base-write-command';
+import { IdbClearCommand } from './idb-clear-command';
 import { IdbCommandFactory } from './idb-command-factory';
 import { IdbCreateCommand } from './idb-create-command';
 import { IdbPutCommand } from './idb-put-command';
@@ -11,5 +12,6 @@ export {
   IdbCreateCommand,
   IdbUpdateCommand,
   IdbPutCommand,
-  IdbRemoveCommand
+  IdbRemoveCommand,
+  IdbClearCommand
 };

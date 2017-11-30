@@ -1,4 +1,5 @@
 import { BaseCommand } from './base-command';
+import { ClearCommand } from './clear-command';
 import { Command } from './command';
 import { CommandFactory } from './command-factory';
 import { CreateCommand } from './create-command';
@@ -15,5 +16,6 @@ export {
   UpdateCommand,
   PutCommand,
   RemoveCommand,
+  ClearCommand,
   BaseCommand
 };

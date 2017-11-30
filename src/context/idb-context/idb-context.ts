@@ -51,6 +51,15 @@ export class IdbContext extends Context {
     return IdbCommandFactory.instance(this);
   }
 
+  public objectStoreNames(): string[] {
+    const osnList = this._db.objectStoreNames;
+    const osnArray: string[] = [];
+    for (let i = 0; i < osnList.length; i++) {
+      osnArray.push(osnList.item(i));
+    }
+    return osnArray;
+  }
+
   public read(stores: string | string[] = this._schema.getTypes()): Transaction {
     return this._db.transaction(stores, 'readonly');
   }
