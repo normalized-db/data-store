@@ -92,16 +92,17 @@ export class Query<DbItem> extends BaseQuery<ListResult<DbItem>> implements Quer
    *
    * @param {ReducerFunc<DbItem, Result>} callback
    * @param {Result} initialValue
-   * @returns {Reducer<DbItem, Result>}
+   * @returns {Reducer<DbItem, void, Result>}
    */
-  public reduce<Result>(callback: ReducerFunc<DbItem, Result>, initialValue?: Result) {
+  public reduce<Result>(callback: ReducerFunc<DbItem, Result>, initialValue?: Result): Reducer<DbItem, void, Result> {
     return new Reducer<DbItem, void, Result>(this, null, callback, initialValue);
   }
 
   /**
    * @inheritDoc
    *
-   * @returns {DbItem[]}
+   * @param {boolean} noCache
+   * @returns {Promise<ListResult<DbItem>>}
    */
   public async result(noCache = false): Promise<ListResult<DbItem>> {
     if (this._cachedResult && !noCache) {
@@ -109,14 +110,17 @@ export class Query<DbItem> extends BaseQuery<ListResult<DbItem>> implements Quer
     }
 
     const runner = this._context.queryRunner<DbItem>(this.getQueryConfig());
+    await this._context.open();
     this._cachedResult = await runner.execute();
+    this.autoClose();
+    return this._cachedResult;
   }
 
   /**
    * Number of items in the result. If `noCache` is `true` the query will be re-run.
    *
    * @param {boolean} noCache
-   * @returns {number}
+   * @returns {Promise<number>}
    */
   public async count(noCache = false): Promise<number> {
     return (await this.result(noCache)).total;
@@ -127,7 +131,7 @@ export class Query<DbItem> extends BaseQuery<ListResult<DbItem>> implements Quer
    * If `noCache` is `true` the query will be re-run.
    *
    * @param {boolean} noCache
-   * @returns {boolean}
+   * @returns {Promise<boolean>}
    */
   public async isEmpty(noCache = false): Promise<boolean> {
     return (await this.count(noCache)) === 0;
@@ -138,7 +142,7 @@ export class Query<DbItem> extends BaseQuery<ListResult<DbItem>> implements Quer
    * If `noCache` is `true` the query will be re-run.
    *
    * @param {boolean} noCache
-   * @returns {DbItem}
+   * @returns {Promise<DbItem>}
    * @throws {EmptyResultError}
    */
   public async first(noCache = false): Promise<DbItem> {
@@ -155,7 +159,7 @@ export class Query<DbItem> extends BaseQuery<ListResult<DbItem>> implements Quer
    *
    * @param {DbItem} defaultResult
    * @param {boolean} noCache
-   * @returns {DbItem}
+   * @returns {Promise<DbItem|null>}
    */
   public async firstOrDefault(defaultResult: DbItem = null, noCache = false): Promise<DbItem | null> {
     return (await this.isEmpty(noCache)) ? defaultResult : this._cachedResult[0];

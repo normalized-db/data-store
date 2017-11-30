@@ -8,6 +8,7 @@ export interface RemoveCommand<T> extends Command<T | ValidKey> {
    *
    * @param {T|ValidKey} data
    * @returns {Promise<boolean>}
+   * @throws {NotFoundError}
    */
   execute(data: T | ValidKey): Promise<boolean>;
 }

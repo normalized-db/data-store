@@ -14,8 +14,11 @@ export class SingleItemQuery<DbItem> extends BaseQuery<DbItem | null> implements
 
   private _depth: number | Depth;
 
-  constructor(_context: Context, _type: string, private readonly _key: ValidKey) {
-    super(_context, _type);
+  constructor(_context: Context,
+              _autoCloseContext = true,
+              _type: string,
+              private readonly _key: ValidKey) {
+    super(_context, _autoCloseContext, _type);
   }
 
   /**
@@ -70,6 +73,7 @@ export class SingleItemQuery<DbItem> extends BaseQuery<DbItem | null> implements
     }
 
     const runner = this._context.queryRunner<DbItem>(this.getQueryConfig());
+    await this._context.open();
     const result = await runner.singleExecute();
 
     if (!result) {
@@ -82,7 +86,9 @@ export class SingleItemQuery<DbItem> extends BaseQuery<DbItem | null> implements
       }
     }
 
-    return this._cachedResult = result;
+    this._cachedResult = result;
+    this.autoClose();
+    return this._cachedResult;
   }
 
   /**

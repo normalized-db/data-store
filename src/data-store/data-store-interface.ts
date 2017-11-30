@@ -1,8 +1,8 @@
 import { ValidKey } from '@normalized-db/core';
-import { DataStoreTypes } from './model/data-store-types';
-import { Parent } from './model/parent';
-import { Query } from './query/query';
-import { SingleItemQuery } from './query/single-item-query';
+import { DataStoreTypes } from '../model/data-store-types';
+import { Parent } from '../model/parent';
+import { Query } from '../query/query';
+import { SingleItemQuery } from '../query/single-item-query';
 
 export interface IDataStore<Types extends DataStoreTypes> {
 
@@ -31,12 +31,12 @@ export interface IDataStore<Types extends DataStoreTypes> {
    * manual key is provided.
    *
    * @param {Types} type
-   * @param {Item} item
+   * @param {Item|Item[]} item
    * @param {Parent} parent
    * @returns {Promise<boolean>}
    * @throws {MissingKeyError}
    */
-  create<Item>(type: Types, item: Item, parent?: Parent): Promise<boolean> ;
+  create<Item>(type: Types, item: Item | Item[], parent?: Parent): Promise<boolean> ;
 
   /**
    * Update the items. If any of the items does not exist a `NotFoundError` will be thrown.
@@ -44,6 +44,8 @@ export interface IDataStore<Types extends DataStoreTypes> {
    * @param {Types} type
    * @param {Item|Item[]} item
    * @returns {Promise<boolean>}
+   * @throws {MissingKeyError}
+   * @throws {NotFoundError}
    */
   update<Item>(type: Types, item: Item | Item[]): Promise<boolean> ;
 
@@ -64,6 +66,7 @@ export interface IDataStore<Types extends DataStoreTypes> {
    * @param {Types} type
    * @param {Item|ValidKey} item
    * @returns {Promise<boolean>}
+   * @throws {NotFoundError}
    */
   remove<Item>(type: Types, item: Item | ValidKey): Promise<boolean> ;
 }

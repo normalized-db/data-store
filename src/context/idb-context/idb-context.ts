@@ -2,22 +2,15 @@ import { ISchema } from '@normalized-db/core';
 import { IDenormalizer } from '@normalized-db/denormalizer';
 import { INormalizer } from '@normalized-db/normalizer';
 import { DB, default as DBFactory, Transaction, UpgradeDB } from 'idb';
-import { CommandFactory } from '../command/command-factory';
-import { IdbCommandFactory } from '../command/idb-command/idb-command-factory';
-import { QueryConfig } from '../query/query-config';
-import { IdbQueryRunner } from '../query/runner/idb-query-runner';
-import { QueryRunner } from '../query/runner/query-runner';
-import { Context } from './context';
-
-export interface IdbConfig {
-  name: string;
-  version: number;
-  upgrade?: (UpgradeDB) => void;
-}
+import { CommandFactory } from '../../command/command-factory';
+import { IdbCommandFactory } from '../../command/idb-command/idb-command-factory';
+import { QueryConfig } from '../../query/query-config';
+import { IdbQueryRunner } from '../../query/runner/idb-query-runner';
+import { QueryRunner } from '../../query/runner/query-runner';
+import { Context } from '../context';
+import { IdbConfig } from './idb-config';
 
 export class IdbContext extends Context {
-
-  protected _isReady = false;
 
   private _db: DB;
 
@@ -26,18 +19,28 @@ export class IdbContext extends Context {
               denormalizer: IDenormalizer,
               private readonly dbConfig: IdbConfig) {
     super(schema, normalizer, denormalizer);
-
     this.onUpgradeNeeded = this.onUpgradeNeeded.bind(this);
   }
 
-  public async init(): Promise<void> {
-    this._db = await DBFactory.open(
-      this.dbConfig.name,
-      this.dbConfig.version,
-      this.dbConfig.upgrade || this.onUpgradeNeeded
-    );
+  public isReady(): boolean {
+    return !!this._db;
+  }
 
-    this._isReady = true;
+  public async open(): Promise<void> {
+    if (!this.isReady()) {
+      this._db = await DBFactory.open(
+        this.dbConfig.name,
+        this.dbConfig.version,
+        this.dbConfig.upgrade || this.onUpgradeNeeded
+      );
+    }
+  }
+
+  public async close(): Promise<void> {
+    if (this.isReady()) {
+      this._db.close();
+      this._db = null;
+    }
   }
 
   public queryRunner<Result>(config: QueryConfig): QueryRunner<Result> {

@@ -9,6 +9,7 @@ export abstract class BaseQuery<Result> implements Queryable<Result> {
   protected _cachedResult?: Result;
 
   constructor(protected readonly _context: Context,
+              private readonly _autoCloseContext: boolean,
               protected readonly _type: string) {
     if (!this.schema.hasType(_type)) {
       throw new InvalidTypeError(_type);
@@ -33,5 +34,11 @@ export abstract class BaseQuery<Result> implements Queryable<Result> {
 
   protected get schema(): ISchema {
     return this._context.schema();
+  }
+
+  protected async autoClose(): Promise<void> {
+    if (this._autoCloseContext) {
+      await this._context.close();
+    }
   }
 }

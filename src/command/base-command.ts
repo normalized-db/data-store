@@ -1,5 +1,5 @@
 import { ISchema, isNull, IStore, IStoreConfig, NormalizedData, ValidKey } from '@normalized-db/core';
-import { IdbContext } from '../context/idb-context';
+import { IdbContext } from '../context/idb-context/idb-context';
 import { InvalidTypeError } from '../error/invalid-type-error';
 import { MissingKeyError } from '../error/missing-key-error';
 import { Command } from './command';
