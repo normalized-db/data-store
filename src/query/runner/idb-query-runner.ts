@@ -34,6 +34,8 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
   public async execute(): Promise<ListResult<Result>> {
     if (this._config.parent) {
       return (await this.findInParent()) as ListResult<Result>;
+    } else if (this._config.keys && this._config.keys.length > 0) {
+      return await this.findAllByKeys(this._config.keys);
     } else {
       if (this._config.singleItem) {
         console.warn(
@@ -194,7 +196,7 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
    * @returns {Promise<Result|ListResult<Result>>}
    */
   private async findInParent(): Promise<Result | ListResult<Result>> {
-    const { parent, singleItem: key } = this._config;
+    const { parent, keys, singleItem: key } = this._config;
     const childConfig = this._schema.getTargetConfig(parent.type, parent.field);
 
     const transaction = this._context.read([parent.type, childConfig.type]);
@@ -205,14 +207,23 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
 
     if (parent.field in parentObj) {
       const fieldValue = parentObj[parent.field];
-      const isArray = Array.isArray(fieldValue);
+      const fieldIsArray = Array.isArray(fieldValue);
 
       if (isNull(key)) {
-        return await isArray
-          ? this.findAllByKeys(fieldValue, childConfig.type, transaction)
-          : this.findByKey(childConfig.type, key);
+        if (keys) {
+          if (fieldIsArray) {
+            const filteredChildKeys = fieldValue.filter(k => keys.findIndex(filterKey => filterKey === k) >= 0);
+            return await this.findAllByKeys(filteredChildKeys, childConfig.type, transaction);
+          } else if (keys.findIndex(filterKey => filterKey === fieldValue) >= 0) {
+            return await this.findByKey(childConfig.type, fieldValue);
+          }
+        } else {
+          return await fieldIsArray
+            ? this.findAllByKeys(fieldValue, childConfig.type, transaction)
+            : this.findByKey(childConfig.type, key);
+        }
       } else {
-        if ((!isArray && fieldValue === key) || (isArray && fieldValue.indexOf(k => k === key) >= 0)) {
+        if ((!fieldIsArray && fieldValue === key) || (fieldIsArray && fieldValue.indexOf(k => k === key) >= 0)) {
           return await this.findByKey(childConfig.type, key, transaction);
         }
       }
