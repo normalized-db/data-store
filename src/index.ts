@@ -1,10 +1,11 @@
 import { DataStore } from './data-store';
-import { ObservedDataStore } from './observed-data-store';
 
+export * from './command';
+export * from './context';
+export * from './error';
 export * from './model';
-export * from './builder';
+export * from './query';
 
 export {
-  DataStore,
-  ObservedDataStore
+  DataStore
 };

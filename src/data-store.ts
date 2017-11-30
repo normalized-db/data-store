@@ -1,188 +1,88 @@
-import { Depth, ISchema, NormalizedData, ValidKey } from '@normalized-db/core';
-import { IDataStore } from './data-store-interface';
-import { HistoryRange } from './model/history-range';
-import { LogHistory } from './model/log-history';
-import { Range } from './model/range';
+import { ValidKey } from '@normalized-db/core';
+import { Context } from './context/context';
+import { DataStoreTypes } from './model/data-store-types';
+import { Parent } from './model/parent';
+import { Query } from './query/query';
+import { SingleItemQuery } from './query/single-item-query';
 
-export class DataStore implements IDataStore {
+export class DataStore<Types extends DataStoreTypes> {
 
-  constructor(protected readonly schema: ISchema,
-              protected readonly implementation: IDataStore,
-              protected readonly useReverseReferences: boolean = false) {
+  constructor(private readonly _context: Context) {
   }
 
-  public getTypes(): Promise<string[]> {
-    return Promise.resolve(this.schema.getTypes());
+  /**
+   * Create a new `Query`.
+   *
+   * @param {Types} type
+   * @returns {Query<Result>}
+   * @throws {InvalidTypeError}
+   */
+  public find<Result>(type: Types): Query<Result> {
+    return new Query<Result>(this._context, type);
   }
 
-  public getData(): Promise<NormalizedData> {
-    return this.implementation.getData();
+  /**
+   * Create a new `SingleItemQuery`.
+   *
+   * @param {Types} type
+   * @param {ValidKey} key
+   * @returns {SingleItemQuery<Result>}
+   * @throws {InvalidTypeError}
+   */
+  public findByKey<Result>(type: Types, key: ValidKey): SingleItemQuery<Result> {
+    return new SingleItemQuery<Result>(this._context, type, key);
   }
 
-  public getHistory<Key extends ValidKey, T>(type: string, range?: HistoryRange): Promise<LogHistory<Key, T>> {
-    return this.implementation.getHistory<Key, T>(type, range);
+  /**
+   * Adds new items. If any item's primary key is set it still will be reassigned a new one if `autoKey` is `false`
+   * for the related data-store-configuration. Non-auto-key data-stores will throw a `MissingKeyError` if no
+   * manual key is provided.
+   *
+   * @param {Types} type
+   * @param {Item} item
+   * @param {Parent} parent
+   * @returns {Promise<boolean>}
+   * @throws {MissingKeyError}
+   */
+  public create<Item>(type: Types, item: Item, parent?: Parent): Promise<boolean> {
+    const cmd = this._context.commandFactory().createCommand<Item>(type);
+    return cmd.execute(item, parent);
   }
 
-  public clearHistory(type: string, range?: HistoryRange): Promise<void> {
-    return this.implementation.clearHistory(type, range);
+  /**
+   * Update the items. If any of the items does not exist a `NotFoundError` will be thrown.
+   *
+   * @param {Types} type
+   * @param {Item|Item[]} item
+   * @returns {Promise<boolean>}
+   */
+  public update<Item>(type: Types, item: Item | Item[]): Promise<boolean> {
+    const cmd = this._context.commandFactory().updateCommand<Item>(type);
+    return cmd.execute(item);
   }
 
-  public count(type: string): Promise<number> {
-    return this.implementation.count(type);
+  /**
+   * The item will be either created or updated. For details see `.create(…)` and `.update(…)` respectively.
+   *
+   * @param {Types} type
+   * @param {Item|Item[]} item
+   * @returns {Promise<boolean>}
+   */
+  public put<Item>(type: Types, item: Item | Item[]): Promise<boolean> {
+    const cmd = this._context.commandFactory().putCommand<Item>(type);
+    return cmd.execute(item);
   }
 
-  public isEmpty(type: string): Promise<boolean> {
-    return this.implementation.isEmpty(type);
-  }
-
-  public getKeys<Key extends ValidKey>(type: string, range?: Range): Promise<Key[]> {
-    return this.implementation.getKeys<Key>(type, range);
-  }
-
-  public getInvertedKeys<Key extends ValidKey>(excludedKeys: Key[], type: string, range?: Range): Promise<Key[]> {
-    return this.implementation.getInvertedKeys<Key>(excludedKeys, type, range);
-  }
-
-  public hasKey<Key extends ValidKey>(key: Key, type: string): Promise<boolean> {
-    return this.implementation.hasKey<Key>(key, type);
-  }
-
-  public getAll<T>(type: string, depth?: number | Depth, range?: Range): Promise<T[]> {
-    return this.implementation.getAll<T>(type, depth, range);
-  }
-
-  public getAllInverted<Key extends ValidKey, T>(excludedKeys: Key[],
-                                                 type: string,
-                                                 depth?: number | Depth,
-                                                 range?: Range): Promise<T[]> {
-    return this.implementation.getAllInverted<Key, T>(excludedKeys, type, depth, range);
-  }
-
-  public getAllByKeys<Key extends ValidKey, T>(keys: Key[],
-                                               type: string,
-                                               depth?: number | Depth,
-                                               range?: Range): Promise<T[]> {
-    return this.implementation.getAllByKeys<Key, T>(keys, type, depth, range);
-  }
-
-  public getByKey<Key extends ValidKey, T>(key: Key, type: string, depth?: number | Depth): Promise<T> {
-    return this.implementation.getByKey<Key, T>(key, type, depth);
-  }
-
-  public async getLatestKey<Key extends ValidKey>(type: string): Promise<Key> {
-    return this.implementation.getLatestKey<Key>(type);
-  }
-
-  public getOrDefault<Key extends ValidKey, T>(key: Key,
-                                               type: string,
-                                               defaultResult: T = null,
-                                               depth?: number | Depth): Promise<T> {
-    return this.implementation.getOrDefault(key, type, defaultResult, depth);
-  }
-
-  public async put<T>(data: T | T[], type: string): Promise<void> {
-    await this.implementation.put(data, type);
-  }
-
-  public remove<Key extends ValidKey>(keys: Key | Key[], type: string): Promise<Key[]> {
-    return this.implementation.remove(keys, type);
-  }
-
-  public getNested<Key extends ValidKey, T>(key: Key, type: string, field: string, depth?: number | Depth): Promise<T> {
-    return this.implementation.getNested<Key, T>(key, type, field, depth);
-  }
-
-  public getAllNested<Key extends ValidKey, T>(key: Key,
-                                               type: string,
-                                               field: string,
-                                               depth?: number | Depth,
-                                               range?: Range): Promise<T[]> {
-    return this.implementation.getAllNested<Key, T>(key, type, field, depth, range);
-  }
-
-  public getNestedFromArray<Key extends ValidKey, FieldKey extends ValidKey, T>(key: Key,
-                                                                                type: string,
-                                                                                field: string,
-                                                                                fieldKey: FieldKey,
-                                                                                depth?: number | Depth): Promise<T> {
-    return this.implementation.getNestedFromArray<Key, FieldKey, T>(key, type, field, fieldKey, depth);
-  }
-
-  public getNestedInverted<Key extends ValidKey, T>(key: Key,
-                                                    type: string,
-                                                    field: string,
-                                                    depth?: number | Depth,
-                                                    range?: Range): Promise<T[]> {
-    return this.implementation.getNestedInverted<Key, T>(key, type, field, depth, range);
-  }
-
-  public addNested<Key extends ValidKey, T>(key: Key, type: string, item: T, field: string): Promise<boolean> {
-    return this.implementation.addNested<Key, T>(key, type, item, field);
-  }
-
-  public removeNested<Key extends ValidKey, T>(key: Key, type: string, nestedItem: T, field: string): Promise<boolean> {
-    return this.implementation.removeNested<Key, T>(key, type, nestedItem, field);
-  }
-
-  public async getReverse<Key extends ValidKey, T>(key: Key,
-                                                   type: string,
-                                                   parentType: string,
-                                                   depth?: number | Depth,
-                                                   range?: Range): Promise<T[]> {
-    if (this.useReverseReferences) {
-      this.validateType(type);
-
-      const item = await this.getByKey<Key, any>(key, type, 0);
-
-      return '_refs' in item && parentType in item._refs
-        ? await this.getAllByKeys<any, T>(Array.from(item._refs[parentType]), parentType, depth, range)
-        : [];
-
-    } else {
-      throw new Error('This data prefix was not created with `useReverseReferences` set to `true` hence reverse ' +
-        'relations cannot be resolved');
-    }
-  }
-
-  public async getFirstReverse<Key extends ValidKey, T>(key: Key,
-                                                        type: string,
-                                                        parentType: string,
-                                                        depth?: number | Depth): Promise<T> {
-    if (this.useReverseReferences) {
-      this.validateType(type);
-
-      const item = await this.getByKey<Key, any>(key, type, 0);
-
-      if ('_refs' in item && parentType in item._refs) {
-        const it = item._refs[parentType].values().next();
-        if (!it.done) {
-          return await this.getByKey<ValidKey, T>(it.value, parentType, depth);
-        }
-      }
-
-      return null;
-
-    } else {
-      throw new Error('This data prefix was not created with `useReverseReferences` set to `true` hence reverse ' +
-        'relations cannot be resolved');
-    }
-  }
-
-  public async clear(type?: string): Promise<void> {
-    if (type) {
-      await this.clearType(type);
-    } else {
-      await Promise.all(this.schema.getTypes().map(async t => await this.clearType(t)));
-    }
-  }
-
-  protected async clearType(type: string): Promise<void> {
-    await this.implementation.clear(type);
-  }
-
-  protected validateType(type: string) {
-    if (!this.schema.hasType(type)) {
-      throw new Error('Type \'' + type + '\' is not defined');
-    }
+  /**
+   * Remove the item from its data-store and remove references to this item.
+   * If any `cascadeRemoval`-children are configured for this item, these will be removed as well.
+   *
+   * @param {Types} type
+   * @param {Item|ValidKey} item
+   * @returns {Promise<boolean>}
+   */
+  public remove<Item>(type: Types, item: Item | ValidKey): Promise<boolean> {
+    const cmd = this._context.commandFactory().removeCommand<Item>(type);
+    return cmd.execute(item);
   }
 }
