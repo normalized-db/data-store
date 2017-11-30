@@ -12,7 +12,7 @@ export class SingleItemQuery<DbItem> extends BaseQuery<DbItem | null> implements
   private _parent?: Parent;
   private _default?: DbItem;
 
-  private _depth: Depth;
+  private _depth: number | Depth;
 
   constructor(_context: Context, _type: string, private readonly _key: ValidKey) {
     super(_context, _type);
@@ -24,7 +24,7 @@ export class SingleItemQuery<DbItem> extends BaseQuery<DbItem | null> implements
    *
    * @param {ValidKey} key
    * @param {string} field
-   * @returns {Query<DbItem>}
+   * @returns {SingleItemQuery<DbItem|null>}
    */
   public parent(key: ValidKey, field: string): SingleItemQuery<DbItem | null> {
     this._parent = new Parent(this._type, key, field);
@@ -35,7 +35,7 @@ export class SingleItemQuery<DbItem> extends BaseQuery<DbItem | null> implements
    * Set the default value to be returned when the item is not found in the given type or parent.
    *
    * @param {DbItem} value
-   * @returns {SingleItemQuery<DbItem>}
+   * @returns {SingleItemQuery<DbItem|null>}
    */
   public defaultValue(value: DbItem): SingleItemQuery<DbItem | null> {
     this._default = value;
@@ -45,10 +45,10 @@ export class SingleItemQuery<DbItem> extends BaseQuery<DbItem | null> implements
   /**
    * Set the `Depth` determining how far an object has to be denormalized.
    *
-   * @param {Depth} depth
-   * @returns {Query<DbItem>}
+   * @param {number|Depth} depth
+   * @returns {SingleItemQuery<DbItem|null>}
    */
-  public depth(depth: Depth): SingleItemQuery<DbItem | null> {
+  public depth(depth: number | Depth): SingleItemQuery<DbItem | null> {
     this._depth = depth;
     return this;
   }
@@ -60,21 +60,21 @@ export class SingleItemQuery<DbItem> extends BaseQuery<DbItem | null> implements
    * a `NotFoundError` or, if a `parent` was used`, a `ChildNotFoundError`.
    *
    * @param {boolean} noCache
-   * @returns {DbItem}
+   * @returns {Promise<DbItem|null>}
    * @throws {NotFoundError} when now `defaultValue` is available
    * @throws {ChildNotFoundError} when no `defaultValue` is available and a `parent`-item was used
    */
   public async result(noCache = false): Promise<DbItem | null> {
     if (this._cachedResult && !noCache) {
-      return this._cachedResult || this._default;
+      return this._cachedResult;
     }
 
     const runner = this._context.queryRunner<DbItem>(this.getQueryConfig());
-    const result = await runner.execute();
+    const result = await runner.singleExecute();
 
-    if (!result || result.length === 0) {
+    if (!result) {
       if (isNull(this._default)) {
-        return this._default;
+        return this._cachedResult = this._default;
       } else if (this._parent) {
         throw new ChildNotFoundError(this._parent, this._key);
       } else {
@@ -82,18 +82,20 @@ export class SingleItemQuery<DbItem> extends BaseQuery<DbItem | null> implements
       }
     }
 
-    return this._cachedResult = result[0];
+    return this._cachedResult = result;
   }
 
   /**
-   * Check whether an object was found or not. If `noCache` is `true` the query will be re-run.
+   * Check whether an object was found or not. Returns `true` if the result is defined and not equal to the default.
+   * If `noCache` is `true` the query will be re-run.
    *
    * @param {boolean} noCache
    * @returns {Promise<boolean>}
    */
   public async hasResult(noCache = false): Promise<boolean> {
     await this.result(noCache);
-    return !isNull(this._cachedResult);
+    const key = this.schema.getConfig(this._type).key;
+    return !isNull(this._cachedResult) && this._cachedResult[key] !== this._default[key];
   }
 
   protected getQueryConfig(): QueryConfig {

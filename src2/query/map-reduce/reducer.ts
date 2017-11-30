@@ -1,3 +1,4 @@
+import { ListResult } from '../list-result/list-result';
 import { Query } from '../query';
 import { Queryable } from '../queryable';
 import { Mapper } from './mapper';
@@ -25,7 +26,7 @@ export class Reducer<QueryResult, MapperResult, Result> implements Queryable<Res
 
     const parentResult = await this.parent.result(noCache);
 
-    return this._cachedResult = parentResult.reduce<Result>(
+    return this._cachedResult = parentResult.items.reduce<Result>(
       (result, item) => this._callback(result, item),
       this._initialValue
     );
@@ -41,7 +42,7 @@ export class Reducer<QueryResult, MapperResult, Result> implements Queryable<Res
     this._cachedResult = null;
   }
 
-  public get parent(): Queryable<any[]> {
+  public get parent(): Queryable<ListResult<any>> {
     return this.mapper || this.query;
   }
 
@@ -49,9 +50,9 @@ export class Reducer<QueryResult, MapperResult, Result> implements Queryable<Res
    * Returns the result of the underlying query. If `noCache` is `true` the query will be re-run.
    *
    * @param {boolean} noCache
-   * @returns {Promise<any[]>}
+   * @returns {Promise<ListResponse<QueryResult>>}
    */
-  public queryResult(noCache = false): Promise<any[]> {
+  public queryResult(noCache = false): Promise<ListResult<QueryResult>> {
     return this.query.result(noCache);
   }
 
@@ -60,9 +61,9 @@ export class Reducer<QueryResult, MapperResult, Result> implements Queryable<Res
    * If `noCache` is `true` the query will be re-run.
    *
    * @param {boolean} noCache
-   * @returns {Promise<MapperResult[]>}
+   * @returns {Promise<ListResult<QueryResult|MapperResult>>}
    */
-  public mapResult(noCache = false): Promise<MapperResult[]> {
+  public mapResult(noCache = false): Promise<ListResult<QueryResult | MapperResult>> {
     return this.mapper ? this.mapper.result(noCache) : this.queryResult(noCache);
   }
 }

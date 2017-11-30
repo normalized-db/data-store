@@ -1,5 +1,5 @@
 import { Depth, ValidKey } from '@normalized-db/core';
-import { Predicate } from '../model/predicate';
+import { Filter } from './model/filter';
 import { Parent } from './model/parent';
 
 export class QueryConfig {
@@ -13,8 +13,8 @@ export class QueryConfig {
 
   public offset? = QueryConfig.DEFAULT_OFFSET;
   public limit? = QueryConfig.DEFAULT_LIMIT;
-  public filter?: Predicate<any>;
+  public filter?: Filter<any>;
   public parent?: Parent;
 
-  public depth?: Depth;
+  public depth?: number | Depth;
 }
