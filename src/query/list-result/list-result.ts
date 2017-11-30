@@ -4,10 +4,17 @@ export class ListResult<Result> {
               private _total: number,
               private readonly _offset: number,
               private readonly _limit: number) {
+    if (!this._items) {
+      this._items = [];
+    }
   }
 
   public get items(): Result[] {
     return this._items;
+  }
+
+  public get first(): Result|null {
+    return this.isEmpty ? null : this._items[0];
   }
 
   public get total(): number {
