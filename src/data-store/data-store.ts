@@ -2,6 +2,7 @@ import { ValidKey } from '@normalized-db/core';
 import { Context } from '../context/context';
 import { DataStoreTypes } from '../model/data-store-types';
 import { Parent } from '../model/parent';
+import { CountQuery } from '../query/count-query';
 import { Query } from '../query/query';
 import { SingleItemQuery } from '../query/single-item-query';
 import { IDataStore } from './data-store-interface';
@@ -9,6 +10,16 @@ import { IDataStore } from './data-store-interface';
 export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types> {
 
   constructor(private readonly _context: Context, private readonly _autoCloseContext = true) {
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @param {Types} type
+   * @returns {CountQuery}
+   */
+  public count(type: Types): CountQuery {
+    return new CountQuery(this._context, this._autoCloseContext, type);
   }
 
   /**

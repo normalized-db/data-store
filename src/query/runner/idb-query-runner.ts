@@ -20,6 +20,15 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
   /**
    * @inheritDoc
    *
+   * @returns {Promise<number>}
+   */
+  public count(): Promise<number> {
+    return this._context.read(this._config.type).objectStore(this._config.type).count();
+  }
+
+  /**
+   * @inheritDoc
+   *
    * @returns {Promise<ListResult<Result>>}
    */
   public async execute(): Promise<ListResult<Result>> {

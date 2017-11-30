@@ -9,6 +9,7 @@ export class QueryConfig {
 
   public type: string;
 
+  public countOnly?: boolean;
   public singleItem?: ValidKey;
 
   public offset? = QueryConfig.DEFAULT_OFFSET;
