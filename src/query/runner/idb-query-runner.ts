@@ -83,7 +83,7 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
 
         let denormalizedData, isValid = true;
         if (hasFilter) {
-          if (this._config.filter.requiresNormalization()) {
+          if (this._config.filter.requiresNormalization) {
             denormalizedData = await this._context.denormalizer().apply<Result>(cursor.value, type, this._config.depth);
             isValid = this._config.filter.test(denormalizedData);
           } else {
@@ -142,7 +142,7 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
 
       let denormalizedData, isValid = true;
       if (this._config.filter) {
-        if (this._config.filter.requiresNormalization()) {
+        if (this._config.filter.requiresNormalization) {
           denormalizedData = await this._context.denormalizer().apply<Result>(item, type, this._config.depth);
           isValid = this._config.filter.test(denormalizedData);
         } else {
