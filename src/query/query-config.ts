@@ -14,6 +14,7 @@ export class QueryConfig {
 
   public offset? = QueryConfig.DEFAULT_OFFSET;
   public limit? = QueryConfig.DEFAULT_LIMIT;
+  public keys?: ValidKey[];
   public filter?: Filter<any>;
   public parent?: Parent;
 

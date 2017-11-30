@@ -15,6 +15,7 @@ export class Query<DbItem> extends BaseQuery<ListResult<DbItem>> implements Quer
 
   private _offset?: number;
   private _limit?: number;
+  private _keys?: ValidKey[];
   private _filter?: Predicate<DbItem>;
   private _parent?: Parent;
 
@@ -39,6 +40,17 @@ export class Query<DbItem> extends BaseQuery<ListResult<DbItem>> implements Quer
    */
   public limit(limit: number): Query<DbItem> {
     this._limit = limit;
+    return this;
+  }
+
+  /**
+   * Filter the result by keys.
+   *
+   * @param {ValidKey[]} keys
+   * @returns {Query<DbItem>}
+   */
+  public keys(keys: ValidKey[]): Query<DbItem> {
+    this._keys = keys;
     return this;
   }
 
@@ -169,6 +181,7 @@ export class Query<DbItem> extends BaseQuery<ListResult<DbItem>> implements Quer
     return Object.assign({
       offset: this._offset || QueryConfig.DEFAULT_OFFSET,
       limit: this._limit || QueryConfig.DEFAULT_LIMIT,
+      keys: this._keys,
       filter: this._filter,
       parent: this._parent,
       depth: this._depth
