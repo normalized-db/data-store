@@ -1,6 +1,7 @@
 import { IdbContext } from '../../context/idb-context';
 import { CommandFactory } from '../command-factory';
 import { CreateCommand } from '../create-command';
+import { PutCommand } from '../put-command';
 import { RemoveCommand } from '../remove-command';
 import { UpdateCommand } from '../update-command';
 import { IdbCreateCommand } from './idb-create-command';
@@ -31,7 +32,7 @@ export class IdbCommandFactory implements CommandFactory {
     return new IdbUpdateCommand(this._context, type);
   }
 
-  public putCommand<Item>(type: string): CreateCommand<Item> {
+  public putCommand<Item>(type: string): PutCommand<Item> {
     return new IdbPutCommand(this._context, type);
   }
 
