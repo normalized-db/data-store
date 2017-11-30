@@ -1,9 +1,11 @@
 import { IdbContext } from '../../context/idb-context/idb-context';
+import { ClearCommand } from '../clear-command';
 import { CommandFactory } from '../command-factory';
 import { CreateCommand } from '../create-command';
 import { PutCommand } from '../put-command';
 import { RemoveCommand } from '../remove-command';
 import { UpdateCommand } from '../update-command';
+import { IdbClearCommand } from './idb-clear-command';
 import { IdbCreateCommand } from './idb-create-command';
 import { IdbPutCommand } from './idb-put-command';
 import { IdbRemoveCommand } from './idb-remove-command';
@@ -38,5 +40,9 @@ export class IdbCommandFactory implements CommandFactory {
 
   public removeCommand<Item>(type: string): RemoveCommand<Item> {
     return new IdbRemoveCommand(this._context, type);
+  }
+
+  public clearCommand(): ClearCommand {
+    return new IdbClearCommand(this._context);
   }
 }
