@@ -1,4 +1,4 @@
-import { ISchema, UniqueKeyCallback } from '@normalized-db/core';
+import { ISchema, UniqueKeyCallback, ValidKey } from '@normalized-db/core';
 import { IDenormalizer } from '@normalized-db/denormalizer';
 import { INormalizer } from '@normalized-db/normalizer';
 import { CommandFactory } from '../command/command-factory';
@@ -39,6 +39,10 @@ export abstract class Context {
   public withKeyGenerator(keyGenerator: UniqueKeyCallback) {
     this._keyGenerator = keyGenerator;
     return this;
+  }
+
+  public newKey(type: string): ValidKey | null {
+    return this._keyGenerator ? this._keyGenerator(type) : null;
   }
 
   public abstract queryRunner<Result>(config: QueryConfig): QueryRunner<Result>;
