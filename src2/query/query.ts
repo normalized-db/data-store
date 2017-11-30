@@ -2,6 +2,7 @@ import { Depth, ValidKey } from '@normalized-db/core';
 import { EmptyResultError } from '../error/empty-result-error';
 import { Predicate } from '../model/predicate';
 import { BaseQuery } from './base-query';
+import { ListResult } from './list-result/list-result';
 import { MapFunc } from './map-reduce/map-func';
 import { Mapper } from './map-reduce/mapper';
 import { ReducerFunc } from './map-reduce/reduce-func';
@@ -10,14 +11,14 @@ import { Parent } from './model/parent';
 import { QueryConfig } from './query-config';
 import { Queryable } from './queryable';
 
-export class Query<DbItem> extends BaseQuery<DbItem[]> implements Queryable<DbItem[]> {
+export class Query<DbItem> extends BaseQuery<ListResult<DbItem>> implements Queryable<ListResult<DbItem>> {
 
   private _offset?: number;
   private _limit?: number;
   private _filter?: Predicate<DbItem>;
   private _parent?: Parent;
 
-  private _depth: Depth;
+  private _depth: number | Depth;
 
   /**
    * Index of the first item that shall be included into the result.
@@ -68,10 +69,10 @@ export class Query<DbItem> extends BaseQuery<DbItem[]> implements Queryable<DbIt
   /**
    * Set the `Depth` determining how far an object has to be denormalized.
    *
-   * @param {Depth} depth
+   * @param {number|Depth} depth
    * @returns {Query<DbItem>}
    */
-  public depth(depth: Depth): Query<DbItem> {
+  public depth(depth: number | Depth): Query<DbItem> {
     this._depth = depth;
     return this;
   }
@@ -102,13 +103,13 @@ export class Query<DbItem> extends BaseQuery<DbItem[]> implements Queryable<DbIt
    *
    * @returns {DbItem[]}
    */
-  public async result(noCache = false): Promise<DbItem[]> {
+  public async result(noCache = false): Promise<ListResult<DbItem>> {
     if (this._cachedResult && !noCache) {
       return this._cachedResult;
     }
 
     const runner = this._context.queryRunner<DbItem>(this.getQueryConfig());
-    return this._cachedResult = await runner.execute();
+    this._cachedResult = await runner.execute();
   }
 
   /**
@@ -118,7 +119,7 @@ export class Query<DbItem> extends BaseQuery<DbItem[]> implements Queryable<DbIt
    * @returns {number}
    */
   public async count(noCache = false): Promise<number> {
-    return (await this.result(noCache)).length;
+    return (await this.result(noCache)).total;
   }
 
   /**

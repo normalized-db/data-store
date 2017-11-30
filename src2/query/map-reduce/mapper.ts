@@ -1,12 +1,14 @@
+import { ListResult } from '../list-result/list-result';
+import { ListResultBuilder } from '../list-result/list-result.builder';
 import { Query } from '../query';
 import { Queryable } from '../queryable';
 import { MapFunc } from './map-func';
 import { ReducerFunc } from './reduce-func';
 import { Reducer } from './reducer';
 
-export class Mapper<QueryResult, Result> implements Queryable<Result[]> {
+export class Mapper<QueryResult, Result> implements Queryable<ListResult<Result>> {
 
-  private _cachedResult?: Result[];
+  private _cachedResult?: ListResult<Result>;
 
   constructor(public readonly query: Query<QueryResult>,
               private readonly _callback: MapFunc<QueryResult, Result>) {
@@ -26,15 +28,21 @@ export class Mapper<QueryResult, Result> implements Queryable<Result[]> {
   /**
    * @inheritDoc
    *
-   * @returns {Result[]}
+   * @param {boolean} noCache
+   * @returns {Promise<ListResult<Result>>}
    */
-  public async result(noCache = false): Promise<Result[]> {
+  public async result(noCache = false): Promise<ListResult<Result>> {
     if (this._cachedResult && !noCache) {
       return this._cachedResult;
     }
 
     const parentResult = await this.query.result(noCache);
-    return this._cachedResult = parentResult.map(this._callback);
+    return this._cachedResult = new ListResultBuilder<Result>()
+      .items(parentResult.items.map(this._callback))
+      .total(parentResult.total)
+      .offset(parentResult.offset)
+      .limit(parentResult.limit)
+      .build();
   }
 
   /**
@@ -51,9 +59,9 @@ export class Mapper<QueryResult, Result> implements Queryable<Result[]> {
    * Returns the result of the underlying query. If `noCache` is `true` the query will be re-run.
    *
    * @param {boolean} noCache
-   * @returns {Promise<any[]>}
+   * @returns {Promise<ListResult<QueryResult>>}
    */
-  public queryResult(noCache = false): Promise<QueryResult[]> {
+  public queryResult(noCache = false): Promise<ListResult<QueryResult>> {
     return this.query.result(noCache);
   }
 }
