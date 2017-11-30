@@ -1,4 +1,4 @@
-import { IdbContext } from '../../context/idb-context';
+import { IdbContext } from '../../context/idb-context/idb-context';
 import { CommandFactory } from '../command-factory';
 import { CreateCommand } from '../create-command';
 import { PutCommand } from '../put-command';

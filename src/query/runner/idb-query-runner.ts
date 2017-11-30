@@ -1,6 +1,6 @@
 import { ISchema, isNull, ValidKey } from '@normalized-db/core';
 import { Transaction } from 'idb';
-import { IdbContext } from '../../context/idb-context';
+import { IdbContext } from '../../context/idb-context/idb-context';
 import { InvalidQueryConfigError } from '../../error/invalid-query-config-error';
 import { NotFoundError } from '../../error/not-found-error';
 import { ListResult } from '../list-result/list-result';

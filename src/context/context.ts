@@ -7,8 +7,6 @@ import { QueryRunner } from '../query/runner/query-runner';
 
 export abstract class Context {
 
-  protected abstract _isReady: boolean;
-
   protected _keyGenerator: UniqueKeyCallback;
 
   constructor(protected readonly _schema: ISchema,
@@ -16,13 +14,11 @@ export abstract class Context {
               protected readonly _denormalizer: IDenormalizer) {
   }
 
-  public async init(): Promise<void> {
-    // nothing to do here
-  }
+  public abstract isReady(): boolean;
 
-  public get isReady(): boolean {
-    return this._isReady;
-  }
+  public abstract open(): Promise<void>;
+
+  public abstract close(): Promise<void>;
 
   public schema(): ISchema {
     return this._schema;

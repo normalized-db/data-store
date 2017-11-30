@@ -13,7 +13,7 @@ export class IdbPutCommand<T> extends IdbBaseWriteCommand<T> implements PutComma
    * @param {Parent} parent
    * @returns {Promise<boolean>}
    */
-  public execute(data: T|T[], parent?: Parent): Promise<boolean> {
+  public execute(data: T | T[], parent?: Parent): Promise<boolean> {
     if (Array.isArray(data)) {
       data.forEach(item => this.setKey(item));
     } else {
