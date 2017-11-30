@@ -7,5 +7,7 @@ export interface CommandFactory {
 
   updateCommand<Item>(type: string): UpdateCommand<Item>;
 
+  putCommand<Item>(type: string): UpdateCommand<Item>;
+
   removeCommand<Item>(type: string): RemoveCommand<Item>;
 }

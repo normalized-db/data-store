@@ -1,25 +1,36 @@
-import { BaseCommand } from '../base-command';
+import { isNull } from '@normalized-db/core';
+import { ObjectStore } from 'idb';
+import { MissingKeyError } from '../../error/missing-key-error';
+import { NotFoundError } from '../../error/not-found-error';
 import { UpdateCommand } from '../update-command';
+import { IdbBaseWriteCommand } from './idb-base-write-command';
 
-export class IdbUpdateCommand<T> extends BaseCommand<T> implements UpdateCommand<T> {
+export class IdbUpdateCommand<T> extends IdbBaseWriteCommand<T> implements UpdateCommand<T> {
 
-  public async execute(item: T): Promise<boolean> {
-    const key = this.getKey(item);
-    const objectStore = this._context.write(this._type).objectStore(this._type);
-    try {
-      const oldItem = await objectStore.get(key);
-      await Promise.all([
-        this.updateRefs(oldItem, item),
-        objectStore.put(item)
-      ]);
-    } catch (e) {
-      return false;
+  /**
+   * @inheritDoc
+   *
+   * @param {T|T[]} data
+   * @returns {Promise<boolean>}
+   * @throws {MissingKeyError}
+   * @throws {NotFoundError}
+   */
+  public async execute(data: T | T[]): Promise<boolean> {
+    const objectStore = this._context.read(this._type).objectStore(this._type);
+    if (Array.isArray(data)) {
+      await Promise.all(data.map(item => this.checkExistence(objectStore, item)));
+    } else {
+      await this.checkExistence(objectStore, data);
     }
 
-    return true;
+    return super.execute(data);
   }
 
-  private async updateRefs(oldItem: T, newItem: T): Promise<void> {
-    // TODO
+  private async checkExistence(objectStore: ObjectStore, item: T): Promise<void> {
+    const key = this.getKey(item);
+    const existingItem = objectStore.get(key);
+    if (isNull(existingItem)) {
+      throw new NotFoundError(this._type, key);
+    }
   }
 }
