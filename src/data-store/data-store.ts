@@ -57,7 +57,7 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
   public async create<Item>(type: Types, item: Item | Item[], parent?: Parent): Promise<boolean> {
     await this._context.open();
     const cmd = this._context.commandFactory().createCommand<Item>(type);
-    const success = cmd.execute(item, parent);
+    const success = await cmd.execute(item, parent);
     this.autoClose();
     return success;
   }
@@ -74,7 +74,7 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
   public async update<Item>(type: Types, item: Item | Item[]): Promise<boolean> {
     await this._context.open();
     const cmd = this._context.commandFactory().updateCommand<Item>(type);
-    const success = cmd.execute(item);
+    const success = await cmd.execute(item);
     this.autoClose();
     return success;
   }
@@ -90,7 +90,7 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
   public async put<Item>(type: Types, item: Item | Item[], parent?: Parent): Promise<boolean> {
     await this._context.open();
     const cmd = this._context.commandFactory().putCommand<Item>(type);
-    const success = cmd.execute(item, parent);
+    const success = await cmd.execute(item, parent);
     this.autoClose();
     return success;
   }
@@ -106,7 +106,7 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
   public async remove<Item>(type: Types, item: Item | ValidKey): Promise<boolean> {
     await this._context.open();
     const cmd = this._context.commandFactory().removeCommand<Item>(type);
-    const success = cmd.execute(item);
+    const success = await cmd.execute(item);
     this.autoClose();
     return success;
   }
