@@ -1,6 +1,5 @@
-import { ISchema } from '@normalized-db/core';
+import { InvalidTypeError, ISchema } from '@normalized-db/core';
 import { Context } from '../context/context';
-import { InvalidTypeError } from '../error/invalid-type-error';
 import { QueryConfig } from './query-config';
 import { Queryable } from './queryable';
 

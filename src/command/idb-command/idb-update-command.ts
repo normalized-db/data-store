@@ -1,7 +1,6 @@
-import { isNull } from '@normalized-db/core';
+import { isNull, NotFoundError } from '@normalized-db/core';
 import { ObjectStore } from 'idb';
 import { MissingKeyError } from '../../error/missing-key-error';
-import { NotFoundError } from '../../error/not-found-error';
 import { UpdateCommand } from '../update-command';
 import { IdbBaseWriteCommand } from './idb-base-write-command';
 

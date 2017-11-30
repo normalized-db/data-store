@@ -1,6 +1,5 @@
-import { isNull, ValidKey } from '@normalized-db/core';
+import { isNull, NotFoundError, ValidKey } from '@normalized-db/core';
 import { Cursor, Transaction } from 'idb';
-import { NotFoundError } from '../../error/not-found-error';
 import { Parent } from '../../model/parent';
 import { BaseCommand } from '../base-command';
 import { CreateCommand } from '../create-command';
@@ -19,7 +18,7 @@ export abstract class IdbBaseWriteCommand<T> extends BaseCommand<T | T[]> implem
    * @returns {Promise<boolean>}
    */
   public async execute(data: T | T[], parent?: Parent): Promise<boolean> {
-    const normalizedData = this._context.normalizer().apply(data, this._type);
+    const normalizedData = this._context.normalizer().apply(this._type, data);
     const involvedTypes = this.getTypes(normalizedData);
     if (parent) {
       involvedTypes.push(parent.type);
@@ -32,7 +31,7 @@ export abstract class IdbBaseWriteCommand<T> extends BaseCommand<T | T[]> implem
         const objectStore = transaction.objectStore(type);
         await Promise.all(normalizedData[type].map(async item => {
           const cursor = await objectStore.get(this.getKey(item, config));
-          return await (cursor ? this.updateCursor(cursor, item) : objectStore.put(item));
+          return await (cursor && cursor.value ? this.updateCursor(cursor, item) : objectStore.put(item));
         }));
       });
 

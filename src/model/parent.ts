@@ -1,6 +1,5 @@
 import { ValidKey } from '@normalized-db/core';
 
-// TODO validate core/Parent
 export class Parent {
 
   /**

@@ -1,6 +1,5 @@
-import { isNull, IStore, IStoreTarget, ValidKey } from '@normalized-db/core';
+import { isNull, IStore, IStoreTarget, NotFoundError, ValidKey } from '@normalized-db/core';
 import { ObjectStore, Transaction } from 'idb';
-import { NotFoundError } from '../../error/not-found-error';
 import { isValidKey } from '../../utility/valid-key';
 import { BaseCommand } from '../base-command';
 import { RemoveCommand } from '../remove-command';
