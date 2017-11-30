@@ -1,10 +1,19 @@
 import { ValidKey } from '@normalized-db/core';
 import { DataStoreTypes } from '../model/data-store-types';
 import { Parent } from '../model/parent';
+import { CountQuery } from '../query/count-query';
 import { Query } from '../query/query';
 import { SingleItemQuery } from '../query/single-item-query';
 
 export interface IDataStore<Types extends DataStoreTypes> {
+
+  /**
+   * Returns the total number of items of a given type.
+   *
+   * @param {Types} type
+   * @returns {CountQuery}
+   */
+  count(type: Types): CountQuery;
 
   /**
    * Create a new `Query`.
@@ -36,7 +45,7 @@ export interface IDataStore<Types extends DataStoreTypes> {
    * @returns {Promise<boolean>}
    * @throws {MissingKeyError}
    */
-  create<Item>(type: Types, item: Item | Item[], parent?: Parent): Promise<boolean> ;
+  create<Item>(type: Types, item: Item | Item[], parent?: Parent): Promise<boolean>;
 
   /**
    * Update the items. If any of the items does not exist a `NotFoundError` will be thrown.
