@@ -281,9 +281,9 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
   }
 
   private fetchCallback(type: string, keys: ValidKey | ValidKey[]): Promise<any | any[]> {
-    const objectStore = this.transaction.objectStore(type);
+    const objectStore = this._context.read(type).objectStore(type);
     return Array.isArray(keys)
       ? Promise.all(keys.map(async key => await objectStore.get(key)))
-      : this.transaction.objectStore(type).get(keys);
+      : objectStore.get(keys);
   }
 }

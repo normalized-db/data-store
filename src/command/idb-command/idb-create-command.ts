@@ -1,4 +1,4 @@
-import { MissingKeyError } from '../../error/missing-key-error';
+import { isNull, MissingKeyError } from '@normalized-db/core';
 import { Parent } from '../../model/parent';
 import { CreateCommand } from '../create-command';
 import { IdbBaseWriteCommand } from './idb-base-write-command';
@@ -32,7 +32,12 @@ export class IdbCreateCommand<T> extends IdbBaseWriteCommand<T> implements Creat
     if (this._typeConfig.autoKey) {
       delete item[this._typeConfig.key];
     } else {
-      item[this._typeConfig.key] = this._context.newKey(this._type);
+      const newKey = this._context.newKey(this._type);
+      if (isNull(newKey)) {
+        throw new MissingKeyError(this._type, this._typeConfig.key);
+      }
+
+      item[this._typeConfig.key] = newKey;
     }
   }
 }
