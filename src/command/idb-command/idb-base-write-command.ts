@@ -26,7 +26,7 @@ export abstract class IdbBaseWriteCommand<T> extends BaseCommand<T | T[]> implem
 
     const transaction = this._context.write(involvedTypes);
     try {
-      const requests = involvedTypes.map(async type => {
+      const requests = Object.keys(normalizedData).map(async type => {
         const config = this.schema.getConfig(type);
         const objectStore = transaction.objectStore(type);
         await Promise.all(normalizedData[type].map(async item => {
@@ -93,7 +93,7 @@ export abstract class IdbBaseWriteCommand<T> extends BaseCommand<T | T[]> implem
     }
 
     const parentTargets = this.schema.getConfig(parent.type).targets;
-    if (!parentTargets || !(parent.field in parentTargets) || parentTargets.field.type !== this._type) {
+    if (!parentTargets || !(parent.field in parentTargets) || parentTargets[parent.field].type !== this._type) {
       throw new Error(`${parent.type}.${parent.field} is not configured as target for ${this._type}`);
     }
 

@@ -1,6 +1,14 @@
-import { InvalidTypeError, ISchema, isNull, IStore, IStoreConfig, NormalizedData, ValidKey } from '@normalized-db/core';
+import {
+  InvalidTypeError,
+  ISchema,
+  isNull,
+  IStore,
+  IStoreConfig,
+  MissingKeyError,
+  NormalizedData,
+  ValidKey
+} from '@normalized-db/core';
 import { IdbContext } from '../context/idb-context/idb-context';
-import { MissingKeyError } from '../error/missing-key-error';
 import { Command } from './command';
 
 export abstract class BaseCommand<T> implements Command<T> {

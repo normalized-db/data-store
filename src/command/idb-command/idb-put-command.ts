@@ -1,5 +1,4 @@
-import { isNull } from '@normalized-db/core';
-import { MissingKeyError } from '../../error/missing-key-error';
+import { isNull, MissingKeyError } from '@normalized-db/core';
 import { Parent } from '../../model/parent';
 import { PutCommand } from '../put-command';
 import { IdbBaseWriteCommand } from './idb-base-write-command';
