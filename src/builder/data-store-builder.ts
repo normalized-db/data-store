@@ -66,7 +66,7 @@ export class DataStoreBuilder {
   }
 
   protected buildIndexedDbImplementation(): Promise<IndexedDb> {
-    return this.indexedDb.build(this.schema, this.useReverseReferences, this.logging);
+    return this.indexedDb.build(this.schema, this.uniqueKeyCallback, this.useReverseReferences, this.logging);
   }
 
   protected async buildInMemoryImplementation(): Promise<InMemoryDb> {

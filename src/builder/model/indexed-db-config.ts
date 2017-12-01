@@ -1,4 +1,4 @@
-import { ISchema } from '@normalized-db/core';
+import { ISchema, UniqueKeyCallback } from '@normalized-db/core';
 import { IndexedDb } from '../../implementation/indexed-db/indexed-db';
 import { IndexedDbRr } from '../../implementation/indexed-db/indexed-db-rr';
 import { LoggingConfig } from './logging-config';
@@ -11,11 +11,12 @@ export class IndexedDbConfig {
   }
 
   public async build(schema: ISchema,
+                     uniqueKeyCallback?: UniqueKeyCallback,
                      useReverseReferences: boolean = false,
                      logging?: LoggingConfig): Promise<IndexedDb> {
     const normalizedDb = useReverseReferences
-      ? new IndexedDbRr(schema, logging)
-      : new IndexedDb(schema, logging);
+      ? new IndexedDbRr(schema, uniqueKeyCallback, logging)
+      : new IndexedDb(schema, uniqueKeyCallback, logging);
 
     await normalizedDb.open(this.name, this.version, this.upgrade);
 
