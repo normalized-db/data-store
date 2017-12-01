@@ -6,6 +6,7 @@ import {
   IStoreTargetItem,
   NormalizedData,
   Parent,
+  UniqueKeyCallback,
   ValidKey
 } from '@normalized-db/core';
 import { DenormalizerBuilder } from '@normalized-db/denormalizer';
@@ -29,6 +30,7 @@ export class IndexedDb implements IDataStore {
   private db: DB;
 
   constructor(protected readonly schema: ISchema,
+              protected readonly uniqueKeyCallback?: UniqueKeyCallback,
               protected readonly logging: LoggingConfig = new LoggingConfig()) {
     this.onUpgradeNeeded = this.onUpgradeNeeded.bind(this);
     this.fetchCallback = this.fetchCallback.bind(this);
@@ -487,7 +489,8 @@ export class IndexedDb implements IDataStore {
 
   protected buildNormalizer(): NormalizerBuilder {
     return new NormalizerBuilder()
-      .withSchema(this.schema);
+      .withSchema(this.schema)
+      .withUniqueKeyCallback(this.uniqueKeyCallback);
   }
 
   protected buildDenormalizer(): DenormalizerBuilder {

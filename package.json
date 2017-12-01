@@ -1,6 +1,6 @@
 {
   "name": "@normalized-db/data-store",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "Sandro Schmid <saseb.schmid@gmail.com>",
   "license": "MIT",
   "description": "`JavaScript` data stores for in-memory data and as `IndexedDB`-wrapper using normalized data (implemented with `TypeScript`).",
@@ -28,7 +28,8 @@
     "build-prod": "tslint ./src/*.ts ./src/**/*.ts && WEBPACK_ENV=prod webpack",
     "build-all": "npm run build && npm run build-prod",
     "clean-build": "rm -rf lib/ && npm run build-all",
-    "test": "npm run build && ./node_modules/karma/bin/karma start ./karma.conf.js"
+    "test": "npm run build && ./node_modules/karma/bin/karma start ./karma.conf.js",
+    "build-and-publish": "npm run clean-build && npm publish"
   },
   "dependencies": {
     "@normalized-db/core": "1.0.4",
