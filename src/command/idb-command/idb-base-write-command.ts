@@ -1,5 +1,5 @@
 import { isNull, NotFoundError, ValidKey } from '@normalized-db/core';
-import { Cursor, Transaction } from 'idb';
+import { Cursor, ObjectStore, Transaction } from 'idb';
 import { Parent } from '../../model/parent';
 import { BaseCommand } from '../base-command';
 import { CreateCommand } from '../create-command';
@@ -26,22 +26,35 @@ export abstract class IdbBaseWriteCommand<T> extends BaseCommand<T | T[]> implem
 
     const transaction = this._context.write(involvedTypes);
     try {
-      const requests = Object.keys(normalizedData).map(async type => {
+      const newItemKeys: ValidKey[] = [];
+      await Promise.all(Object.keys(normalizedData).map(async type => {
         const config = this.schema.getConfig(type);
         const objectStore = transaction.objectStore(type);
         await Promise.all(normalizedData[type].map(async item => {
-          const cursor = await objectStore.get(this.getKey(item, config));
-          return await (cursor && cursor.value ? this.updateCursor(cursor, item) : objectStore.put(item));
+          let key = this.getKey(item, config, true);
+          if (!isNull(key)) {
+            const cursor = await objectStore.get(key);
+            await (cursor && cursor.value ? this.updateCursor(cursor, item) : objectStore.put(item));
+          } else {
+            await objectStore.put(item);
+            item[config.key] = key = await this.getLatestKey(objectStore);
+          }
+
+          if (type === this._type) {
+            newItemKeys.push(key);
+          }
         }));
-      });
+      }));
 
       if (parent) {
-        requests.push(this.addToParent(transaction, parent, data));
+        await this.addToParent(transaction, parent, newItemKeys);
       }
-
-      await Promise.all(requests);
     } catch (e) {
-      transaction.abort();
+      try {
+        transaction.abort();
+      } catch (e2) {
+        e = e2;
+      }
       console.error(e);
       return false;
     }
@@ -86,7 +99,11 @@ export abstract class IdbBaseWriteCommand<T> extends BaseCommand<T | T[]> implem
     return await cursor.update(mergedItem);
   }
 
-  private async addToParent(transaction: Transaction, parent: Parent, data: T | T[]): Promise<void> {
+  private async addToParent(transaction: Transaction, parent: Parent, keys: ValidKey[]): Promise<void> {
+    if (keys && keys.length === 0) {
+      return;
+    }
+
     const parentItem = await transaction.objectStore(parent.type).get(parent.key);
     if (isNull(parentItem)) {
       throw new NotFoundError(parent.type, parent.key);
@@ -101,7 +118,7 @@ export abstract class IdbBaseWriteCommand<T> extends BaseCommand<T | T[]> implem
       transaction,
       parent,
       parentItem,
-      Array.isArray(data) ? data.map(item => this.getKey(item)) : [this.getKey(data)]
+      keys
     );
   }
 
@@ -113,16 +130,16 @@ export abstract class IdbBaseWriteCommand<T> extends BaseCommand<T | T[]> implem
     const fieldValue = parentItem[parent.field];
     if (Array.isArray(fieldValue)) {
       if (isNull(fieldValue)) {
+        parentItem[parent.field] = keys;
+        parentChanged = true;
+      } else {
         keys.forEach(itemKey => {
           const index = fieldValue.findIndex(key => key === itemKey);
           if (index < 0) {
-            parentItem[parent.field].add(itemKey);
+            parentItem[parent.field].push(itemKey);
             parentChanged = true;
           }
         });
-      } else {
-        parentItem[parent.field] = keys;
-        parentChanged = true;
       }
     } else {
       if (keys.length > 1) {
@@ -150,5 +167,10 @@ export abstract class IdbBaseWriteCommand<T> extends BaseCommand<T | T[]> implem
     if (parentChanged) {
       await transaction.objectStore(parent.type).put(parentItem);
     }
+  }
+
+  private async getLatestKey(objectStore: ObjectStore): Promise<ValidKey | null> {
+    const cursor = await objectStore.openCursor(null, 'prevunique');
+    return cursor ? cursor.key as ValidKey : null;
   }
 }
