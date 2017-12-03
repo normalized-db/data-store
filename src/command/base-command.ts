@@ -33,8 +33,8 @@ export abstract class BaseCommand<T> implements Command<T> {
     return config.key in item && !isNull(item[config.key]);
   }
 
-  protected getKey(item: any, config: IStoreConfig = this._typeConfig): ValidKey {
-    if (!this.hasKey(item, config)) {
+  protected getKey(item: any, config: IStoreConfig = this._typeConfig, isNullAllowed = false): ValidKey | null {
+    if (!isNullAllowed && !this.hasKey(item, config)) {
       throw new MissingKeyError(this._type, config.key);
     }
 

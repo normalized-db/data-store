@@ -9,7 +9,7 @@ import { Queryable } from './queryable';
 export class SingleItemQuery<DbItem> extends BaseQuery<DbItem | null> implements Queryable<DbItem | null> {
 
   private _parent?: Parent;
-  private _default?: DbItem;
+  private _default?: DbItem = null;
 
   private _depth: number | Depth;
 
@@ -58,15 +58,15 @@ export class SingleItemQuery<DbItem> extends BaseQuery<DbItem | null> implements
   /**
    * @inheritDoc
    *
-   * If no object with the given key was found this will either return the `defaultValue` (if set) or otherwise throw
-   * a `NotFoundError` or, if a `parent` was used`, a `ChildNotFoundError`.
+   * If no object with the given key was found this will either throw a `NotFoundError` or, if a `parent` was used`,
+   * a `ChildNotFoundError`. If you want to use a default value instead, use `#orDefault(…)`.
    *
    * @param {boolean} noCache
-   * @returns {Promise<DbItem|null>}
+   * @returns {Promise<DbItem>}
    * @throws {NotFoundError} when now `defaultValue` is available
    * @throws {ChildNotFoundError} when no `defaultValue` is available and a `parent`-item was used
    */
-  public async result(noCache = false): Promise<DbItem | null> {
+  public async result(noCache = false): Promise<DbItem> {
     if (this._cachedResult && !noCache) {
       return this._cachedResult;
     }
@@ -76,9 +76,7 @@ export class SingleItemQuery<DbItem> extends BaseQuery<DbItem | null> implements
     const result = await runner.singleExecute();
 
     if (!result) {
-      if (isNull(this._default)) {
-        return this._cachedResult = this._default;
-      } else if (this._parent) {
+      if (this._parent) {
         throw new ChildNotFoundError(this._parent, this._key);
       } else {
         throw new NotFoundError(this._type, this._key);
@@ -88,6 +86,24 @@ export class SingleItemQuery<DbItem> extends BaseQuery<DbItem | null> implements
     this._cachedResult = result;
     this.autoClose();
     return this._cachedResult;
+  }
+
+  /**
+   * Fetch the query's result and return `defaultValue` if not item was found instead of throwing an error.
+   *
+   * @param {DbItem|null} defaultValue
+   * @param {boolean} noCache
+   * @returns {Promise<DbItem & (any | undefined)>}
+   */
+  public async orDefault(defaultValue: DbItem = null, noCache = false): Promise<DbItem | null> {
+    let result: DbItem;
+    try {
+      result = await this.result(noCache);
+    } catch (e) {
+      // ignore
+    }
+
+    return result || defaultValue;
   }
 
   /**

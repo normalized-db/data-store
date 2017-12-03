@@ -1,5 +1,6 @@
 import { isNull, IStore, IStoreTarget, NotFoundError, ValidKey } from '@normalized-db/core';
 import { ObjectStore, Transaction } from 'idb';
+import { EmptyInputError } from '../../error/empty-input-error';
 import { isValidKey } from '../../utility/valid-key';
 import { BaseCommand } from '../base-command';
 import { RemoveCommand } from '../remove-command';
@@ -14,6 +15,10 @@ export class IdbRemoveCommand<T> extends BaseCommand<T | ValidKey> implements Re
    * @throws {NotFoundError}
    */
   public async execute(data: T | ValidKey): Promise<boolean> {
+    if (isNull(data)) {
+      throw new EmptyInputError('remove');
+    }
+
     const key = isValidKey(data) ? data as ValidKey : this.getKey(data);
     const oldItem = await this._context.read(this._type).objectStore(this._type).get(key);
     if (isNull(oldItem)) {
@@ -24,7 +29,12 @@ export class IdbRemoveCommand<T> extends BaseCommand<T | ValidKey> implements Re
     try {
       await this.executeRecursive(this._type, oldItem, transaction, transaction.objectStore(this._type));
     } catch (e) {
-      transaction.abort();
+      try {
+        transaction.abort();
+      } catch (e2) {
+        e = e2;
+      }
+      console.error(e);
       return false;
     }
 
@@ -73,7 +83,7 @@ export class IdbRemoveCommand<T> extends BaseCommand<T | ValidKey> implements Re
       if (!isNull(target)) {
         if ('_refs' in target && parentType in target._refs) {
           // prevent update of parent which is deleted anyway
-          target._refs.parentType.delete(parentKey);
+          target._refs[parentType].delete(parentKey);
         }
         await this.executeRecursive(targetType, target, transaction, objectStore);
       }
@@ -100,7 +110,7 @@ export class IdbRemoveCommand<T> extends BaseCommand<T | ValidKey> implements Re
         const requests: Promise<void>[] = [];
         const objectStore = transaction.objectStore(refType);
 
-        const it: Iterator<any> = oldItem._refs.refType.values();
+        const it: Iterator<any> = oldItem._refs[refType].values();
         let current = it.next();
         while (!current.done) {
           requests.push(this.removeFromParent(objectStore, parentFields, current.value, oldItemKey));
@@ -115,8 +125,7 @@ export class IdbRemoveCommand<T> extends BaseCommand<T | ValidKey> implements Re
   private getParentFields(oldItemType: string, parentConfig: IStore): string[] {
     const parentFields: string[] = [];
     Object.keys(parentConfig.targets).forEach(field => {
-      const target = parentConfig.targets.key;
-      if (target.type === oldItemType) {
+      if (parentConfig.targets[field].type === oldItemType) {
         parentFields.push(field);
       }
     });

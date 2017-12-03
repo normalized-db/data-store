@@ -1,4 +1,5 @@
 import { isNull, MissingKeyError } from '@normalized-db/core';
+import { EmptyInputError } from '../../error/empty-input-error';
 import { Parent } from '../../model/parent';
 import { CreateCommand } from '../create-command';
 import { IdbBaseWriteCommand } from './idb-base-write-command';
@@ -14,6 +15,10 @@ export class IdbCreateCommand<T> extends IdbBaseWriteCommand<T> implements Creat
    * @throws {MissingKeyError}
    */
   public async execute(data: T | T[], parent?: Parent): Promise<boolean> {
+    if (isNull(data)) {
+      throw new EmptyInputError('create');
+    }
+
     if (Array.isArray(data)) {
       data.forEach(item => this.setKey(item));
     } else {

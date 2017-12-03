@@ -1,4 +1,9 @@
+import { isNull } from '@normalized-db/core';
+
 export class ListResult<Result> {
+
+  public static readonly DEFAULT_OFFSET = 0;
+  public static readonly DEFAULT_LIMIT = Infinity;
 
   constructor(private _items: Result[],
               private _total: number,
@@ -7,13 +12,25 @@ export class ListResult<Result> {
     if (!this._items) {
       this._items = [];
     }
+
+    if (isNull(this._total)) {
+      this._total = this._items.length;
+    }
+
+    if (isNull(this._offset)) {
+      this._offset = ListResult.DEFAULT_OFFSET;
+    }
+
+    if (isNull(this._limit)) {
+      this._limit = ListResult.DEFAULT_LIMIT;
+    }
   }
 
   public get items(): Result[] {
     return this._items;
   }
 
-  public get first(): Result|null {
+  public get first(): Result | null {
     return this.isEmpty ? null : this._items[0];
   }
 

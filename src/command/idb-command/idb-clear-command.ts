@@ -34,8 +34,12 @@ export class IdbClearCommand implements ClearCommand {
     try {
       involvedTypes.forEach(osn => transaction.objectStore(osn).clear());
     } catch (e) {
+      try {
+        transaction.abort();
+      } catch (e2) {
+        e = e2;
+      }
       console.error(e);
-      transaction.abort();
       return false;
     }
 

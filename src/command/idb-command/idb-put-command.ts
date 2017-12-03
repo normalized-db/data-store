@@ -1,4 +1,5 @@
 import { isNull, MissingKeyError } from '@normalized-db/core';
+import { EmptyInputError } from '../../error/empty-input-error';
 import { Parent } from '../../model/parent';
 import { PutCommand } from '../put-command';
 import { IdbBaseWriteCommand } from './idb-base-write-command';
@@ -12,14 +13,18 @@ export class IdbPutCommand<T> extends IdbBaseWriteCommand<T> implements PutComma
    * @param {Parent} parent
    * @returns {Promise<boolean>}
    */
-  public execute(data: T | T[], parent?: Parent): Promise<boolean> {
+  public async execute(data: T | T[], parent?: Parent): Promise<boolean> {
+    if (isNull(data)) {
+      throw new EmptyInputError('put');
+    }
+
     if (Array.isArray(data)) {
       data.forEach(item => this.setKey(item));
     } else {
       this.setKey(data);
     }
 
-    return super.execute(data, parent);
+    return await super.execute(data, parent);
   }
 
   private setKey(item: T): void {

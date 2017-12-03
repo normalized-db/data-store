@@ -1,11 +1,9 @@
 import { ISchema, isNull, NotFoundError, ValidKey } from '@normalized-db/core';
 import { IDenormalizer } from '@normalized-db/denormalizer';
 import { Transaction } from 'idb';
-import { IdbContext } from '../../context/idb-context/idb-context';
-import { InvalidQueryConfigError } from '../../error/invalid-query-config-error';
-import { InvalidQueryRunnerStatusError } from '../../error/invalid-query-runner-status-error';
-import { ListResult } from '../list-result/list-result';
-import { ListResultBuilder } from '../list-result/list-result.builder';
+import { IdbContext } from '../../context/idb-context';
+import { InvalidQueryConfigError, InvalidQueryRunnerStatusError } from '../../error';
+import { ListResult, ListResultBuilder } from '../list-result';
 import { QueryConfig } from '../query-config';
 import { QueryRunner } from './query-runner';
 
@@ -47,7 +45,7 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
     let result: ListResult<Result>;
     if (this._config.parent) {
       result = (await this.findInParent()) as ListResult<Result>;
-    } else if (this._config.keys && this._config.keys.length > 0) {
+    } else if (this._config.keys) {
       result = await this.findAllByKeys(this._config.keys);
     } else {
       if (this._config.singleItem) {
