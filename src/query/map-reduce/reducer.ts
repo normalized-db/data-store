@@ -17,19 +17,22 @@ export class Reducer<QueryResult, MapperResult, Result> implements Queryable<Res
   /**
    * @inheritDoc
    *
-   * @returns {Result}
+   * @returns {Promise<Result>}
    */
   public async result(noCache = false): Promise<Result> {
     if (this._cachedResult && !noCache) {
       return this._cachedResult;
     }
 
-    const parentResult = await this.parent.result(noCache);
+    const parentResult = (await this.parent.result(noCache)).items;
+    const parentResultLength = parentResult.length;
+    let i = 0, accumulated = this._initialValue;
+    while (i < parentResultLength) {
+      accumulated = await this._callback(accumulated, parentResult[i], i, parentResult);
+      i++;
+    }
 
-    return this._cachedResult = parentResult.items.reduce<Result>(
-      (result, item) => this._callback(result, item),
-      this._initialValue
-    );
+    return this._cachedResult = accumulated;
   }
 
   /**

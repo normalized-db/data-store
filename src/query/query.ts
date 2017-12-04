@@ -118,8 +118,8 @@ export class Query<DbItem> extends BaseQuery<ListResult<DbItem>> implements Quer
    * @param {Result} initialValue
    * @returns {Reducer<DbItem, void, Result>}
    */
-  public reduce<Result>(callback: ReducerFunc<DbItem, Result>, initialValue?: Result): Reducer<DbItem, void, Result> {
-    return new Reducer<DbItem, void, Result>(this, null, callback, initialValue);
+  public reduce<Result>(callback: ReducerFunc<DbItem, Result>, initialValue?: Result): Reducer<DbItem, DbItem, Result> {
+    return new Reducer<DbItem, DbItem, Result>(this, null, callback, initialValue);
   }
 
   /**
