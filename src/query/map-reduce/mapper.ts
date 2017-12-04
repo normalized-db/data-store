@@ -38,7 +38,7 @@ export class Mapper<QueryResult, Result> implements Queryable<ListResult<Result>
 
     const parentResult = await this.query.result(noCache);
     return this._cachedResult = new ListResultBuilder<Result>()
-      .items(parentResult.items.map(this._callback))
+      .items(await Promise.all(parentResult.items.map(this._callback)))
       .total(parentResult.total)
       .offset(parentResult.offset)
       .limit(parentResult.limit)
