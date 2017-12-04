@@ -1,6 +1,7 @@
-import { Depth, isNull, NotFoundError, ValidKey } from '@normalized-db/core';
+import { Depth, isNull, NotFoundError, RefsUtility, ValidKey } from '@normalized-db/core';
 import { Context } from '../context/context';
 import { ChildNotFoundError } from '../error/child-not-found-error';
+import { RefNotFoundError } from '../error/ref-not-found-error';
 import { Parent } from '../model/parent';
 import { BaseQuery } from './base-query';
 import { QueryConfig } from './query-config';
@@ -41,6 +42,21 @@ export class SingleItemQuery<DbItem> extends BaseQuery<DbItem | null> implements
    */
   public defaultValue(value: DbItem): SingleItemQuery<DbItem | null> {
     this._default = value;
+    return this;
+  }
+
+  /**
+   * Ensures `sourceItem` has a reverse reference an item of `type` with the `key`, throws `RefNotFoundError`
+   * otherwise.
+   *
+   * @param sourceItem
+   * @returns {SingleItemQuery<DbItem|null>}
+   * @throws {RefNotFoundError}
+   */
+  public reverse(sourceItem: any): SingleItemQuery<DbItem | null> {
+    if (!RefsUtility.hasKey(sourceItem, this._type, this._key)) {
+      throw new RefNotFoundError(this._type, this._key);
+    }
     return this;
   }
 

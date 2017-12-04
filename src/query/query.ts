@@ -1,4 +1,4 @@
-import { Depth, ValidKey } from '@normalized-db/core';
+import { Depth, RefsUtility, ValidKey } from '@normalized-db/core';
 import { EmptyResultError } from '../error/empty-result-error';
 import { Parent } from '../model/parent';
 import { Predicate } from '../model/predicate';
@@ -75,6 +75,18 @@ export class Query<DbItem> extends BaseQuery<ListResult<DbItem>> implements Quer
    */
   public parent(key: ValidKey, field: string): Query<DbItem> {
     this._parent = new Parent(this._type, key, field);
+    return this;
+  }
+
+  /**
+   * Filter by reverse keys set in `sourceItem._refs.{type}`. Uses the queries `keys`-filter so you should not try
+   * to use `keys(…)` and `reverse(…)` in the same query.
+   *
+   * @param sourceItem
+   * @returns {Query<DbItem>}
+   */
+  public reverse(sourceItem: any): Query<DbItem> {
+    this._keys = RefsUtility.getAll(sourceItem, this._type);
     return this;
   }
 
