@@ -1,5 +1,7 @@
 import { isNull, NotFoundError, ValidKey } from '@normalized-db/core';
 import { Cursor, ObjectStore, Transaction } from 'idb';
+import { CreatedEvent } from '../../event/created-event';
+import { UpdatedEvent } from '../../event/updated-event';
 import { Parent } from '../../model/parent';
 import { BaseCommand } from '../base-command';
 import { CreateCommand } from '../create-command';
@@ -32,12 +34,19 @@ export abstract class IdbBaseWriteCommand<T> extends BaseCommand<T | T[]> implem
         const objectStore = transaction.objectStore(type);
         await Promise.all(normalizedData[type].map(async item => {
           let key = this.getKey(item, config, true);
-          if (!isNull(key)) {
-            const cursor = await objectStore.get(key);
-            await (cursor && cursor.value ? this.updateCursor(cursor, item) : objectStore.put(item));
-          } else {
+          if (isNull(key)) {
             await objectStore.put(item);
             item[config.key] = key = await this.getLatestKey(objectStore);
+            this._eventQueue.enqueue(new CreatedEvent(type, item, type === this._type ? parent : null));
+          } else {
+            const cursor = await objectStore.get(key);
+            if (cursor && cursor.value) {
+              const mergedItem = await this.updateCursor(cursor, item);
+              this._eventQueue.enqueue(new UpdatedEvent(type, mergedItem));
+            } else {
+              await objectStore.put(item);
+              this._eventQueue.enqueue(new CreatedEvent(type, item, type === this._type ? parent : null));
+            }
           }
 
           if (type === this._type) {
@@ -59,6 +68,7 @@ export abstract class IdbBaseWriteCommand<T> extends BaseCommand<T | T[]> implem
       return false;
     }
 
+    this.onSuccess();
     return true;
   }
 
@@ -68,9 +78,9 @@ export abstract class IdbBaseWriteCommand<T> extends BaseCommand<T | T[]> implem
    *
    * @param {Cursor} cursor
    * @param newItem
-   * @returns {Promise<void>}
+   * @returns {Promise<object>}
    */
-  private async updateCursor(cursor: Cursor, newItem: any): Promise<void> {
+  private async updateCursor(cursor: Cursor, newItem: any): Promise<object> {
     const mergedItem = cursor.value;
     Object.keys(newItem)
       .filter(field => field !== '_refs')
@@ -96,7 +106,8 @@ export abstract class IdbBaseWriteCommand<T> extends BaseCommand<T | T[]> implem
     }
 
     mergedItem._refs = mergedRefs;
-    return await cursor.update(mergedItem);
+    await cursor.update(mergedItem);
+    return mergedItem;
   }
 
   private async addToParent(transaction: Transaction, parent: Parent, keys: ValidKey[]): Promise<void> {

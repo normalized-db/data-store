@@ -9,11 +9,13 @@ import {
   ValidKey
 } from '@normalized-db/core';
 import { IdbContext } from '../context/idb-context/idb-context';
+import { EventQueue } from '../event/utility/event-queue';
 import { Command } from './command';
 
 export abstract class BaseCommand<T> implements Command<T> {
 
   protected readonly _typeConfig: IStore;
+  protected readonly _eventQueue: EventQueue;
 
   constructor(protected readonly _context: IdbContext<any>,
               protected readonly _type: string) {
@@ -41,7 +43,11 @@ export abstract class BaseCommand<T> implements Command<T> {
     return item[config.key];
   }
 
-  protected getTypes(normalizedData: NormalizedData) {
+  protected getTypes(normalizedData: NormalizedData): string[] {
     return Object.keys(normalizedData);
+  }
+
+  protected onSuccess(): void {
+    this._eventQueue.notify();
   }
 }
