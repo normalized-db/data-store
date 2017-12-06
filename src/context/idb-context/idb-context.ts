@@ -4,13 +4,14 @@ import { INormalizerBuilder } from '@normalized-db/normalizer';
 import { DB, default as DBFactory, Transaction, UpgradeDB } from 'idb';
 import { CommandFactory } from '../../command/command-factory';
 import { IdbCommandFactory } from '../../command/idb-command/idb-command-factory';
+import { DataStoreTypes } from '../../model/data-store-types';
 import { QueryConfig } from '../../query/query-config';
 import { IdbQueryRunner } from '../../query/runner/idb-query-runner';
 import { QueryRunner } from '../../query/runner/query-runner';
 import { Context } from '../context';
 import { IdbConfig } from './idb-config';
 
-export class IdbContext extends Context {
+export class IdbContext<Types extends DataStoreTypes> extends Context<Types> {
 
   private _db: DB;
 

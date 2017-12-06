@@ -15,7 +15,7 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
   private transaction: Transaction;
   private denormalizer: IDenormalizer;
 
-  constructor(private readonly _context: IdbContext,
+  constructor(private readonly _context: IdbContext<any>,
               private readonly _config: QueryConfig) {
     this.fetchCallback = this.fetchCallback.bind(this);
     this._schema = this._context.schema();

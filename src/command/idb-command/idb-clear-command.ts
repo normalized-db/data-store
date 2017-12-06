@@ -5,7 +5,7 @@ import { ClearCommand } from '../clear-command';
 
 export class IdbClearCommand implements ClearCommand {
 
-  constructor(protected readonly _context: IdbContext) {
+  constructor(protected readonly _context: IdbContext<any>) {
   }
 
   /**

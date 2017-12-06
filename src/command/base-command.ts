@@ -15,7 +15,7 @@ export abstract class BaseCommand<T> implements Command<T> {
 
   protected readonly _typeConfig: IStore;
 
-  constructor(protected readonly _context: IdbContext,
+  constructor(protected readonly _context: IdbContext<any>,
               protected readonly _type: string) {
     const schema = this.schema;
     if (!schema.hasType(_type)) {

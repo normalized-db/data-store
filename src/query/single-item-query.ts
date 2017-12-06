@@ -14,7 +14,7 @@ export class SingleItemQuery<DbItem> extends BaseQuery<DbItem | null> implements
 
   private _depth: number | Depth;
 
-  constructor(_context: Context,
+  constructor(_context: Context<any>,
               _autoCloseContext = true,
               _type: string,
               private readonly _key: ValidKey) {
