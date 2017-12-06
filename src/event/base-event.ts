@@ -1,3 +1,4 @@
+import { ValidKey } from '@normalized-db/core/lib/src/model/valid-key';
 import { EventType } from './utility/event-type';
 
 export abstract class BaseEvent<T> {
@@ -6,6 +7,7 @@ export abstract class BaseEvent<T> {
 
   constructor(public readonly eventType: EventType,
               public readonly dataStoreType: string,
-              public readonly item: T) {
+              public readonly item: T,
+              public readonly itemKey: ValidKey) {
   }
 }

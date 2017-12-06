@@ -37,15 +37,15 @@ export abstract class IdbBaseWriteCommand<T> extends BaseCommand<T | T[]> implem
           if (isNull(key)) {
             await objectStore.put(item);
             item[config.key] = key = await this.getLatestKey(objectStore);
-            this._eventQueue.enqueue(new CreatedEvent(type, item, type === this._type ? parent : null));
+            this._eventQueue.enqueue(new CreatedEvent(type, item, key, type === this._type ? parent : null));
           } else {
             const cursor = await objectStore.get(key);
             if (cursor && cursor.value) {
               const mergedItem = await this.updateCursor(cursor, item);
-              this._eventQueue.enqueue(new UpdatedEvent(type, mergedItem));
+              this._eventQueue.enqueue(new UpdatedEvent(type, mergedItem, key));
             } else {
               await objectStore.put(item);
-              this._eventQueue.enqueue(new CreatedEvent(type, item, type === this._type ? parent : null));
+              this._eventQueue.enqueue(new CreatedEvent(type, item, key, type === this._type ? parent : null));
             }
           }
 

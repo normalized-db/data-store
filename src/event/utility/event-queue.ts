@@ -14,7 +14,7 @@ export class EventQueue {
 
   public notify(): void {
     let i = this._queue.length;
-    while (i-- >= 0) {
+    while (--i >= 0) {
       this._eventPipe.notify(this._queue.pop());
     }
   }

@@ -24,6 +24,7 @@ export abstract class BaseCommand<T> implements Command<T> {
       throw new InvalidTypeError(_type);
     }
 
+    this._eventQueue = new EventQueue(this._context.eventPipe);
     this._typeConfig = schema.getConfig(this._type);
   }
 

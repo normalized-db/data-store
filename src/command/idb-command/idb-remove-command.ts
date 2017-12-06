@@ -49,13 +49,14 @@ export class IdbRemoveCommand<T> extends BaseCommand<T | ValidKey> implements Re
                                  transaction: Transaction,
                                  objectStore: ObjectStore): Promise<void> {
     const config = this.schema.getConfig(type);
+    const key = this.getKey(item, config);
     await Promise.all([
       this.cascadeRemoval(transaction, config.targets, type, item),
       this.updateParents(transaction, type, item),
-      objectStore.delete(this.getKey(item, config))
+      objectStore.delete(key)
     ]);
 
-    this._eventQueue.enqueue(new RemovedEvent(type, item));
+    this._eventQueue.enqueue(new RemovedEvent(type, item, key));
   }
 
   // region remove dependent child entities
@@ -156,6 +157,7 @@ export class IdbRemoveCommand<T> extends BaseCommand<T | ValidKey> implements Re
       const enqueueRemovedEvent = (field: string) => this._eventQueue.enqueue(new RemovedEvent(
         oldItemType,
         oldItem,
+        oldItemKey,
         new Parent(parentObjectStore.name, parentKey, field)
       ));
 
