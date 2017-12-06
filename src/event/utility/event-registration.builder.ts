@@ -1,16 +1,16 @@
 import { ListenerRegisteredError } from '../../error/listener-registered-error';
 import { DataStoreTypes } from '../../model/data-store-types';
-import { EventListener } from './event-listener';
 import { EventRegistration } from './event-registration';
 import { EventType } from './event-type';
+import { OnDataChanged } from './on-data-changed';
 
 export class EventRegistrationBuilder<Types extends DataStoreTypes> {
 
   private _dataStoreType: Types;
   private _eventType: EventType;
 
-  constructor(private readonly registrations: Map<EventListener, EventRegistration<Types>>,
-              private readonly listener: EventListener) {
+  constructor(private readonly registrations: Map<OnDataChanged, EventRegistration<Types>>,
+              private readonly listener: OnDataChanged) {
     if (this.registrations.has(listener)) {
       throw new ListenerRegisteredError();
     }

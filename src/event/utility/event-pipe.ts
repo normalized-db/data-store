@@ -1,18 +1,18 @@
 import { DataStoreTypes } from '../../model/data-store-types';
 import { BaseEvent } from '../base-event';
-import { EventListener } from './event-listener';
 import { EventRegistration } from './event-registration';
 import { EventRegistrationBuilder } from './event-registration.builder';
+import { OnDataChanged } from './on-data-changed';
 
 export class EventPipe<Types extends DataStoreTypes> {
 
-  private readonly registrations = new Map<EventListener, EventRegistration<Types>>();
+  private readonly registrations = new Map<OnDataChanged, EventRegistration<Types>>();
 
-  public add(listener: EventListener): EventRegistrationBuilder<Types> {
+  public add(listener: OnDataChanged): EventRegistrationBuilder<Types> {
     return new EventRegistrationBuilder<Types>(this.registrations, listener);
   }
 
-  public remove(listener: EventListener): void {
+  public remove(listener: OnDataChanged): void {
     this.registrations.delete(listener);
   }
 
