@@ -12,8 +12,6 @@ export abstract class Context<Types extends DataStoreTypes> {
 
   public readonly eventPipe = new EventPipe<Types>();
 
-  // protected _keyGenerator: UniqueKeyCallback;
-
   private readonly _normalizer: INormalizer;
 
   constructor(protected readonly _schema: ISchema,
