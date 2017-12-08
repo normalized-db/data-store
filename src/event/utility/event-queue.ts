@@ -3,12 +3,12 @@ import { EventPipe } from './event-pipe';
 
 export class EventQueue {
 
-  private readonly _queue: BaseEvent<any>[] = [];
+  private readonly _queue: BaseEvent<any, any>[] = [];
 
   constructor(private readonly _eventPipe: EventPipe<any>) {
   }
 
-  public enqueue(event: BaseEvent<any>): void {
+  public enqueue(event: BaseEvent<any, any>): void {
     this._queue.unshift(event);
   }
 

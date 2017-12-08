@@ -4,6 +4,8 @@ import { INormalizerBuilder } from '@normalized-db/normalizer';
 import { DB, default as DBFactory, Transaction, UpgradeDB } from 'idb';
 import { CommandFactory } from '../../command/command-factory';
 import { IdbCommandFactory } from '../../command/idb-command/idb-command-factory';
+import { IdbLogger } from '../../logging/idb-logger';
+import { Logger } from '../../logging/logger';
 import { DataStoreTypes } from '../../model/data-store-types';
 import { QueryConfig } from '../../query/query-config';
 import { IdbQueryRunner } from '../../query/runner/idb-query-runner';
@@ -13,7 +15,9 @@ import { IdbConfig } from './idb-config';
 
 export class IdbContext<Types extends DataStoreTypes> extends Context<Types> {
 
-  private _db: DB;
+  protected readonly _logger = new IdbLogger<Types>(this);
+
+  protected _db: DB;
 
   constructor(schema: ISchema,
               normalizerBuilder: INormalizerBuilder,
@@ -53,6 +57,10 @@ export class IdbContext<Types extends DataStoreTypes> extends Context<Types> {
     return IdbCommandFactory.instance(this);
   }
 
+  public logger(): Logger<Types, IdbContext<Types>> {
+    return this._logger;
+  }
+
   public objectStoreNames(): string[] {
     const osnList = this._db.objectStoreNames;
     const osnArray: string[] = [];
@@ -71,6 +79,7 @@ export class IdbContext<Types extends DataStoreTypes> extends Context<Types> {
   }
 
   private onUpgradeNeeded(upgradeDb: UpgradeDB) {
+    this._logger.onUpgradeNeeded(upgradeDb);
     this._schema.getTypes().forEach(type => {
       const config = this._schema.getConfig(type);
       upgradeDb.createObjectStore(type, { keyPath: config.key });

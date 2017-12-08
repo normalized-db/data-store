@@ -12,13 +12,13 @@ export class EventRegistration<Types extends DataStoreTypes> {
               private readonly itemKey?: ValidKey) {
   }
 
-  public isMatching(event: BaseEvent<any>): boolean {
+  public isMatching(event: BaseEvent<Types, any>): boolean {
     return (!this.eventType || this.eventType === event.eventType) &&
       (!this.dataStoreType || this.dataStoreType === event.dataStoreType) &&
       (isNull(this.itemKey) || this.itemKey === event.itemKey);
   }
 
-  public notify(event: BaseEvent<any>): void {
+  public notify(event: BaseEvent<Types, any>): void {
     this.listener.ndbOnDataChanged(event);
   }
 }

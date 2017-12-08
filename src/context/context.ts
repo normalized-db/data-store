@@ -4,6 +4,7 @@ import { IDenormalizerBuilder } from '@normalized-db/denormalizer';
 import { INormalizer, INormalizerBuilder } from '@normalized-db/normalizer';
 import { CommandFactory } from '../command/command-factory';
 import { EventPipe } from '../event/utility/event-pipe';
+import { Logger } from '../logging/logger';
 import { DataStoreTypes } from '../model/data-store-types';
 import { QueryConfig } from '../query/query-config';
 import { QueryRunner } from '../query/runner/query-runner';
@@ -46,4 +47,6 @@ export abstract class Context<Types extends DataStoreTypes> {
   public abstract queryRunner<Result>(config: QueryConfig): QueryRunner<Result>;
 
   public abstract commandFactory(): CommandFactory;
+
+  public abstract logger(): Logger<Types, Context<Types>>;
 }

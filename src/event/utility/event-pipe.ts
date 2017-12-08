@@ -16,7 +16,7 @@ export class EventPipe<Types extends DataStoreTypes> {
     this.registrations.delete(listener);
   }
 
-  public notify(event: BaseEvent<any>): void {
+  public notify(event: BaseEvent<Types, any>): void {
     this.registrations.forEach(registration => {
       if (registration.isMatching(event)) {
         registration.notify(event);

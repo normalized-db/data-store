@@ -1,9 +1,10 @@
 import { ValidKey } from '@normalized-db/core/lib/src/model/valid-key';
+import { DataStoreTypes } from '../model/data-store-types';
 import { BaseEvent } from './base-event';
 
-export class UpdatedEvent<T> extends BaseEvent<T> {
+export class UpdatedEvent<Types extends DataStoreTypes, T> extends BaseEvent<Types, T> {
 
-  constructor(type: string, item: T, itemKey: ValidKey) {
+  constructor(type: Types, item: T, itemKey: ValidKey) {
     super('removed', type, item, itemKey);
   }
 }
