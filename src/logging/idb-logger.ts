@@ -1,19 +1,26 @@
-import { ObjectStore, UpgradeDB } from 'idb';
+import { UpgradeDB } from 'idb';
 import { IdbContext } from '../context/idb-context/idb-context';
 import { BaseEvent } from '../event/base-event';
 import { OnDataChanged } from '../event/utility/on-data-changed';
 import { DataStoreTypes } from '../model/data-store-types';
 import { Logger } from './logger';
 import { LogEntry } from './model/log-entry';
+import { LogQueryConfig } from './query/log-query-config';
+import { IdbLogQueryRunner } from './query/runner/idb-log-query-runner';
+import { LogQueryRunner } from './query/runner/log-query-runner';
 
 export class IdbLogger<Types extends DataStoreTypes> extends Logger<Types, IdbContext<Types>> implements OnDataChanged {
 
   public static readonly OBJECT_STORE = '_logs';
 
-  private static readonly IDX_TIME = 'idx_time';
-  private static readonly IDX_ACTION = 'idx_action';
-  private static readonly IDX_TYPE = 'idx_type';
-  private static readonly IDX_KEY = 'idx_key';
+  // region index names
+
+  public static readonly IDX_TIME = 'idx_time';
+  public static readonly IDX_ACTION = 'idx_action';
+  public static readonly IDX_TYPE = 'idx_type';
+  public static readonly IDX_KEY = 'idx_key';
+
+  // endregion
 
   constructor(idbContext: IdbContext<Types>) {
     super(idbContext);
@@ -27,14 +34,12 @@ export class IdbLogger<Types extends DataStoreTypes> extends Logger<Types, IdbCo
     logStore.createIndex(IdbLogger.IDX_KEY, 'key');
   }
 
-  public async ndbOnDataChanged(event: BaseEvent<Types, any>): Promise<void> {
-    await this.objectStore(true).put(new LogEntry<Types>(event));
+  public queryRunner(config: LogQueryConfig): LogQueryRunner<Types> {
+    return new IdbLogQueryRunner<Types>(this._context, config);
   }
 
-  private objectStore(write = false): ObjectStore {
-    const transaction = write
-      ? this._context.write(IdbLogger.OBJECT_STORE)
-      : this._context.read(IdbLogger.OBJECT_STORE);
-    return transaction.objectStore(IdbLogger.OBJECT_STORE);
+  public async ndbOnDataChanged(event: BaseEvent<Types, any>): Promise<void> {
+    const logStore = this._context.write(IdbLogger.OBJECT_STORE).objectStore(IdbLogger.OBJECT_STORE);
+    await logStore.put(new LogEntry<Types>(event));
   }
 }
