@@ -1,6 +1,7 @@
 import { NotFoundError } from '@normalized-db/core';
 import { Transaction } from 'idb';
 import { IdbContext } from '../../context/idb-context/idb-context';
+import { ClearedEvent } from '../../event/cleared-event';
 import { ClearCommand } from '../clear-command';
 import { IdbBaseCommand } from './idb-base-command';
 
@@ -45,6 +46,8 @@ export class IdbClearCommand extends IdbBaseCommand<IdbContext<any>> implements 
       return false;
     }
 
+    this._eventQueue.enqueue(new ClearedEvent(Array.isArray(type) ? type.join(',') : type));
+    this.onSuccess();
     return true;
   }
 }

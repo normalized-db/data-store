@@ -1,1 +1,1 @@
-export type LogAction = 'created' | 'updated' | 'removed';
+export type LogAction = 'created' | 'updated' | 'removed' | 'cleared';
