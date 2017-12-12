@@ -1,4 +1,4 @@
-import { ISchema, UniqueKeyCallback } from '@normalized-db/core';
+import { ISchema } from '@normalized-db/core';
 import { IDenormalizerBuilder } from '@normalized-db/denormalizer';
 import { INormalizerBuilder } from '@normalized-db/normalizer';
 import { DB, default as DBFactory, Transaction, UpgradeDB } from 'idb';
@@ -22,9 +22,8 @@ export class IdbContext<Types extends DataStoreTypes> extends Context<Types> {
   constructor(schema: ISchema,
               normalizerBuilder: INormalizerBuilder,
               denormalizerBuilder: IDenormalizerBuilder,
-              private readonly dbConfig: IdbConfig,
-              keyGenerator?: UniqueKeyCallback) {
-    super(schema, normalizerBuilder, denormalizerBuilder, keyGenerator);
+              private readonly dbConfig: IdbConfig) {
+    super(schema, normalizerBuilder, denormalizerBuilder);
     this.onUpgradeNeeded = this.onUpgradeNeeded.bind(this);
   }
 

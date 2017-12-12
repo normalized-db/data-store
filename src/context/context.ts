@@ -14,12 +14,13 @@ export abstract class Context<Types extends DataStoreTypes> {
   public readonly eventPipe = new EventPipe<Types>();
 
   private readonly _normalizer: INormalizer;
+  private readonly _uniqueKeyCallback: UniqueKeyCallback;
 
   constructor(protected readonly _schema: ISchema,
               protected readonly _normalizerBuilder: INormalizerBuilder,
-              protected readonly _denormalizerBuilder: IDenormalizerBuilder,
-              protected readonly _keyGenerator?: UniqueKeyCallback) {
+              protected readonly _denormalizerBuilder: IDenormalizerBuilder) {
     this._normalizer = _normalizerBuilder.build();
+    this._uniqueKeyCallback = this._normalizer.getUniqueKeyCallback();
   }
 
   public abstract isReady(): boolean;
@@ -41,7 +42,7 @@ export abstract class Context<Types extends DataStoreTypes> {
   }
 
   public newKey(type: string): ValidKey | null {
-    return this._keyGenerator ? this._keyGenerator(type) : null;
+    return this._uniqueKeyCallback ? this._uniqueKeyCallback(type) : null;
   }
 
   public abstract queryRunner<Result>(config: QueryConfig): QueryRunner<Result>;
