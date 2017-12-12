@@ -47,12 +47,14 @@ export class IdbLogQueryRunner<Types extends DataStoreTypes> implements LogQuery
 
     // TODO make more use of indices
     const logEntry = cursor.value as LogEntry<Types>;
-    const typeMatching = !this._config.type || this._config.type === logEntry.type;
-    const keyMatching = isNull(this._config.key) || this._config.key === logEntry.key;
-    const actionMatching = !this._config.action || this._config.action === logEntry.action;
-
-    if (typeMatching && keyMatching && actionMatching) {
-      this.result.push(logEntry);
+    if (!this._config.type || this._config.type === logEntry.type) { // type matching
+      if (isNull(this._config.key) || this._config.key === logEntry.key) { // key matching
+        if (!this._config.action || this._config.action === logEntry.action) { // action matching
+          if (!this._config.filter || this._config.filter(cursor.value)) { // filter-predicate matching
+            this.result.push(logEntry);
+          }
+        }
+      }
     }
 
     cursor.continue();

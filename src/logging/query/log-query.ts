@@ -1,6 +1,7 @@
 import { ValidKey } from '@normalized-db/core';
 import { Context } from '../../context/context';
 import { DataStoreTypes } from '../../model/data-store-types';
+import { Predicate } from '../../model/predicate';
 import { Queryable } from '../../query/queryable';
 import { LogAction } from '../model/log-action';
 import { LogEntry } from '../model/log-entry';
@@ -14,6 +15,7 @@ export class LogQuery<Types extends DataStoreTypes> implements Queryable<LogEntr
   private _type: Types;
   private _key: ValidKey;
   private _action: LogAction;
+  private _filter?: Predicate<LogEntry<Types>>;
 
   constructor(protected readonly _context: Context<Types>,
               private readonly _autoCloseContext: boolean) {
@@ -105,6 +107,17 @@ export class LogQuery<Types extends DataStoreTypes> implements Queryable<LogEntr
   }
 
   /**
+   * Filter items that shall be included into the result.
+   *
+   * @param {Predicate<LogEntry<Types>>} callback
+   * @returns {LogQuery<LogEntry<Types>>}
+   */
+  public filter(callback: Predicate<LogEntry<Types>>): LogQuery<Types> {
+    this._filter = callback;
+    return this;
+  }
+
+  /**
    * @inheritDoc
    *
    * @param {boolean} noCache
@@ -136,7 +149,8 @@ export class LogQuery<Types extends DataStoreTypes> implements Queryable<LogEntr
       dateRange: this._dateRange,
       type: this._type,
       key: this._key,
-      action: this._action
+      action: this._action,
+      filter: this._filter
     };
   }
 
