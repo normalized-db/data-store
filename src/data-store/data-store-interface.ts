@@ -91,8 +91,9 @@ export interface IDataStore<Types extends DataStoreTypes> {
    * and hence could get into an invalid state!
    *
    * @param {string|string[]} type
+   * @param {boolean} includeLogs
    * @param {boolean} autoCloseContext
    * @returns {Promise<boolean>}
    */
-  clear(type: string | string[], autoCloseContext?: boolean): Promise<boolean>;
+  clear(type: string | string[], includeLogs?: boolean, autoCloseContext?: boolean): Promise<boolean>;
 }

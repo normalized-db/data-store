@@ -13,5 +13,5 @@ export interface CommandFactory {
 
   removeCommand<Item>(type: string): RemoveCommand<Item>;
 
-  clearCommand(): ClearCommand;
+  clearCommand(includeLogs: boolean): ClearCommand;
 }

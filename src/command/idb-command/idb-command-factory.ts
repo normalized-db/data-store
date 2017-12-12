@@ -42,7 +42,7 @@ export class IdbCommandFactory implements CommandFactory {
     return new IdbRemoveCommand(this._context, type);
   }
 
-  public clearCommand(): ClearCommand {
-    return new IdbClearCommand(this._context);
+  public clearCommand(includeLogs?: boolean): ClearCommand {
+    return new IdbClearCommand(this._context, includeLogs);
   }
 }

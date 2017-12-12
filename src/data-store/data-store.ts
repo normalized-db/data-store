@@ -132,12 +132,13 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
    * @inheritDoc
    *
    * @param {string|string[]} type
+   * @param {boolean} includeLogs
    * @param {boolean} autoCloseContext
    * @returns {Promise<boolean>}
    */
-  public async clear(type?: string | string[], autoCloseContext = false): Promise<boolean> {
+  public async clear(type?: string | string[], includeLogs?: boolean, autoCloseContext = false): Promise<boolean> {
     await this._context.open();
-    const success = await this._context.commandFactory().clearCommand().execute(type);
+    const success = await this._context.commandFactory().clearCommand(includeLogs).execute(type);
     this.autoClose(autoCloseContext);
     return success;
   }

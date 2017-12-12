@@ -2,12 +2,13 @@ import { NotFoundError } from '@normalized-db/core';
 import { Transaction } from 'idb';
 import { IdbContext } from '../../context/idb-context/idb-context';
 import { ClearedEvent } from '../../event/cleared-event';
+import { IdbLogger } from '../../logging/idb-logger';
 import { ClearCommand } from '../clear-command';
 import { IdbBaseCommand } from './idb-base-command';
 
 export class IdbClearCommand extends IdbBaseCommand<IdbContext<any>> implements ClearCommand {
 
-  constructor(context: IdbContext<any>) {
+  constructor(context: IdbContext<any>, private readonly _includeLogs = false) {
     super(context, null, true);
   }
 
@@ -24,6 +25,13 @@ export class IdbClearCommand extends IdbBaseCommand<IdbContext<any>> implements 
       involvedTypes = Array.isArray(type) ? type : [type];
     } else {
       involvedTypes = this._context.objectStoreNames();
+    }
+
+    if (!this._includeLogs) {
+      const logStoreIndex = involvedTypes.indexOf(IdbLogger.OBJECT_STORE);
+      if (logStoreIndex >= 0) {
+        involvedTypes.splice(logStoreIndex, 1);
+      }
     }
 
     let transaction: Transaction;
@@ -46,7 +54,7 @@ export class IdbClearCommand extends IdbBaseCommand<IdbContext<any>> implements 
       return false;
     }
 
-    this._eventQueue.enqueue(new ClearedEvent(Array.isArray(type) ? type.join(',') : type));
+    this._eventQueue.enqueue(new ClearedEvent(involvedTypes.join(';')));
     this.onSuccess();
     return true;
   }
