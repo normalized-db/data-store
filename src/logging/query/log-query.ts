@@ -1,6 +1,8 @@
+import { ValidKey } from '@normalized-db/core';
 import { Context } from '../../context/context';
 import { DataStoreTypes } from '../../model/data-store-types';
 import { Queryable } from '../../query/queryable';
+import { LogAction } from '../model/log-action';
 import { LogEntry } from '../model/log-entry';
 import { LogQueryConfig } from './log-query-config';
 
@@ -10,48 +12,104 @@ export class LogQuery<Types extends DataStoreTypes> implements Queryable<LogEntr
 
   private _dateRange: IDBKeyRange;
   private _type: Types;
-  private _key: string;
-  private _action: string;
+  private _key: ValidKey;
+  private _action: LogAction;
 
   constructor(protected readonly _context: Context<Types>,
               private readonly _autoCloseContext: boolean) {
   }
 
+  /**
+   * Retrieve log-entries created at the given date-time.
+   *
+   * @param {Date} time
+   * @returns {LogQuery<Types extends DataStoreTypes>}
+   */
   public time(time: Date): LogQuery<Types> {
     this._dateRange = IDBKeyRange.only(time);
     return this;
   }
 
+  /**
+   * Retrieve log-entries created after the given date-time. If `open` is `true` the `lower`-date will be excluded,
+   * it is included by default.
+   *
+   * @param {Date} lower
+   * @param {boolean} open
+   * @returns {LogQuery<Types extends DataStoreTypes>}
+   */
   public after(lower: Date, open = false): LogQuery<Types> {
     this._dateRange = IDBKeyRange.lowerBound(lower, open);
     return this;
   }
 
+  /**
+   * Retrieve log-entries created before the given date-time. If `open` is `true` the `upper`-date will be excluded,
+   * it is included by default.
+   *
+   * @param {Date} upper
+   * @param {boolean} open
+   * @returns {LogQuery<Types extends DataStoreTypes>}
+   */
   public before(upper: Date, open = false): LogQuery<Types> {
     this._dateRange = IDBKeyRange.upperBound(upper, open);
     return this;
   }
 
+  /**
+   * Retrieve log-entries created after the given `lower`-date-time and before the given `upper`-date-time.
+   * If `…Open` is `true` the related date will be excluded, both are included by default.
+   *
+   * @param {Date} lower
+   * @param {Date} upper
+   * @param {boolean} lowerOpen
+   * @param {boolean} upperOpen
+   * @returns {LogQuery<Types extends DataStoreTypes>}
+   */
   public between(lower: Date, upper: Date, lowerOpen = false, upperOpen = false): LogQuery<Types> {
     this._dateRange = IDBKeyRange.bound(lower, upper, lowerOpen, upperOpen);
     return this;
   }
 
+  /**
+   * Filter the result by the data-store-type.
+   *
+   * @param {Types} type
+   * @returns {LogQuery<Types extends DataStoreTypes>}
+   */
   public type(type: Types): LogQuery<Types> {
     this._type = type;
     return this;
   }
 
-  public key(key: string): LogQuery<Types> {
+  /**
+   * Filter the result by a primary-key. You probably want to use `type(…)` as well when filtering by a key.
+   *
+   * @param {string} key
+   * @returns {LogQuery<Types extends DataStoreTypes>}
+   */
+  public key(key: ValidKey): LogQuery<Types> {
     this._key = key;
     return this;
   }
 
-  public action(action: string): LogQuery<Types> {
+  /**
+   * Filter the result by the action (e.g. `created` or `removed`)
+   *
+   * @param {LogAction} action
+   * @returns {LogQuery<Types extends DataStoreTypes>}
+   */
+  public action(action: LogAction): LogQuery<Types> {
     this._action = action;
     return this;
   }
 
+  /**
+   * @inheritDoc
+   *
+   * @param {boolean} noCache
+   * @returns {Promise<LogEntry<Types extends DataStoreTypes>[]>}
+   */
   public async result(noCache?: boolean): Promise<LogEntry<Types>[]> {
     if (this._cachedResult && !noCache) {
       return this._cachedResult;
@@ -64,6 +122,11 @@ export class LogQuery<Types extends DataStoreTypes> implements Queryable<LogEntr
     return this._cachedResult;
   }
 
+  /**
+   * @inheritDoc
+   *
+   * @returns {Promise<void>}
+   */
   public async invalidateCachedResult(): Promise<void> {
     this._cachedResult = null;
   }
