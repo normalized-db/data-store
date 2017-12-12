@@ -1,3 +1,4 @@
+import { ValidKey } from '@normalized-db/core';
 import { Context } from '../context/context';
 import { BaseEvent } from '../event/base-event';
 import { EventPipe } from '../event/utility/event-pipe';
@@ -32,4 +33,10 @@ export abstract class Logger<Types extends DataStoreTypes, Ctx extends Context<T
   public abstract queryRunner(config: LogQueryConfig): LogQueryRunner<Types>;
 
   public abstract ndbOnDataChanged(event: BaseEvent<Types, any>): void | Promise<void>;
+
+  public abstract clear(): Promise<boolean>;
+
+  public abstract clearTypes(types: Types | Types[]): Promise<boolean>;
+
+  public abstract clearItem(type: Types, key: ValidKey): Promise<boolean>;
 }
