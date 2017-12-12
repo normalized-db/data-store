@@ -20,21 +20,23 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
    * @inheritDoc
    *
    * @param {Types} type
+   * @param {boolean} autoCloseContext
    * @returns {CountQuery}
    */
-  public count(type: Types): CountQuery {
-    return new CountQuery(this._context, this._autoCloseContext, type);
+  public count(type: Types, autoCloseContext = false): CountQuery {
+    return new CountQuery(this._context, autoCloseContext || this._autoCloseContext, type);
   }
 
   /**
    * @inheritDoc
    *
    * @param {Types} type
+   * @param {boolean} autoCloseContext
    * @returns {Query<Result>}
    * @throws {InvalidTypeError}
    */
-  public find<Result>(type: Types): Query<Result> {
-    return new Query<Result>(this._context, this._autoCloseContext, type);
+  public find<Result>(type: Types, autoCloseContext = false): Query<Result> {
+    return new Query<Result>(this._context, autoCloseContext || this._autoCloseContext, type);
   }
 
   /**
@@ -42,11 +44,12 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
    *
    * @param {Types} type
    * @param {ValidKey} key
+   * @param {boolean} autoCloseContext
    * @returns {SingleItemQuery<Result>}
    * @throws {InvalidTypeError}
    */
-  public findByKey<Result>(type: Types, key: ValidKey): SingleItemQuery<Result> {
-    return new SingleItemQuery<Result>(this._context, this._autoCloseContext, type, key);
+  public findByKey<Result>(type: Types, key: ValidKey, autoCloseContext = false): SingleItemQuery<Result> {
+    return new SingleItemQuery<Result>(this._context, autoCloseContext || this._autoCloseContext, type, key);
   }
 
   /**
@@ -55,14 +58,18 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
    * @param {Types} type
    * @param {Item|Item[]} item
    * @param {Parent} parent
+   * @param {boolean} autoCloseContext
    * @returns {Promise<boolean>}
    * @throws {MissingKeyError}
    */
-  public async create<Item>(type: Types, item: Item | Item[], parent?: Parent): Promise<boolean> {
+  public async create<Item>(type: Types,
+                            item: Item | Item[],
+                            parent?: Parent,
+                            autoCloseContext = false): Promise<boolean> {
     await this._context.open();
     const cmd = this._context.commandFactory().createCommand<Item>(type);
     const success = await cmd.execute(item, parent);
-    this.autoClose();
+    this.autoClose(autoCloseContext);
     return success;
   }
 
@@ -71,15 +78,16 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
    *
    * @param {Types} type
    * @param {Item|Item[]} item
+   * @param {boolean} autoCloseContext
    * @returns {Promise<boolean>}
    * @throws {MissingKeyError}
    * @throws {NotFoundError}
    */
-  public async update<Item>(type: Types, item: Item | Item[]): Promise<boolean> {
+  public async update<Item>(type: Types, item: Item | Item[], autoCloseContext = false): Promise<boolean> {
     await this._context.open();
     const cmd = this._context.commandFactory().updateCommand<Item>(type);
     const success = await cmd.execute(item);
-    this.autoClose();
+    this.autoClose(autoCloseContext);
     return success;
   }
 
@@ -89,13 +97,17 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
    * @param {Types} type
    * @param {Parent} parent
    * @param {Item|Item[]} item
+   * @param {boolean} autoCloseContext
    * @returns {Promise<boolean>}
    */
-  public async put<Item>(type: Types, item: Item | Item[], parent?: Parent): Promise<boolean> {
+  public async put<Item>(type: Types,
+                         item: Item | Item[],
+                         parent?: Parent,
+                         autoCloseContext = false): Promise<boolean> {
     await this._context.open();
     const cmd = this._context.commandFactory().putCommand<Item>(type);
     const success = await cmd.execute(item, parent);
-    this.autoClose();
+    this.autoClose(autoCloseContext);
     return success;
   }
 
@@ -104,14 +116,15 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
    *
    * @param {Types} type
    * @param {Item|ValidKey} item
+   * @param {boolean} autoCloseContext
    * @returns {Promise<boolean>}
    * @throws {NotFoundError}
    */
-  public async remove<Item>(type: Types, item: Item | ValidKey): Promise<boolean> {
+  public async remove<Item>(type: Types, item: Item | ValidKey, autoCloseContext = false): Promise<boolean> {
     await this._context.open();
     const cmd = this._context.commandFactory().removeCommand<Item>(type);
     const success = await cmd.execute(item);
-    this.autoClose();
+    this.autoClose(autoCloseContext);
     return success;
   }
 
@@ -119,17 +132,18 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
    * @inheritDoc
    *
    * @param {string|string[]} type
+   * @param {boolean} autoCloseContext
    * @returns {Promise<boolean>}
    */
-  public async clear(type?: string | string[]): Promise<boolean> {
+  public async clear(type?: string | string[], autoCloseContext = false): Promise<boolean> {
     await this._context.open();
     const success = await this._context.commandFactory().clearCommand().execute(type);
-    this.autoClose();
+    this.autoClose(autoCloseContext);
     return success;
   }
 
-  private async autoClose(): Promise<void> {
-    if (this._autoCloseContext) {
+  private async autoClose(autoCloseContext: boolean): Promise<void> {
+    if (autoCloseContext || this._autoCloseContext) {
       await this._context.close();
     }
   }
