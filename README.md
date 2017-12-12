@@ -15,9 +15,8 @@
 
 Install using NPM:
 
-    `npm install --save @normalized-db/data-store`
+    npm install --save @normalized-db/data-store
     
----
                                                  
 ## Usage
 

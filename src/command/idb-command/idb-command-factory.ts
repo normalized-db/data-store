@@ -15,7 +15,7 @@ export class IdbCommandFactory implements CommandFactory {
 
   private static _instance: IdbCommandFactory;
 
-  public static instance(context: IdbContext): IdbCommandFactory {
+  public static instance(context: IdbContext<any>): IdbCommandFactory {
     if (!this._instance) {
       this._instance = new IdbCommandFactory(context);
     }
@@ -23,7 +23,7 @@ export class IdbCommandFactory implements CommandFactory {
     return this._instance;
   }
 
-  private constructor(private readonly _context: IdbContext) {
+  private constructor(private readonly _context: IdbContext<any>) {
   }
 
   public createCommand<Item>(type: string): CreateCommand<Item> {

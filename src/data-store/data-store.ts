@@ -1,5 +1,6 @@
 import { ValidKey } from '@normalized-db/core';
 import { Context } from '../context/context';
+import { EventPipe } from '../event/utility/event-pipe';
 import { DataStoreTypes } from '../model/data-store-types';
 import { Parent } from '../model/parent';
 import { CountQuery } from '../query/count-query';
@@ -9,7 +10,10 @@ import { IDataStore } from './data-store-interface';
 
 export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types> {
 
-  constructor(private readonly _context: Context, private readonly _autoCloseContext = true) {
+  public readonly eventPipe: EventPipe<Types>;
+
+  constructor(private readonly _context: Context<Types>, private readonly _autoCloseContext = true) {
+    this.eventPipe = this._context.eventPipe;
   }
 
   /**

@@ -3,6 +3,7 @@ import { EmptyInputError } from './empty-input-error';
 import { EmptyResultError } from './empty-result-error';
 import { InvalidQueryConfigError } from './invalid-query-config-error';
 import { InvalidQueryRunnerStatusError } from './invalid-query-runner-status-error';
+import { ListenerRegisteredError } from './listener-registered-error';
 import { InvalidQueryRunnerRegistration } from './query-runner-registered-error';
 import { RefNotFoundError } from './ref-not-found-error';
 
@@ -13,5 +14,6 @@ export {
   EmptyResultError,
   InvalidQueryConfigError,
   InvalidQueryRunnerStatusError,
-  InvalidQueryRunnerRegistration
+  InvalidQueryRunnerRegistration,
+  ListenerRegisteredError
 };

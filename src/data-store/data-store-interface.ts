@@ -56,7 +56,7 @@ export interface IDataStore<Types extends DataStoreTypes> {
    * @throws {MissingKeyError}
    * @throws {NotFoundError}
    */
-  update<Item>(type: Types, item: Item | Item[]): Promise<boolean> ;
+  update<Item>(type: Types, item: Item | Item[]): Promise<boolean>;
 
   /**
    * The item will be either created or updated. For details see `.create(…)` and `.update(…)` respectively.
@@ -77,7 +77,7 @@ export interface IDataStore<Types extends DataStoreTypes> {
    * @returns {Promise<boolean>}
    * @throws {NotFoundError}
    */
-  remove<Item>(type: Types, item: Item | ValidKey): Promise<boolean> ;
+  remove<Item>(type: Types, item: Item | ValidKey): Promise<boolean>;
 
   /**
    * Clear all items, optionally only these from a given type / some types. Note that references will not be updated

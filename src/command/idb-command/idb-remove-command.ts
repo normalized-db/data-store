@@ -1,6 +1,8 @@
 import { isNull, IStore, IStoreTarget, NotFoundError, ValidKey } from '@normalized-db/core';
 import { ObjectStore, Transaction } from 'idb';
 import { EmptyInputError } from '../../error/empty-input-error';
+import { RemovedEvent } from '../../event/removed-event';
+import { Parent } from '../../model/parent';
 import { isValidKey } from '../../utility/valid-key';
 import { BaseCommand } from '../base-command';
 import { RemoveCommand } from '../remove-command';
@@ -29,15 +31,16 @@ export class IdbRemoveCommand<T> extends BaseCommand<T | ValidKey> implements Re
     try {
       await this.executeRecursive(this._type, oldItem, transaction, transaction.objectStore(this._type));
     } catch (e) {
+      console.error(e);
       try {
         transaction.abort();
       } catch (e2) {
-        e = e2;
+        console.error(e2);
       }
-      console.error(e);
       return false;
     }
 
+    this.onSuccess();
     return true;
   }
 
@@ -46,11 +49,14 @@ export class IdbRemoveCommand<T> extends BaseCommand<T | ValidKey> implements Re
                                  transaction: Transaction,
                                  objectStore: ObjectStore): Promise<void> {
     const config = this.schema.getConfig(type);
+    const key = this.getKey(item, config);
     await Promise.all([
       this.cascadeRemoval(transaction, config.targets, type, item),
       this.updateParents(transaction, type, item),
-      objectStore.delete(this.getKey(item, config))
+      objectStore.delete(key)
     ]);
+
+    this._eventQueue.enqueue(new RemovedEvent(type, item, key));
   }
 
   // region remove dependent child entities
@@ -113,7 +119,14 @@ export class IdbRemoveCommand<T> extends BaseCommand<T | ValidKey> implements Re
         const it: Iterator<any> = oldItem._refs[refType].values();
         let current = it.next();
         while (!current.done) {
-          requests.push(this.removeFromParent(objectStore, parentFields, current.value, oldItemKey));
+          requests.push(this.removeFromParent(
+            oldItemType,
+            oldItem,
+            oldItemKey,
+            objectStore,
+            current.value,
+            parentFields
+          ));
           current = it.next();
         }
 
@@ -133,12 +146,21 @@ export class IdbRemoveCommand<T> extends BaseCommand<T | ValidKey> implements Re
     return parentFields;
   }
 
-  private async removeFromParent(objectStore: ObjectStore,
-                                 fields: string[],
+  private async removeFromParent(oldItemType: string,
+                                 oldItem: any,
+                                 oldItemKey: ValidKey,
+                                 parentObjectStore: ObjectStore,
                                  parentKey: ValidKey,
-                                 oldItemKey: ValidKey): Promise<void> {
-    const parentCursor = await objectStore.openCursor(parentKey);
+                                 fields: string[]): Promise<void> {
+    const parentCursor = await parentObjectStore.openCursor(parentKey);
     if (!isNull(parentCursor)) {
+      const enqueueRemovedEvent = (field: string) => this._eventQueue.enqueue(new RemovedEvent(
+        oldItemType,
+        oldItem,
+        oldItemKey,
+        new Parent(parentObjectStore.name, parentKey, field)
+      ));
+
       let parentChanged = false;
       const parent = parentCursor.value;
       fields.forEach(async field => {
@@ -152,10 +174,12 @@ export class IdbRemoveCommand<T> extends BaseCommand<T | ValidKey> implements Re
           if (index >= 0) {
             fieldValue.splice(index, 1);
             parentChanged = true;
+            enqueueRemovedEvent(field);
           }
         } else if (fieldValue === oldItemKey) {
           parent[field] = null;
           parentChanged = true;
+          enqueueRemovedEvent(field);
         }
       });
 
