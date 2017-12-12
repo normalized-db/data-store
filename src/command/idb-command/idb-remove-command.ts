@@ -31,12 +31,12 @@ export class IdbRemoveCommand<T> extends BaseCommand<T | ValidKey> implements Re
     try {
       await this.executeRecursive(this._type, oldItem, transaction, transaction.objectStore(this._type));
     } catch (e) {
+      console.error(e);
       try {
         transaction.abort();
       } catch (e2) {
-        e = e2;
+        console.error(e2);
       }
-      console.error(e);
       return false;
     }
 
