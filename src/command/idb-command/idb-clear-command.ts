@@ -2,10 +2,12 @@ import { NotFoundError } from '@normalized-db/core';
 import { Transaction } from 'idb';
 import { IdbContext } from '../../context/idb-context/idb-context';
 import { ClearCommand } from '../clear-command';
+import { IdbBaseCommand } from './idb-base-command';
 
-export class IdbClearCommand implements ClearCommand {
+export class IdbClearCommand extends IdbBaseCommand<IdbContext<any>> implements ClearCommand {
 
-  constructor(protected readonly _context: IdbContext<any>) {
+  constructor(context: IdbContext<any>) {
+    super(context, null, true);
   }
 
   /**

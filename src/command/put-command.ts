@@ -1,7 +1,7 @@
 import { Parent } from '../model/parent';
-import { BaseCommand } from './base-command';
+import { Command } from './command';
 
-export interface PutCommand<T> extends BaseCommand<T | T[]> {
+export interface PutCommand<T> extends Command<T | T[]> {
 
   /**
    * See `DataStore.put(…)`

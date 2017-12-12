@@ -1,13 +1,18 @@
 import { isNull, IStore, IStoreTarget, NotFoundError, ValidKey } from '@normalized-db/core';
 import { ObjectStore, Transaction } from 'idb';
+import { IdbContext } from '../../context/idb-context/idb-context';
 import { EmptyInputError } from '../../error/empty-input-error';
 import { RemovedEvent } from '../../event/removed-event';
 import { Parent } from '../../model/parent';
 import { isValidKey } from '../../utility/valid-key';
-import { BaseCommand } from '../base-command';
 import { RemoveCommand } from '../remove-command';
+import { IdbBaseCommand } from './idb-base-command';
 
-export class IdbRemoveCommand<T> extends BaseCommand<T | ValidKey> implements RemoveCommand<T> {
+export class IdbRemoveCommand<T> extends IdbBaseCommand<T | ValidKey> implements RemoveCommand<T> {
+
+  constructor(context: IdbContext<any>, type: string) {
+    super(context, type);
+  }
 
   /**
    * @inheritDoc
@@ -120,12 +125,12 @@ export class IdbRemoveCommand<T> extends BaseCommand<T | ValidKey> implements Re
         let current = it.next();
         while (!current.done) {
           requests.push(this.removeFromParent(
-            oldItemType,
-            oldItem,
-            oldItemKey,
-            objectStore,
-            current.value,
-            parentFields
+              oldItemType,
+              oldItem,
+              oldItemKey,
+              objectStore,
+              current.value,
+              parentFields
           ));
           current = it.next();
         }
@@ -155,10 +160,10 @@ export class IdbRemoveCommand<T> extends BaseCommand<T | ValidKey> implements Re
     const parentCursor = await parentObjectStore.openCursor(parentKey);
     if (!isNull(parentCursor)) {
       const enqueueRemovedEvent = (field: string) => this._eventQueue.enqueue(new RemovedEvent(
-        oldItemType,
-        oldItem,
-        oldItemKey,
-        new Parent(parentObjectStore.name, parentKey, field)
+          oldItemType,
+          oldItem,
+          oldItemKey,
+          new Parent(parentObjectStore.name, parentKey, field)
       ));
 
       let parentChanged = false;

@@ -8,24 +8,27 @@ import {
   NormalizedData,
   ValidKey
 } from '@normalized-db/core';
-import { IdbContext } from '../context/idb-context/idb-context';
+import { Context } from '../context/context';
 import { EventQueue } from '../event/utility/event-queue';
 import { Command } from './command';
 
-export abstract class BaseCommand<T> implements Command<T> {
+export abstract class BaseCommand<T, Ctx extends Context<any>> implements Command<T> {
 
   protected readonly _typeConfig: IStore;
   protected readonly _eventQueue: EventQueue;
 
-  constructor(protected readonly _context: IdbContext<any>,
-              protected readonly _type: string) {
+  constructor(protected readonly _context: Ctx,
+              protected readonly _type: string,
+              typeIsOptional = false) {
+    this._eventQueue = new EventQueue(this._context.eventPipe);
+
     const schema = this.schema;
-    if (!schema.hasType(_type)) {
+
+    if (!typeIsOptional && (!_type || !schema.hasType(_type))) {
       throw new InvalidTypeError(_type);
     }
 
-    this._eventQueue = new EventQueue(this._context.eventPipe);
-    this._typeConfig = schema.getConfig(this._type);
+    this._typeConfig = this._type ? schema.getConfig(this._type) : null;
   }
 
   protected get schema(): ISchema {
