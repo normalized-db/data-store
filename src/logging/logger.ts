@@ -34,9 +34,9 @@ export abstract class Logger<Types extends DataStoreTypes, Ctx extends Context<T
 
   public abstract ndbOnDataChanged(event: BaseEvent<Types, any>): void | Promise<void>;
 
-  public abstract clear(): Promise<boolean>;
+  public abstract clear(autoCloseContext?: boolean): Promise<boolean>;
 
-  public abstract clearTypes(types: Types | Types[]): Promise<boolean>;
+  public abstract clearTypes(types: Types | Types[], autoCloseContext?: boolean): Promise<boolean>;
 
-  public abstract clearItem(type: Types, key: ValidKey): Promise<boolean>;
+  public abstract clearItem(type: Types, key: ValidKey, autoCloseContext?: boolean): Promise<boolean>;
 }
