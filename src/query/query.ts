@@ -8,6 +8,7 @@ import { MapFunc } from './map-reduce/map-func';
 import { Mapper } from './map-reduce/mapper';
 import { ReducerFunc } from './map-reduce/reduce-func';
 import { Reducer } from './map-reduce/reducer';
+import { Filter } from './model/filter';
 import { QueryConfig } from './query-config';
 import { Queryable } from './queryable';
 
@@ -16,7 +17,7 @@ export class Query<DbItem> extends BaseQuery<ListResult<DbItem>> implements Quer
   private _offset?: number;
   private _limit?: number;
   private _keys?: ValidKey[];
-  private _filter?: Predicate<DbItem>;
+  private _filter?: Filter<DbItem>;
   private _parent?: Parent;
 
   private _depth: number | Depth;
@@ -57,11 +58,12 @@ export class Query<DbItem> extends BaseQuery<ListResult<DbItem>> implements Quer
   /**
    * Filter items that shall be included into the result.
    *
-   * @param {Predicate<DbItem>} callback
+   * @param {Predicate<DbItem>} predicate
+   * @param {boolean} requiresNormalization
    * @returns {Query<DbItem>}
    */
-  public filter(callback: Predicate<DbItem>): Query<DbItem> {
-    this._filter = callback;
+  public filter(predicate: Predicate<DbItem>, requiresNormalization?: boolean): Query<DbItem> {
+    this._filter = new Filter<DbItem>(predicate, requiresNormalization);
     return this;
   }
 
