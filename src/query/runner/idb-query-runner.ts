@@ -106,7 +106,7 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
       const items = [];
       let index = 0;
       let cursor = await objectStore.openCursor();
-      while (cursor && items.length < this._config.limit) {
+      while (cursor) {
         let denormalizedData, isValid = true;
         if (hasFilter) {
           if (this._config.filter.requiresNormalization) {
@@ -132,7 +132,7 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
         cursor = await cursor.continue();
       }
 
-      return this.listResponse(items, items.length);
+      return this.listResponse(items, index);
     }
   }
 
@@ -152,7 +152,7 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
     const objectStore = this.transaction.objectStore(type);
     const items = [];
     let keyIndex = 0, resultIndex = 0;
-    while (keyIndex < keys.length && items.length < this._config.limit) {
+    while (keyIndex < keys.length) {
       const key = keys[keyIndex];
       if (isNull(key)) {
         keyIndex++;
@@ -190,7 +190,7 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
       keyIndex++;
     }
 
-    return this.listResponse(items, items.length);
+    return this.listResponse(items, resultIndex);
   }
 
   private async findByKey(type = this._config.type, key = this._config.singleItem): Promise<Result> {
