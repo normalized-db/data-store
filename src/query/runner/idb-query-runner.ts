@@ -105,16 +105,8 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
     } else {
       const items = [];
       let index = 0;
-      objectStore.iterateCursor(async cursor => {
-        if (!cursor) {
-          return;
-        }
-
-        if (items.length >= this._config.limit) {
-          cursor.advance(1000);
-          return;
-        }
-
+      let cursor = await objectStore.openCursor();
+      while (cursor && items.length < this._config.limit) {
         let denormalizedData, isValid = true;
         if (hasFilter) {
           if (this._config.filter.requiresNormalization) {
@@ -137,8 +129,8 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
           index++;
         }
 
-        cursor.continue();
-      });
+        cursor = await cursor.continue();
+      }
 
       return this.listResponse(items, items.length);
     }

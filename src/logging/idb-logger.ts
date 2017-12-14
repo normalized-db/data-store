@@ -72,19 +72,18 @@ export class IdbLogger<Types extends DataStoreTypes> extends Logger<Types, IdbCo
     let success = true;
     try {
       const typeIdx = (await this.getWritableObjectStore()).index(IdbLogger.IDX_TYPE);
-      typeIdx.iterateCursor(IDBKeyRange.bound(lower, upper), async cursor => {
-        if (!cursor) {
-          return;
+      const requests: Promise<void>[] = [];
+      let cursor = await typeIdx.openCursor(IDBKeyRange.bound(lower, upper));
+      while (cursor) {
+        if (cursor.value) {
+          const logEntry = cursor.value as LogEntry<Types>;
+          if (typeArr.indexOf(logEntry.type) >= 0) {
+            requests.push(cursor.delete());
+          }
         }
-
-        const logEntry = cursor.value as LogEntry<Types>;
-        if (typeArr.indexOf(logEntry.type) >= 0) {
-          await cursor.delete();
-        }
-
-        await cursor.continue();
-      });
-
+        cursor = await cursor.continue();
+      }
+      await Promise.all(requests);
     } catch (e) {
       console.error('message' in e ? e.message : e);
       success = false;
@@ -98,18 +97,18 @@ export class IdbLogger<Types extends DataStoreTypes> extends Logger<Types, IdbCo
     let success = true;
     try {
       const keyIdx = (await this.getWritableObjectStore()).index(IdbLogger.IDX_KEY);
-      keyIdx.iterateCursor(key, async cursor => {
-        if (!cursor || !cursor.value) {
-          return;
+      const requests: Promise<void>[] = [];
+      let cursor = await keyIdx.openCursor(key);
+      while (cursor) {
+        if (cursor.value) {
+          const logEntry = cursor.value as LogEntry<Types>;
+          if (logEntry.type === type) {
+            requests.push(cursor.delete());
+          }
         }
-
-        const logEntry = cursor.value as LogEntry<Types>;
-        if (logEntry.type === type) {
-          await cursor.delete();
-        }
-
-        await cursor.continue();
-      });
+        cursor = await cursor.continue();
+      }
+      await Promise.all(requests);
     } catch (e) {
       console.error('message' in e ? e.message : e);
       success = false;
