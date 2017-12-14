@@ -5,7 +5,7 @@ export class ListResult<Result> {
   public static readonly DEFAULT_OFFSET = 0;
   public static readonly DEFAULT_LIMIT = Infinity;
 
-  constructor(private readonly _items: Result[],
+  constructor(private readonly _items?: Result[],
               private _total?: number,
               private readonly _offset?: number,
               private readonly _limit?: number) {

@@ -137,7 +137,7 @@ export class Query<DbItem> extends BaseQuery<ListResult<DbItem>> implements Quer
 
     const runner = this._context.queryRunner<DbItem>(this.getQueryConfig());
     await this._context.open();
-    this._cachedResult = await runner.execute();
+    this._cachedResult = (await runner.execute()) || new ListResult<DbItem>();
     this.autoClose();
     return this._cachedResult;
   }
