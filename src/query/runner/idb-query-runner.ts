@@ -212,7 +212,7 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
     const childConfig = this._schema.getTargetConfig(parent.type, parent.field);
 
     this.transaction = await this._context.read([parent.type, childConfig.type]);
-    const parentObj = this.transaction.objectStore(parent.type).get(parent.key);
+    const parentObj = await this.transaction.objectStore(parent.type).get(parent.key);
     if (!parentObj) {
       throw new NotFoundError(parent.type, parent.key);
     }
