@@ -66,7 +66,6 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
                             item: Item | Item[],
                             parent?: Parent,
                             autoCloseContext = false): Promise<boolean> {
-    await this._context.open();
     const cmd = this._context.commandFactory().createCommand<Item>(type);
     const success = await cmd.execute(item, parent);
     this.autoClose(autoCloseContext);
@@ -84,7 +83,6 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
    * @throws {NotFoundError}
    */
   public async update<Item>(type: Types, item: Item | Item[], autoCloseContext = false): Promise<boolean> {
-    await this._context.open();
     const cmd = this._context.commandFactory().updateCommand<Item>(type);
     const success = await cmd.execute(item);
     this.autoClose(autoCloseContext);
@@ -104,7 +102,6 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
                          item: Item | Item[],
                          parent?: Parent,
                          autoCloseContext = false): Promise<boolean> {
-    await this._context.open();
     const cmd = this._context.commandFactory().putCommand<Item>(type);
     const success = await cmd.execute(item, parent);
     this.autoClose(autoCloseContext);
@@ -121,7 +118,6 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
    * @throws {NotFoundError}
    */
   public async remove<Item>(type: Types, item: Item | ValidKey, autoCloseContext = false): Promise<boolean> {
-    await this._context.open();
     const cmd = this._context.commandFactory().removeCommand<Item>(type);
     const success = await cmd.execute(item);
     this.autoClose(autoCloseContext);
@@ -137,7 +133,6 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
    * @returns {Promise<boolean>}
    */
   public async clear(type?: string | string[], includeLogs?: boolean, autoCloseContext = false): Promise<boolean> {
-    await this._context.open();
     const success = await this._context.commandFactory().clearCommand(includeLogs).execute(type);
     this.autoClose(autoCloseContext);
     return success;

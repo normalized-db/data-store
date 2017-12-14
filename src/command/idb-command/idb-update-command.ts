@@ -19,7 +19,7 @@ export class IdbUpdateCommand<T> extends IdbBaseWriteCommand<T> implements Updat
       throw new EmptyInputError('update');
     }
 
-    const objectStore = this._context.read(this._type).objectStore(this._type);
+    const objectStore = (await this._context.read(this._type)).objectStore(this._type);
     if (Array.isArray(data)) {
       await Promise.all(data.map(item => this.checkExistence(objectStore, item)));
     } else {

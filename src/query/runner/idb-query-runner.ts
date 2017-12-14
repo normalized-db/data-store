@@ -29,7 +29,7 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
    */
   public async count(): Promise<number> {
     this.start();
-    const result = await this._context.read(this._config.type).objectStore(this._config.type).count();
+    const result = await (await this._context.read(this._config.type)).objectStore(this._config.type).count();
     this.stop();
     return result;
   }
@@ -91,7 +91,7 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
    */
   private async findAll(type = this._config.type): Promise<ListResult<Result>> {
     if (!this.transaction) {
-      this.transaction = this._context.read(type);
+      this.transaction = await this._context.read(type);
     }
 
     const objectStore = this.transaction.objectStore(type);
@@ -154,7 +154,7 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
    */
   private async findAllByKeys(keys: ValidKey[], type = this._config.type): Promise<ListResult<Result>> {
     if (!this.transaction) {
-      this.transaction = this._context.read(type);
+      this.transaction = await this._context.read(type);
     }
 
     const objectStore = this.transaction.objectStore(type);
@@ -203,7 +203,7 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
 
   private async findByKey(type = this._config.type, key = this._config.singleItem): Promise<Result> {
     if (!this.transaction) {
-      this.transaction = this._context.read(type);
+      this.transaction = await this._context.read(type);
     }
 
     const item = await this.transaction.objectStore(type).get(key);
@@ -219,7 +219,7 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
     const { parent, keys, singleItem: key } = this._config;
     const childConfig = this._schema.getTargetConfig(parent.type, parent.field);
 
-    this.transaction = this._context.read([parent.type, childConfig.type]);
+    this.transaction = await this._context.read([parent.type, childConfig.type]);
     const parentObj = this.transaction.objectStore(parent.type).get(parent.key);
     if (!parentObj) {
       throw new NotFoundError(parent.type, parent.key);
@@ -278,10 +278,10 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
       .build();
   }
 
-  private fetchCallback(type: string, keys: ValidKey | ValidKey[]): Promise<any | any[]> {
-    const objectStore = this._context.read(type).objectStore(type);
-    return Array.isArray(keys)
+  private async fetchCallback(type: string, keys: ValidKey | ValidKey[]): Promise<any | any[]> {
+    const objectStore = (await this._context.read(type)).objectStore(type);
+    return await (Array.isArray(keys)
       ? Promise.all(keys.map(async key => await objectStore.get(key)))
-      : objectStore.get(keys);
+      : objectStore.get(keys));
   }
 }

@@ -40,12 +40,12 @@ export class IdbLogger<Types extends DataStoreTypes> extends Logger<Types, IdbCo
   }
 
   public async ndbOnDataChanged(event: BaseEvent<Types, any>): Promise<void> {
-    await this.writableObjectStore.put(new LogEntry<Types>(event));
+    await (await this.getWritableObjectStore()).put(new LogEntry<Types>(event));
   }
 
   public async clear(types?: Types | Types[]): Promise<boolean> {
     try {
-      await this.writableObjectStore.clear();
+      await (await this.getWritableObjectStore()).clear();
     } catch (e) {
       console.error(e);
       return false;
@@ -67,7 +67,7 @@ export class IdbLogger<Types extends DataStoreTypes> extends Logger<Types, IdbCo
     }
 
     try {
-      const typeIdx = this.writableObjectStore.index(IdbLogger.IDX_TYPE);
+      const typeIdx = (await this.getWritableObjectStore()).index(IdbLogger.IDX_TYPE);
       typeIdx.iterateCursor(IDBKeyRange.bound(lower, upper), async cursor => {
         if (!cursor) {
           return;
@@ -91,7 +91,7 @@ export class IdbLogger<Types extends DataStoreTypes> extends Logger<Types, IdbCo
 
   public async clearItem(type: Types, key: ValidKey): Promise<boolean> {
     try {
-      const keyIdx = this.writableObjectStore.index(IdbLogger.IDX_KEY);
+      const keyIdx = (await this.getWritableObjectStore()).index(IdbLogger.IDX_KEY);
       keyIdx.iterateCursor(key, async cursor => {
         if (!cursor || !cursor.value) {
           return;
@@ -112,7 +112,7 @@ export class IdbLogger<Types extends DataStoreTypes> extends Logger<Types, IdbCo
     return true;
   }
 
-  private get writableObjectStore(): ObjectStore {
-    return this._context.write(IdbLogger.OBJECT_STORE).objectStore(IdbLogger.OBJECT_STORE);
+  private async getWritableObjectStore(): Promise<ObjectStore> {
+    return (await this._context.write(IdbLogger.OBJECT_STORE)).objectStore(IdbLogger.OBJECT_STORE);
   }
 }

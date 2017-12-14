@@ -27,12 +27,12 @@ export class IdbRemoveCommand<T> extends IdbBaseCommand<T | ValidKey> implements
     }
 
     const key = isValidKey(data) ? data as ValidKey : this.getKey(data);
-    const oldItem = await this._context.read(this._type).objectStore(this._type).get(key);
+    const transaction = await this._context.write();
+    const oldItem = await transaction.objectStore(this._type).get(key);
     if (isNull(oldItem)) {
       throw new NotFoundError(this._type, key);
     }
 
-    const transaction = this._context.write();
     try {
       await this.executeRecursive(this._type, oldItem, transaction, transaction.objectStore(this._type));
     } catch (e) {

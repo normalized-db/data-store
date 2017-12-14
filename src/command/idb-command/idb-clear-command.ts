@@ -36,7 +36,7 @@ export class IdbClearCommand extends IdbBaseCommand<IdbContext<any>> implements 
 
     let transaction: Transaction;
     try {
-      transaction = this._context.write(involvedTypes);
+      transaction = await this._context.write(involvedTypes);
     } catch (e) {
       console.error(e);
       return false;

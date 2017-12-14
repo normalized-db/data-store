@@ -69,11 +69,13 @@ export class IdbContext<Types extends DataStoreTypes> extends Context<Types> {
     return osnArray;
   }
 
-  public read(stores: string | string[] = this._schema.getTypes()): Transaction {
+  public async read(stores: string | string[] = this._schema.getTypes()): Promise<Transaction> {
+    await this.open();
     return this._db.transaction(stores, 'readonly');
   }
 
-  public write(stores: string | string[] = this._schema.getTypes()): Transaction {
+  public async write(stores: string | string[] = this._schema.getTypes()): Promise<Transaction> {
+    await this.open();
     return this._db.transaction(stores, 'readwrite');
   }
 

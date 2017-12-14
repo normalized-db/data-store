@@ -21,7 +21,7 @@ export class IdbLogQueryRunner<Types extends DataStoreTypes> implements LogQuery
   }
 
   public async execute(): Promise<LogEntry<Types>[]> {
-    this.start();
+    await  this.start();
 
     this._config.dateRange
       ? this.logStore.index(IdbLogger.IDX_TIME).iterateCursor(this._config.dateRange, this.iterateCursor)
@@ -31,12 +31,12 @@ export class IdbLogQueryRunner<Types extends DataStoreTypes> implements LogQuery
     return this.result;
   }
 
-  private start() {
+  private async start() {
     if (this.transaction) {
       throw new InvalidQueryRunnerStatusError('Log-Query is already running');
     }
 
-    this.transaction = this._context.read(IdbLogger.OBJECT_STORE);
+    this.transaction = await this._context.read(IdbLogger.OBJECT_STORE);
     this.logStore = this.transaction.objectStore(IdbLogger.OBJECT_STORE);
   }
 

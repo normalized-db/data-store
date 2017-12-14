@@ -31,7 +31,7 @@ export abstract class IdbBaseWriteCommand<T> extends IdbBaseCommand<T | T[]> imp
       involvedTypes.push(parent.type);
     }
 
-    const transaction = this._context.write(involvedTypes);
+    const transaction = await this._context.write(involvedTypes);
     try {
       const newItemKeys: ValidKey[] = [];
       await Promise.all(Object.keys(normalizedData).map(async type => {
