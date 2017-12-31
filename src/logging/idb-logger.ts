@@ -39,22 +39,25 @@ export class IdbLogger<Types extends DataStoreTypes> extends Logger<Types, IdbCo
     return new IdbLogQueryRunner<Types>(this._context, config);
   }
 
+  // TODO auto-close context
   public async ndbOnDataChanged(event: BaseEvent<Types, any>): Promise<void> {
-    await this.writableObjectStore.put(new LogEntry<Types>(event));
+    await (await this.getWritableObjectStore()).put(new LogEntry<Types>(event));
   }
 
-  public async clear(types?: Types | Types[]): Promise<boolean> {
+  public async clear(autoCloseContext = true): Promise<boolean> {
+    let success = true;
     try {
-      await this.writableObjectStore.clear();
+      await (await this.getWritableObjectStore()).clear();
     } catch (e) {
-      console.error(e);
-      return false;
+      console.error('message' in e ? e.message : e);
+      success = false;
     }
 
-    return true;
+    this.autoCloseContext(autoCloseContext);
+    return success;
   }
 
-  public async clearTypes(types: Types | Types[]): Promise<boolean> {
+  public async clearTypes(types: Types | Types[], autoCloseContext = true): Promise<boolean> {
     let lower: Types, upper: Types, typeArr: Types[];
     if (Array.isArray(types)) {
       types = types.sort();
@@ -66,53 +69,62 @@ export class IdbLogger<Types extends DataStoreTypes> extends Logger<Types, IdbCo
       typeArr = [types];
     }
 
+    let success = true;
     try {
-      const typeIdx = this.writableObjectStore.index(IdbLogger.IDX_TYPE);
-      typeIdx.iterateCursor(IDBKeyRange.bound(lower, upper), async cursor => {
-        if (!cursor) {
-          return;
+      const typeIdx = (await this.getWritableObjectStore()).index(IdbLogger.IDX_TYPE);
+      const requests: Promise<void>[] = [];
+      let cursor = await typeIdx.openCursor(IDBKeyRange.bound(lower, upper));
+      while (cursor) {
+        if (cursor.value) {
+          const logEntry = cursor.value as LogEntry<Types>;
+          if (typeArr.indexOf(logEntry.type) >= 0) {
+            requests.push(cursor.delete());
+          }
         }
-
-        const logEntry = cursor.value as LogEntry<Types>;
-        if (typeArr.indexOf(logEntry.type) >= 0) {
-          await cursor.delete();
-        }
-
-        await cursor.continue();
-      });
-
+        cursor = await cursor.continue();
+      }
+      await Promise.all(requests);
     } catch (e) {
-      console.error(e);
-      return false;
+      console.error('message' in e ? e.message : e);
+      success = false;
     }
 
-    return true;
+    this.autoCloseContext(autoCloseContext);
+    return success;
   }
 
-  public async clearItem(type: Types, key: ValidKey): Promise<boolean> {
+  public async clearItem(type: Types, key: ValidKey, autoCloseContext = true): Promise<boolean> {
+    let success = true;
     try {
-      const keyIdx = this.writableObjectStore.index(IdbLogger.IDX_KEY);
-      keyIdx.iterateCursor(key, async cursor => {
-        if (!cursor || !cursor.value) {
-          return;
+      const keyIdx = (await this.getWritableObjectStore()).index(IdbLogger.IDX_KEY);
+      const requests: Promise<void>[] = [];
+      let cursor = await keyIdx.openCursor(key);
+      while (cursor) {
+        if (cursor.value) {
+          const logEntry = cursor.value as LogEntry<Types>;
+          if (logEntry.type === type) {
+            requests.push(cursor.delete());
+          }
         }
-
-        const logEntry = cursor.value as LogEntry<Types>;
-        if (logEntry.type === type) {
-          await cursor.delete();
-        }
-
-        await cursor.continue();
-      });
+        cursor = await cursor.continue();
+      }
+      await Promise.all(requests);
     } catch (e) {
-      console.error(e);
-      return false;
+      console.error('message' in e ? e.message : e);
+      success = false;
     }
 
-    return true;
+    this.autoCloseContext(autoCloseContext);
+    return success;
   }
 
-  private get writableObjectStore(): ObjectStore {
-    return this._context.write(IdbLogger.OBJECT_STORE).objectStore(IdbLogger.OBJECT_STORE);
+  private async getWritableObjectStore(): Promise<ObjectStore> {
+    return (await this._context.write(IdbLogger.OBJECT_STORE)).objectStore(IdbLogger.OBJECT_STORE);
+  }
+
+  private async autoCloseContext(autoCloseContext: boolean): Promise<void> {
+    if (autoCloseContext) {
+      await this._context.close();
+    }
   }
 }

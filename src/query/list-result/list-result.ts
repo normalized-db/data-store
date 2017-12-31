@@ -5,10 +5,10 @@ export class ListResult<Result> {
   public static readonly DEFAULT_OFFSET = 0;
   public static readonly DEFAULT_LIMIT = Infinity;
 
-  constructor(private _items: Result[],
-              private _total: number,
-              private readonly _offset: number,
-              private readonly _limit: number) {
+  constructor(private readonly _items?: Result[],
+              private _total?: number,
+              private readonly _offset?: number,
+              private readonly _limit?: number) {
     if (!this._items) {
       this._items = [];
     }
@@ -58,38 +58,26 @@ export class ListResult<Result> {
     return this._offset > 0 || this._limit < Infinity;
   }
 
-  public push(item: Result) {
-    if (this._items) {
-      this._items.push(item);
-    } else {
-      this._items = [item];
-    }
-
+  public push(item: Result): void {
+    this._items.push(item);
     this._total++;
   }
 
-  public unshift(item: Result) {
-    if (this._items) {
-      this._items.unshift(item);
-    } else {
-      this._items = [item];
-    }
-
+  public unshift(item: Result): void {
+    this._items.unshift(item);
     this._total++;
   }
 
-  public remove(item: Result) {
-    if (this._items) {
-      const index = this._items.indexOf(item);
-      if (index >= 0) {
-        this._items.splice(index, 1);
-        this._total--;
-      }
+  public remove(item: Result): void {
+    const index = this._items.indexOf(item);
+    if (index >= 0) {
+      this._items.splice(index, 1);
+      this._total--;
     }
   }
 
-  public removeAt(index: number) {
-    if (this._items && index >= 0 && index < this._items.length) {
+  public removeAt(index: number): void {
+    if (index >= 0 && index < this._items.length) {
       this._items.splice(index, 1);
       this._total--;
     }

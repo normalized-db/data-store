@@ -83,14 +83,7 @@ export class SingleItemQuery<DbItem> extends BaseQuery<DbItem | null> implements
    * @throws {ChildNotFoundError} when no `defaultValue` is available and a `parent`-item was used
    */
   public async result(noCache = false): Promise<DbItem> {
-    if (this._cachedResult && !noCache) {
-      return this._cachedResult;
-    }
-
-    const runner = this._context.queryRunner<DbItem>(this.getQueryConfig());
-    await this._context.open();
-    const result = await runner.singleExecute();
-
+    const result = await this.orDefault(null, noCache);
     if (!result) {
       if (this._parent) {
         throw new ChildNotFoundError(this._parent, this._key);
@@ -99,9 +92,7 @@ export class SingleItemQuery<DbItem> extends BaseQuery<DbItem | null> implements
       }
     }
 
-    this._cachedResult = result;
-    this.autoClose();
-    return this._cachedResult;
+    return result;
   }
 
   /**
@@ -112,14 +103,15 @@ export class SingleItemQuery<DbItem> extends BaseQuery<DbItem | null> implements
    * @returns {Promise<DbItem & (any | undefined)>}
    */
   public async orDefault(defaultValue: DbItem = null, noCache = false): Promise<DbItem | null> {
-    let result: DbItem;
-    try {
-      result = await this.result(noCache);
-    } catch (e) {
-      // ignore
+    if (this._cachedResult && !noCache) {
+      return this._cachedResult;
     }
 
-    return result || defaultValue;
+    const runner = this._context.queryRunner<DbItem>(this.getQueryConfig());
+    await this._context.open();
+    this._cachedResult = (await runner.singleExecute()) || defaultValue;
+    this.autoClose();
+    return this._cachedResult;
   }
 
   /**
