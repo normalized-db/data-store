@@ -34,7 +34,7 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
     if (this._config.filter) {
       const processCursorValue = async (value: any) => {
         let isValid: boolean;
-        if (this._config.filter.requiresNormalization) {
+        if (this._config.filter.requiresDenormalization) {
           const denormalizedData = await this.denormalizer.apply<Result>(this._config.type, value, this._config.depth);
           isValid = this._config.filter.test(denormalizedData);
         } else {
@@ -136,7 +136,7 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
       while (cursor) {
         let denormalizedData, isValid = true;
         if (hasFilter) {
-          if (this._config.filter.requiresNormalization) {
+          if (this._config.filter.requiresDenormalization) {
             denormalizedData = await this.denormalizer.apply<Result>(type, cursor.value, this._config.depth);
             isValid = this._config.filter.test(denormalizedData);
           } else {
@@ -194,7 +194,7 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
 
       let denormalizedData, isValid = true;
       if (this._config.filter) {
-        if (this._config.filter.requiresNormalization) {
+        if (this._config.filter.requiresDenormalization) {
           denormalizedData = await this.denormalizer.apply<Result>(type, item, this._config.depth);
           isValid = this._config.filter.test(denormalizedData);
         } else {

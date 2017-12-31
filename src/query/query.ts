@@ -59,11 +59,11 @@ export class Query<DbItem> extends BaseQuery<ListResult<DbItem>> implements Quer
    * Filter items that shall be included into the result.
    *
    * @param {Predicate<DbItem>} predicate
-   * @param {boolean} requiresNormalization
+   * @param {boolean} requiresDenormalization
    * @returns {Query<DbItem>}
    */
-  public filter(predicate: Predicate<DbItem>, requiresNormalization?: boolean): Query<DbItem> {
-    this._filter = new Filter<DbItem>(predicate, requiresNormalization);
+  public filter(predicate: Predicate<DbItem>, requiresDenormalization?: boolean): Query<DbItem> {
+    this._filter = new Filter<DbItem>(predicate, requiresDenormalization);
     return this;
   }
 
