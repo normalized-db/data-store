@@ -6,8 +6,8 @@ import { OnDataChanged } from './on-data-changed';
 
 export class EventRegistrationBuilder<Types extends DataStoreTypes> {
 
-  private _dataStoreType: Types;
-  private _eventType: EventType;
+  private _eventType: EventType | EventType[];
+  private _dataStoreType: Types | Types[];
 
   constructor(private readonly registrations: Map<OnDataChanged, EventRegistration<Types>>,
               private readonly listener: OnDataChanged) {
@@ -16,17 +16,18 @@ export class EventRegistrationBuilder<Types extends DataStoreTypes> {
     }
   }
 
-  public type(value: Types): EventRegistrationBuilder<Types> {
-    this._dataStoreType = value;
-    return this;
-  }
-
-  public eventType(value: EventType): EventRegistrationBuilder<Types> {
+  public eventType(value: EventType | EventType[]): EventRegistrationBuilder<Types> {
     this._eventType = value;
     return this;
   }
 
+  public type(value: Types | Types[]): EventRegistrationBuilder<Types> {
+    this._dataStoreType = value;
+    return this;
+  }
+
   public register(): void {
-    this.registrations.set(this.listener, new EventRegistration(this.listener, this._eventType, this._dataStoreType));
+    const registration = new EventRegistration<Types>(this.listener, this._eventType, this._dataStoreType);
+    this.registrations.set(this.listener, registration);
   }
 }
