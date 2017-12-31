@@ -8,7 +8,7 @@ import { DataStoreTypes } from '../model/data-store-types';
 import { LogConfig } from './config/log-config';
 import { LogQuery } from './query/log-query';
 import { LogQueryConfig } from './query/log-query-config';
-import { LogQueryRunner } from './query/runner/log-query-runner';
+import { LogQueryRunner } from './query/log-query-runner';
 
 export abstract class Logger<Types extends DataStoreTypes, Ctx extends Context<Types>> implements OnDataChanged {
 

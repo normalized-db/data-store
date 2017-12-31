@@ -4,7 +4,7 @@ import { INormalizerBuilder } from '@normalized-db/normalizer';
 import { DB, default as DBFactory, Transaction, UpgradeDB } from 'idb';
 import { CommandFactory } from '../../command/command-factory';
 import { IdbCommandFactory } from '../../command/idb-command/idb-command-factory';
-import { IdbLogger } from '../../logging/idb-logger';
+import { IdbLogger } from '../../logging/idb-logging/idb-logger';
 import { Logger } from '../../logging/logger';
 import { DataStoreTypes } from '../../model/data-store-types';
 import { QueryConfig } from '../../query/query-config';

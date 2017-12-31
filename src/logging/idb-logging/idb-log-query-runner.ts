@@ -1,12 +1,12 @@
 import { isNull } from '@normalized-db/core';
 import { ObjectStore, Transaction } from 'idb';
-import { IdbContext } from '../../../context/idb-context/idb-context';
-import { InvalidQueryRunnerStatusError } from '../../../error/index';
-import { DataStoreTypes } from '../../../model/data-store-types';
-import { IdbLogger } from '../../idb-logger';
-import { LogEntry } from '../../model/log-entry';
-import { LogQueryConfig } from '../log-query-config';
-import { LogQueryRunner } from './log-query-runner';
+import { IdbContext } from '../../context/idb-context/idb-context';
+import { InvalidQueryRunnerStatusError } from '../../error/index';
+import { DataStoreTypes } from '../../model/data-store-types';
+import { LogEntry } from '../model/log-entry';
+import { LogQueryConfig } from '../query/log-query-config';
+import { LogQueryRunner } from '../query/log-query-runner';
+import { IdbLogger } from './idb-logger';
 
 export class IdbLogQueryRunner<Types extends DataStoreTypes> implements LogQueryRunner<DataStoreTypes> {
 

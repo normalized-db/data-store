@@ -1,14 +1,14 @@
 import { ValidKey } from '@normalized-db/core';
 import { ObjectStore, UpgradeDB } from 'idb';
-import { IdbContext } from '../context/idb-context/idb-context';
-import { BaseEvent } from '../event/base-event';
-import { OnDataChanged } from '../event/utility/on-data-changed';
-import { DataStoreTypes } from '../model/data-store-types';
-import { Logger } from './logger';
-import { LogEntry } from './model/log-entry';
-import { LogQueryConfig } from './query/log-query-config';
-import { IdbLogQueryRunner } from './query/runner/idb-log-query-runner';
-import { LogQueryRunner } from './query/runner/log-query-runner';
+import { IdbContext } from '../../context/idb-context/idb-context';
+import { BaseEvent } from '../../event/base-event';
+import { OnDataChanged } from '../../event/utility/on-data-changed';
+import { DataStoreTypes } from '../../model/data-store-types';
+import { Logger } from '../logger';
+import { LogEntry } from '../model/log-entry';
+import { LogQueryConfig } from '../query/log-query-config';
+import { LogQueryRunner } from '../query/log-query-runner';
+import { IdbLogQueryRunner } from './idb-log-query-runner';
 
 export class IdbLogger<Types extends DataStoreTypes> extends Logger<Types, IdbContext<Types>> implements OnDataChanged {
 

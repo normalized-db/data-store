@@ -1,7 +1,7 @@
 import { IdbLogQueryRunner } from './idb-log-query-runner';
-import { LogQueryRunner } from './log-query-runner';
+import { IdbLogger } from './idb-logger';
 
 export {
-  LogQueryRunner,
+  IdbLogger,
   IdbLogQueryRunner
 };
