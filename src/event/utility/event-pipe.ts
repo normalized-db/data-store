@@ -8,11 +8,11 @@ export class EventPipe<Types extends DataStoreTypes> {
 
   private readonly registrations = new Map<OnDataChanged, EventRegistration<Types>>();
 
-  public add(listener: OnDataChanged): EventRegistrationBuilder<Types> {
+  public register(listener: OnDataChanged): EventRegistrationBuilder<Types> {
     return new EventRegistrationBuilder<Types>(this.registrations, listener);
   }
 
-  public remove(listener: OnDataChanged): void {
+  public unregister(listener: OnDataChanged): void {
     this.registrations.delete(listener);
   }
 

@@ -18,12 +18,12 @@ export abstract class Logger<Types extends DataStoreTypes, Ctx extends Context<T
 
   public enable(): void {
     // TODO enable for some types
-    this._eventPipe.add(this).register();
+    this._eventPipe.register(this).build();
   }
 
   public disable(): void {
     // TODO disable some types only
-    this._eventPipe.remove(this);
+    this._eventPipe.unregister(this);
   }
 
   public logs(autoCloseContext = true): LogQuery<Types> {

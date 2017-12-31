@@ -26,8 +26,9 @@ export class EventRegistrationBuilder<Types extends DataStoreTypes> {
     return this;
   }
 
-  public register(): void {
+  public build(): EventRegistration<Types> {
     const registration = new EventRegistration<Types>(this.listener, this._eventType, this._dataStoreType);
     this.registrations.set(this.listener, registration);
+    return registration;
   }
 }
