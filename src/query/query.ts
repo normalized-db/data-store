@@ -75,14 +75,14 @@ export class Query<DbItem> extends BaseQuery<ListResult<DbItem>> implements Quer
    * @param {string} field
    * @returns {Query<DbItem>}
    */
-  public parent(key: ValidKey, field: string): Query<DbItem> {
+  public nested(key: ValidKey, field: string): Query<DbItem> {
     this._parent = new Parent(this._type, key, field);
     return this;
   }
 
   /**
-   * Filter by reverse keys set in `sourceItem._refs.{type}`. Uses the queries `keys`-filter so you should not try
-   * to use `keys(…)` and `reverse(…)` in the same query.
+   * Filter by reverse keys set in `sourceItem._refs.{type}`. Uses the queries `keys`-filter hence `keys(…)` and
+   * `reverse(…)` must not be used within in the same query.
    *
    * @param sourceItem
    * @returns {Query<DbItem>}

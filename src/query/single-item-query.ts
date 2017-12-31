@@ -29,19 +29,8 @@ export class SingleItemQuery<DbItem> extends BaseQuery<DbItem | null> implements
    * @param {string} field
    * @returns {SingleItemQuery<DbItem|null>}
    */
-  public parent(key: ValidKey, field: string): SingleItemQuery<DbItem | null> {
+  public nested(key: ValidKey, field: string): SingleItemQuery<DbItem | null> {
     this._parent = new Parent(this._type, key, field);
-    return this;
-  }
-
-  /**
-   * Set the default value to be returned when the item is not found in the given type or parent.
-   *
-   * @param {DbItem} value
-   * @returns {SingleItemQuery<DbItem|null>}
-   */
-  public defaultValue(value: DbItem): SingleItemQuery<DbItem | null> {
-    this._default = value;
     return this;
   }
 
@@ -68,6 +57,17 @@ export class SingleItemQuery<DbItem> extends BaseQuery<DbItem | null> implements
    */
   public depth(depth: number | Depth): SingleItemQuery<DbItem | null> {
     this._depth = depth;
+    return this;
+  }
+
+  /**
+   * Set the default value to be returned when the item is not found in the given type or parent.
+   *
+   * @param {DbItem} value
+   * @returns {SingleItemQuery<DbItem|null>}
+   */
+  public defaultValue(value: DbItem): SingleItemQuery<DbItem | null> {
+    this._default = value;
     return this;
   }
 
