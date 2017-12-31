@@ -11,9 +11,9 @@ export class EventRegistrationBuilder<Types extends DataStoreTypes> {
   private _dataStoreType: Types | Types[];
   private _itemKey: ValidKey | ValidKey[];
 
-  constructor(private readonly registrations: Map<OnDataChanged, EventRegistration<Types>>,
-              private readonly listener: OnDataChanged) {
-    if (this.registrations.has(listener)) {
+  constructor(private readonly _registrations: Map<OnDataChanged, EventRegistration<Types>>,
+              private readonly _listener: OnDataChanged) {
+    if (this._registrations.has(_listener)) {
       throw new ListenerRegisteredError();
     }
   }
@@ -35,13 +35,13 @@ export class EventRegistrationBuilder<Types extends DataStoreTypes> {
 
   public build(): EventRegistration<Types> {
     const registration = new EventRegistration<Types>(
-      this.listener,
+      this._listener,
       this._eventType,
       this._dataStoreType,
       this._itemKey
     );
 
-    this.registrations.set(this.listener, registration);
+    this._registrations.set(this._listener, registration);
     return registration;
   }
 }

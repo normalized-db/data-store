@@ -6,108 +6,108 @@ import { OnDataChanged } from './on-data-changed';
 
 export class EventRegistration<Types extends DataStoreTypes> {
 
-  constructor(private readonly listener: OnDataChanged,
-              private eventType?: EventType | EventType[],
-              private dataStoreType?: Types | Types[],
-              private itemKey?: ValidKey | ValidKey[]) {
+  constructor(private readonly _listener: OnDataChanged,
+              private _eventType?: EventType | EventType[],
+              private _dataStoreType?: Types | Types[],
+              private _itemKey?: ValidKey | ValidKey[]) {
   }
 
   public addEventType(type: EventType): void {
-    if (!this.eventType) {
-      this.eventType = type;
-    } else if (Array.isArray(this.eventType)) {
-      this.eventType.push(type);
+    if (!this._eventType) {
+      this._eventType = type;
+    } else if (Array.isArray(this._eventType)) {
+      this._eventType.push(type);
     } else {
-      this.eventType = [this.eventType, type];
+      this._eventType = [this._eventType, type];
     }
   }
 
   public removeEventType(type: EventType): void {
-    if (this.eventType) {
-      if (Array.isArray(this.eventType)) {
-        const index = this.eventType.indexOf(type);
+    if (this._eventType) {
+      if (Array.isArray(this._eventType)) {
+        const index = this._eventType.indexOf(type);
         if (index >= 0) {
-          this.eventType.splice(index, 1);
+          this._eventType.splice(index, 1);
         }
-      } else if (this.eventType === type) {
-        this.eventType = null;
+      } else if (this._eventType === type) {
+        this._eventType = null;
       }
     }
   }
 
   public addDataStoreType(type: Types): void {
-    if (!this.dataStoreType) {
-      this.dataStoreType = type;
-    } else if (Array.isArray(this.dataStoreType)) {
-      this.dataStoreType.push(type);
+    if (!this._dataStoreType) {
+      this._dataStoreType = type;
+    } else if (Array.isArray(this._dataStoreType)) {
+      this._dataStoreType.push(type);
     } else {
-      this.dataStoreType = [this.dataStoreType, type];
+      this._dataStoreType = [this._dataStoreType, type];
     }
   }
 
   public removeDataStoreType(type: Types): void {
-    if (this.dataStoreType) {
-      if (Array.isArray(this.dataStoreType)) {
-        const index = this.dataStoreType.indexOf(type);
+    if (this._dataStoreType) {
+      if (Array.isArray(this._dataStoreType)) {
+        const index = this._dataStoreType.indexOf(type);
         if (index >= 0) {
-          this.dataStoreType.splice(index, 1);
+          this._dataStoreType.splice(index, 1);
         }
-      } else if (this.dataStoreType === type) {
-        this.dataStoreType = null;
+      } else if (this._dataStoreType === type) {
+        this._dataStoreType = null;
       }
     }
   }
 
   public addItemKey(key: ValidKey): void {
-    if (!this.itemKey) {
-      this.itemKey = key;
-    } else if (Array.isArray(this.itemKey)) {
-      this.itemKey.push(key);
+    if (!this._itemKey) {
+      this._itemKey = key;
+    } else if (Array.isArray(this._itemKey)) {
+      this._itemKey.push(key);
     } else {
-      this.itemKey = [this.itemKey, key];
+      this._itemKey = [this._itemKey, key];
     }
   }
 
   public removeItemKey(key: ValidKey): void {
-    if (this.itemKey) {
-      if (Array.isArray(this.itemKey)) {
-        const index = this.itemKey.indexOf(key);
+    if (this._itemKey) {
+      if (Array.isArray(this._itemKey)) {
+        const index = this._itemKey.indexOf(key);
         if (index >= 0) {
-          this.itemKey.splice(index, 1);
+          this._itemKey.splice(index, 1);
         }
-      } else if (this.itemKey === key) {
-        this.itemKey = null;
+      } else if (this._itemKey === key) {
+        this._itemKey = null;
       }
     }
   }
 
   public isMatching(event: BaseEvent<Types, any>): boolean {
-    if (!isNull(this.itemKey)) {
-      if (Array.isArray(this.itemKey)) {
-        if (this.itemKey.indexOf(event.itemKey) < 0) {
+    if (!isNull(this._itemKey)) {
+      if (Array.isArray(this._itemKey)) {
+        if (this._itemKey.indexOf(event.itemKey) < 0) {
           return false;
         }
-      } else if (this.itemKey !== event.itemKey) {
+      } else if (this._itemKey !== event.itemKey) {
         return false;
       }
     }
 
-    if (this.eventType) {
-      if (Array.isArray(this.eventType)) {
-        if (this.eventType.indexOf(event.eventType) < 0) {
+    if (this._eventType) {
+      if (Array.isArray(this._eventType)) {
+        if (this._eventType.indexOf(event.eventType) < 0) {
           return false;
         }
-      } else if (this.eventType !== event.eventType) {
+      } else if (this._eventType !== event.eventType) {
         return false;
       }
     }
 
-    if (this.dataStoreType) {
-      if (Array.isArray(this.dataStoreType)) {
-        if (this.dataStoreType.indexOf(event.dataStoreType) < 0) {
+    if (this._dataStoreType) {
+      if (Array.isArray(this._dataStoreType)) {
+        if (this._dataStoreType.indexOf(event.dataStoreType) < 0) {
           return false;
         }
-      } else if (this.dataStoreType !== event.dataStoreType) {
+      } else if (this._dataStoreType !== event.dataStoreType) {
         return false;
       }
     }
@@ -116,6 +116,6 @@ export class EventRegistration<Types extends DataStoreTypes> {
   }
 
   public notify(event: BaseEvent<Types, any>): void {
-    this.listener.ndbOnDataChanged(event);
+    this._listener.ndbOnDataChanged(event);
   }
 }
