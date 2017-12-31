@@ -1,3 +1,4 @@
+import { ValidKey } from '@normalized-db/core';
 import { ListenerRegisteredError } from '../../error/listener-registered-error';
 import { DataStoreTypes } from '../../model/data-store-types';
 import { EventRegistration } from './event-registration';
@@ -8,6 +9,7 @@ export class EventRegistrationBuilder<Types extends DataStoreTypes> {
 
   private _eventType: EventType | EventType[];
   private _dataStoreType: Types | Types[];
+  private _itemKey: ValidKey | ValidKey[];
 
   constructor(private readonly registrations: Map<OnDataChanged, EventRegistration<Types>>,
               private readonly listener: OnDataChanged) {
@@ -26,8 +28,19 @@ export class EventRegistrationBuilder<Types extends DataStoreTypes> {
     return this;
   }
 
+  public itemKey(value: ValidKey | ValidKey[]): EventRegistrationBuilder<Types> {
+    this._itemKey = value;
+    return this;
+  }
+
   public build(): EventRegistration<Types> {
-    const registration = new EventRegistration<Types>(this.listener, this._eventType, this._dataStoreType);
+    const registration = new EventRegistration<Types>(
+      this.listener,
+      this._eventType,
+      this._dataStoreType,
+      this._itemKey
+    );
+
     this.registrations.set(this.listener, registration);
     return registration;
   }

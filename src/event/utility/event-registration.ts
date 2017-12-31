@@ -9,7 +9,7 @@ export class EventRegistration<Types extends DataStoreTypes> {
   constructor(private readonly listener: OnDataChanged,
               private eventType?: EventType | EventType[],
               private dataStoreType?: Types | Types[],
-              private readonly itemKey?: ValidKey) {
+              private itemKey?: ValidKey | ValidKey[]) {
   }
 
   public addEventType(type: EventType): void {
@@ -58,9 +58,38 @@ export class EventRegistration<Types extends DataStoreTypes> {
     }
   }
 
+  public addItemKey(key: ValidKey): void {
+    if (!this.itemKey) {
+      this.itemKey = key;
+    } else if (Array.isArray(this.itemKey)) {
+      this.itemKey.push(key);
+    } else {
+      this.itemKey = [this.itemKey, key];
+    }
+  }
+
+  public removeItemKey(key: ValidKey): void {
+    if (this.itemKey) {
+      if (Array.isArray(this.itemKey)) {
+        const index = this.itemKey.indexOf(key);
+        if (index >= 0) {
+          this.itemKey.splice(index, 1);
+        }
+      } else if (this.itemKey === key) {
+        this.itemKey = null;
+      }
+    }
+  }
+
   public isMatching(event: BaseEvent<Types, any>): boolean {
-    if (!isNull(this.itemKey) && this.itemKey !== event.itemKey) {
-      return false;
+    if (!isNull(this.itemKey)) {
+      if (Array.isArray(this.itemKey)) {
+        if (this.itemKey.indexOf(event.itemKey) < 0) {
+          return false;
+        }
+      } else if (this.itemKey !== event.itemKey) {
+        return false;
+      }
     }
 
     if (this.eventType) {
