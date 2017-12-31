@@ -1,3 +1,4 @@
+import { IdbBaseCommand } from './idb-base-command';
 import { IdbBaseWriteCommand } from './idb-base-write-command';
 import { IdbClearCommand } from './idb-clear-command';
 import { IdbCommandFactory } from './idb-command-factory';
@@ -8,6 +9,7 @@ import { IdbUpdateCommand } from './idb-update-command';
 
 export {
   IdbCommandFactory,
+  IdbBaseCommand,
   IdbBaseWriteCommand,
   IdbCreateCommand,
   IdbUpdateCommand,

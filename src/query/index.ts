@@ -11,10 +11,10 @@ export * from './model';
 export * from './runner';
 
 export {
-  QueryConfig,
   Queryable,
   BaseQuery,
   CountQuery,
   Query,
-  SingleItemQuery
+  SingleItemQuery,
+  QueryConfig
 };
