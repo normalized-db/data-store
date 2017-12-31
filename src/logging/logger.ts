@@ -2,8 +2,10 @@ import { ValidKey } from '@normalized-db/core';
 import { Context } from '../context/context';
 import { BaseEvent } from '../event/base-event';
 import { EventPipe } from '../event/utility/event-pipe';
+import { EventRegistration } from '../event/utility/event-registration';
 import { OnDataChanged } from '../event/utility/on-data-changed';
 import { DataStoreTypes } from '../model/data-store-types';
+import { LogConfig } from './config/log-config';
 import { LogQuery } from './query/log-query';
 import { LogQueryConfig } from './query/log-query-config';
 import { LogQueryRunner } from './query/runner/log-query-runner';
@@ -16,13 +18,18 @@ export abstract class Logger<Types extends DataStoreTypes, Ctx extends Context<T
     this._eventPipe = this._context.eventPipe;
   }
 
-  public enable(): void {
-    // TODO enable for some types
-    this._eventPipe.register(this).build();
+  public enable(logConfig?: LogConfig<Types>): EventRegistration<Types> {
+    const eventRegistrationBuilder = this._eventPipe.register(this);
+    if (logConfig) {
+      eventRegistrationBuilder.eventType(logConfig.eventType)
+        .type(logConfig.dataStoreType)
+        .itemKey(logConfig.itemKey);
+    }
+
+    return eventRegistrationBuilder.build();
   }
 
   public disable(): void {
-    // TODO disable some types only
     this._eventPipe.unregister(this);
   }
 
