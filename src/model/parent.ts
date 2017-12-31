@@ -11,4 +11,8 @@ export class Parent {
               public readonly key: ValidKey,
               public readonly field: string) {
   }
+
+  public equals(other: Parent) {
+    return other && this.key === other.key && this.field === other.field && this.type === other.type;
+  }
 }

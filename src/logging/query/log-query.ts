@@ -1,6 +1,7 @@
 import { ValidKey } from '@normalized-db/core';
 import { Context } from '../../context/context';
 import { DataStoreTypes } from '../../model/data-store-types';
+import { Parent } from '../../model/parent';
 import { Predicate } from '../../model/predicate';
 import { Queryable } from '../../query/queryable';
 import { LogAction } from '../model/log-action';
@@ -15,6 +16,7 @@ export class LogQuery<Types extends DataStoreTypes> implements Queryable<LogEntr
   private _type: Types;
   private _key: ValidKey;
   private _action: LogAction;
+  private _parent: Parent;
   private _filter?: Predicate<LogEntry<Types>>;
 
   constructor(protected readonly _context: Context<Types>,
@@ -96,13 +98,24 @@ export class LogQuery<Types extends DataStoreTypes> implements Queryable<LogEntr
   }
 
   /**
-   * Filter the result by the action (e.g. `created` or `removed`)
+   * Filter the result by the action (e.g. `created` or `removed`).
    *
    * @param {LogAction} action
    * @returns {LogQuery<Types extends DataStoreTypes>}
    */
   public action(action: LogAction): LogQuery<Types> {
     this._action = action;
+    return this;
+  }
+
+  /**
+   * Only include log-entries with a specific `Parent`.
+   *
+   * @param {Parent} parent
+   * @returns {LogQuery<Types extends DataStoreTypes>}
+   */
+  public parent(parent: Parent): LogQuery<Types> {
+    this._parent = parent;
     return this;
   }
 
@@ -150,6 +163,7 @@ export class LogQuery<Types extends DataStoreTypes> implements Queryable<LogEntr
       type: this._type,
       key: this._key,
       action: this._action,
+      parent: this._parent,
       filter: this._filter
     };
   }

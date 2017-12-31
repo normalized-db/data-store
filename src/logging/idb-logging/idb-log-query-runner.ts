@@ -57,8 +57,10 @@ export class IdbLogQueryRunner<Types extends DataStoreTypes> implements LogQuery
     if (!this._config.type || this._config.type === logEntry.type) { // type matching
       if (isNull(this._config.key) || this._config.key === logEntry.key) { // key matching
         if (!this._config.action || this._config.action === logEntry.action) { // action matching
-          if (!this._config.filter || this._config.filter(logEntry)) { // filter-predicate matching
-            this.result.push(logEntry);
+          if (!this._config.parent || this._config.parent.equals(logEntry.parent)) {
+            if (!this._config.filter || this._config.filter(logEntry)) { // filter-predicate matching
+              this.result.push(logEntry);
+            }
           }
         }
       }
