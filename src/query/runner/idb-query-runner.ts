@@ -29,7 +29,34 @@ export class IdbQueryRunner<Result> implements QueryRunner<Result> {
    */
   public async count(): Promise<number> {
     this.start();
-    const result = await (await this._context.read(this._config.type)).objectStore(this._config.type).count();
+    const objectStore = (await this._context.read(this._config.type)).objectStore(this._config.type);
+    let result = 0;
+    if (this._config.filter) {
+      const processCursorValue = async (value: any) => {
+        let isValid: boolean;
+        if (this._config.filter.requiresNormalization) {
+          const denormalizedData = await this.denormalizer.apply<Result>(this._config.type, value, this._config.depth);
+          isValid = this._config.filter.test(denormalizedData);
+        } else {
+          isValid = this._config.filter.test(value);
+        }
+
+        if (isValid) {
+          result++;
+        }
+      };
+
+      const requests: Promise<void>[] = [];
+      let cursor = await objectStore.openCursor();
+      while (cursor && cursor.value) {
+        requests.push(processCursorValue(cursor.value));
+        cursor = await cursor.continue();
+      }
+      await Promise.all(requests);
+    } else {
+      result = await objectStore.count();
+    }
+
     this.stop();
     return result;
   }

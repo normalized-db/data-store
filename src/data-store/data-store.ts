@@ -21,10 +21,10 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
    *
    * @param {Types} type
    * @param {boolean} autoCloseContext
-   * @returns {CountQuery}
+   * @returns {CountQuery<Item>}
    */
-  public count(type: Types, autoCloseContext = false): CountQuery {
-    return new CountQuery(this._context, autoCloseContext || this._autoCloseContext, type);
+  public count<Item>(type: Types, autoCloseContext = false): CountQuery<Item> {
+    return new CountQuery<Item>(this._context, autoCloseContext || this._autoCloseContext, type);
   }
 
   /**

@@ -12,9 +12,9 @@ export interface IDataStore<Types extends DataStoreTypes> {
    *
    * @param {Types} type
    * @param {boolean} autoCloseContext
-   * @returns {CountQuery}
+   * @returns {CountQuery<Item>}
    */
-  count(type: Types, autoCloseContext?: boolean): CountQuery;
+  count<Item>(type: Types, autoCloseContext?: boolean): CountQuery<Item>;
 
   /**
    * Create a new `Query`.
