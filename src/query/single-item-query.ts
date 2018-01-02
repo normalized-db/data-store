@@ -44,7 +44,7 @@ export class SingleItemQuery<DbItem extends NdbDocument>
    * @returns {SingleItemQuery<DbItem|null>}
    * @throws {RefNotFoundError}
    */
-  public reverse(sourceItem: any): SingleItemQuery<DbItem | null> {
+  public reverse(sourceItem: NdbDocument): SingleItemQuery<DbItem | null> {
     if (!RefsUtility.hasKey(sourceItem, this._type, this._key)) {
       throw new RefNotFoundError(this._type, this._key);
     }
@@ -102,7 +102,7 @@ export class SingleItemQuery<DbItem extends NdbDocument>
    *
    * @param {DbItem|null} defaultValue
    * @param {boolean} noCache
-   * @returns {Promise<DbItem & (any | undefined)>}
+   * @returns {Promise<DbItem | null>}
    */
   public async orDefault(defaultValue: DbItem = null, noCache = false): Promise<DbItem | null> {
     if (this._cachedResult && !noCache) {
