@@ -2,11 +2,20 @@ import { NdbDocument, ValidKey } from '@normalized-db/core';
 import { Context } from '../context/context';
 import { EventPipe } from '../event/utility/event-pipe';
 import { DataStoreTypes } from '../model/data-store-types';
-import { Parent } from '../model/parent';
 import { CountQuery } from '../query/count-query';
 import { Query } from '../query/query';
 import { SingleItemQuery } from '../query/single-item-query';
 import { IDataStore } from './data-store-interface';
+import { BaseOptions } from './options/base-options';
+import { ClearOptions } from './options/clear-options';
+import { CountOptions } from './options/count-options';
+import { CreateOptions } from './options/create-options';
+import { FindByKeyOptions } from './options/find-by-key-options';
+import { FindOptions } from './options/find-options';
+import { PutOptions } from './options/put-options';
+import { RemoveOptions } from './options/remove-options';
+import { SetOptions } from './options/set-options';
+import { UpdateOptions } from './options/update-options';
 
 export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types> {
 
@@ -20,23 +29,23 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
    * @inheritDoc
    *
    * @param {Types} type
-   * @param {boolean} autoCloseContext
+   * @param {CountOptions} options
    * @returns {CountQuery<Item>}
    */
-  public count<Item extends NdbDocument>(type: Types, autoCloseContext = false): CountQuery<Item> {
-    return new CountQuery<Item>(this._context, autoCloseContext || this._autoCloseContext, type);
+  public count<Item extends NdbDocument>(type: Types, options?: CountOptions): CountQuery<Item> {
+    return new CountQuery<Item>(this._context, this.isAutoClose(options), type);
   }
 
   /**
    * @inheritDoc
    *
    * @param {Types} type
-   * @param {boolean} autoCloseContext
+   * @param {FindOptions} options
    * @returns {Query<Result>}
    * @throws {InvalidTypeError}
    */
-  public find<Result extends NdbDocument>(type: Types, autoCloseContext = false): Query<Result> {
-    return new Query<Result>(this._context, autoCloseContext || this._autoCloseContext, type);
+  public find<Result extends NdbDocument>(type: Types, options?: FindOptions): Query<Result> {
+    return new Query<Result>(this._context, this.isAutoClose(options), type);
   }
 
   /**
@@ -44,14 +53,14 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
    *
    * @param {Types} type
    * @param {ValidKey} key
-   * @param {boolean} autoCloseContext
+   * @param {FindByKeyOptions} options
    * @returns {SingleItemQuery<Result>}
    * @throws {InvalidTypeError}
    */
   public findByKey<Result extends NdbDocument>(type: Types,
                                                key: ValidKey,
-                                               autoCloseContext = false): SingleItemQuery<Result> {
-    return new SingleItemQuery<Result>(this._context, autoCloseContext || this._autoCloseContext, type, key);
+                                               options?: FindByKeyOptions): SingleItemQuery<Result> {
+    return new SingleItemQuery<Result>(this._context, this.isAutoClose(options), type, key);
   }
 
   /**
@@ -59,18 +68,16 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
    *
    * @param {Types} type
    * @param {Item|Item[]} item
-   * @param {Parent} parent
-   * @param {boolean} autoCloseContext
+   * @param {CreateOptions} options
    * @returns {Promise<boolean>}
    * @throws {MissingKeyError}
    */
   public async create<Item extends NdbDocument>(type: Types,
                                                 item: Item | Item[],
-                                                parent?: Parent,
-                                                autoCloseContext = false): Promise<boolean> {
+                                                options?: CreateOptions): Promise<boolean> {
     const cmd = this._context.commandFactory().createCommand<Item>(type);
-    const success = await cmd.execute(item, parent);
-    this.autoClose(autoCloseContext);
+    const success = await cmd.execute(item, options ? options.parent : null);
+    this.autoClose(options);
     return success;
   }
 
@@ -79,19 +86,17 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
    *
    * @param {Types} type
    * @param {Item|Item[]} item
-   * @param {boolean} isPartialUpdate
-   * @param {boolean} autoCloseContext
+   * @param {UpdateOptions} options
    * @returns {Promise<boolean>}
    * @throws {MissingKeyError}
    * @throws {NotFoundError}
    */
   public async update<Item extends NdbDocument>(type: Types,
                                                 item: Item | Item[],
-                                                isPartialUpdate = false,
-                                                autoCloseContext = false): Promise<boolean> {
+                                                options?: UpdateOptions): Promise<boolean> {
     const cmd = this._context.commandFactory().updateCommand<Item>(type);
-    const success = await cmd.execute(item, isPartialUpdate);
-    this.autoClose(autoCloseContext);
+    const success = await cmd.execute(item, options && options.isPartialUpdate);
+    this.autoClose(options);
     return success;
   }
 
@@ -100,15 +105,15 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
    *
    * @param {Types} type
    * @param {Data|Data[]} item
-   * @param {boolean} autoCloseContext
+   * @param {SetOptions} options
    * @returns {Promise<boolean>}
    * @throws {MissingKeyError}
    * @throws {NotFoundError}
    */
-  public async set<Data extends object>(type: Types, item: Data | Data[], autoCloseContext = false): Promise<boolean> {
+  public async set<Data extends object>(type: Types, item: Data | Data[], options?: SetOptions): Promise<boolean> {
     const cmd = this._context.commandFactory().setCommand<Data>(type);
     const success = await cmd.execute(item);
-    this.autoClose(autoCloseContext);
+    this.autoClose(options);
     return success;
   }
 
@@ -117,19 +122,15 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
    *
    * @param {Types} type
    * @param {Item|Item[]} item
-   * @param {Parent} parent
-   * @param {boolean} isPartialUpdate
-   * @param {boolean} autoCloseContext
+   * @param {PutOptions} options
    * @returns {Promise<boolean>}
    */
-  public async put<Item extends NdbDocument>(type: Types,
-                                             item: Item | Item[],
-                                             parent?: Parent,
-                                             isPartialUpdate = false,
-                                             autoCloseContext = false): Promise<boolean> {
+  public async put<Item extends NdbDocument>(type: Types, item: Item | Item[], options?: PutOptions): Promise<boolean> {
     const cmd = this._context.commandFactory().putCommand<Item>(type);
-    const success = await cmd.execute(item, parent, isPartialUpdate);
-    this.autoClose(autoCloseContext);
+    const success = await (options
+        ? cmd.execute(item, options.parent, options.isPartialUpdate)
+        : cmd.execute(item));
+    this.autoClose(options);
     return success;
   }
 
@@ -138,16 +139,16 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
    *
    * @param {Types} type
    * @param {Item|ValidKey} item
-   * @param {boolean} autoCloseContext
+   * @param {RemoveOptions} options
    * @returns {Promise<boolean>}
    * @throws {NotFoundError}
    */
   public async remove<Item extends NdbDocument>(type: Types,
                                                 item: Item | ValidKey,
-                                                autoCloseContext = false): Promise<boolean> {
+                                                options?: RemoveOptions): Promise<boolean> {
     const cmd = this._context.commandFactory().removeCommand<Item>(type);
     const success = await cmd.execute(item);
-    this.autoClose(autoCloseContext);
+    this.autoClose(options);
     return success;
   }
 
@@ -155,18 +156,21 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
    * @inheritDoc
    *
    * @param {string|string[]} type
-   * @param {boolean} includeLogs
-   * @param {boolean} autoCloseContext
+   * @param {ClearOptions} options
    * @returns {Promise<boolean>}
    */
-  public async clear(type?: string | string[], includeLogs?: boolean, autoCloseContext = false): Promise<boolean> {
-    const success = await this._context.commandFactory().clearCommand(includeLogs).execute(type);
-    this.autoClose(autoCloseContext);
+  public async clear(type?: string | string[], options?: ClearOptions): Promise<boolean> {
+    const success = await this._context.commandFactory().clearCommand(options && options.includeLogs).execute(type);
+    this.autoClose(options);
     return success;
   }
 
-  private async autoClose(autoCloseContext: boolean): Promise<void> {
-    if (autoCloseContext || this._autoCloseContext) {
+  private isAutoClose(options: BaseOptions): boolean {
+    return (options && options.autoCloseContext) || this._autoCloseContext;
+  }
+
+  private async autoClose(options: BaseOptions): Promise<void> {
+    if (this.isAutoClose(options)) {
       await this._context.close();
     }
   }

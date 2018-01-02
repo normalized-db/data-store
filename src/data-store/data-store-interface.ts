@@ -1,9 +1,17 @@
 import { NdbDocument, ValidKey } from '@normalized-db/core';
 import { DataStoreTypes } from '../model/data-store-types';
-import { Parent } from '../model/parent';
 import { CountQuery } from '../query/count-query';
 import { Query } from '../query/query';
 import { SingleItemQuery } from '../query/single-item-query';
+import { ClearOptions } from './options/clear-options';
+import { CountOptions } from './options/count-options';
+import { CreateOptions } from './options/create-options';
+import { FindByKeyOptions } from './options/find-by-key-options';
+import { FindOptions } from './options/find-options';
+import { PutOptions } from './options/put-options';
+import { RemoveOptions } from './options/remove-options';
+import { SetOptions } from './options/set-options';
+import { UpdateOptions } from './options/update-options';
 
 export interface IDataStore<Types extends DataStoreTypes> {
 
@@ -11,33 +19,33 @@ export interface IDataStore<Types extends DataStoreTypes> {
    * Returns the total number of items of a given type.
    *
    * @param {Types} type
-   * @param {boolean} autoCloseContext
+   * @param {CountOptions} options
    * @returns {CountQuery<Item>}
    */
-  count<Item extends NdbDocument>(type: Types, autoCloseContext?: boolean): CountQuery<Item>;
+  count<Item extends NdbDocument>(type: Types, options?: CountOptions): CountQuery<Item>;
 
   /**
    * Create a new `Query`.
    *
    * @param {Types} type
-   * @param {boolean} autoCloseContext
+   * @param {FindOptions} options
    * @returns {Query<Result>}
    * @throws {InvalidTypeError}
    */
-  find<Result extends NdbDocument>(type: Types, autoCloseContext?: boolean): Query<Result>;
+  find<Result extends NdbDocument>(type: Types, options?: FindOptions): Query<Result>;
 
   /**
    * Create a new `SingleItemQuery`.
    *
    * @param {Types} type
    * @param {ValidKey} key
-   * @param {boolean} autoCloseContext
+   * @param {FindByKeyOptions} options
    * @returns {SingleItemQuery<Result>}
    * @throws {InvalidTypeError}
    */
   findByKey<Result extends NdbDocument>(type: Types,
                                         key: ValidKey,
-                                        autoCloseContext?: boolean): SingleItemQuery<Result>;
+                                        options?: FindByKeyOptions): SingleItemQuery<Result>;
 
   /**
    * Adds new items. If any item's primary key is set it still will be reassigned a new one if `autoKey` is `false`
@@ -46,59 +54,46 @@ export interface IDataStore<Types extends DataStoreTypes> {
    *
    * @param {Types} type
    * @param {Item|Item[]} item
-   * @param {Parent} parent
-   * @param {boolean} autoCloseContext
+   * @param {CreateOptions} options
    * @returns {Promise<boolean>}
    * @throws {MissingKeyError}
    */
-  create<Item extends NdbDocument>(type: Types,
-                                   item: Item | Item[],
-                                   parent?: Parent,
-                                   autoCloseContext?: boolean): Promise<boolean>;
+  create<Item extends NdbDocument>(type: Types, item: Item | Item[], options?: CreateOptions): Promise<boolean>;
 
   /**
-   * Update the items. If any of the items does not exist a `NotFoundError` will be thrown.
+   * Either fully replace existing documents by the items or partially update them by using
+   * `UpdateOptions.isPartialUpdate:true`. If any of the items does not exist a `NotFoundError` will be thrown.
    *
    * @param {Types} type
    * @param {Item|Item[]} item
-   * @param {boolean} isPartialUpdate
-   * @param {boolean} autoCloseContext
+   * @param {UpdateOptions} options
    * @returns {Promise<boolean>}
    * @throws {MissingKeyError}
    * @throws {NotFoundError}
    */
-  update<Item extends NdbDocument>(type: Types,
-                                   item: Item | Item[],
-                                   isPartialUpdate?: boolean,
-                                   autoCloseContext?: boolean): Promise<boolean>;
+  update<Item extends NdbDocument>(type: Types, item: Item | Item[], options?: UpdateOptions): Promise<boolean>;
 
   /**
    * Update the items partially. If any of the items does not exist a `NotFoundError` will be thrown.
    *
    * @param {Types} type
    * @param {Data|Data[]} item
-   * @param {boolean} autoCloseContext
+   * @param {SetOptions} options
    * @returns {Promise<boolean>}
    * @throws {MissingKeyError}
    * @throws {NotFoundError}
    */
-  set<Data extends object>(type: Types, item: Data | Data[], autoCloseContext?: boolean): Promise<boolean>;
+  set<Data extends object>(type: Types, item: Data | Data[], options?: SetOptions): Promise<boolean>;
 
   /**
    * The item will be either created or updated. For details see `.create(…)` and `.update(…)` respectively.
    *
    * @param {Types} type
    * @param {Item|Item[]} item
-   * @param {Parent} parent
-   * @param {boolean} isPartialUpdate
-   * @param {boolean} autoCloseContext
+   * @param {PutOptions} options
    * @returns {Promise<boolean>}
    */
-  put<Item extends NdbDocument>(type: Types,
-                                item: Item | Item[],
-                                parent?: Parent,
-                                isPartialUpdate?: boolean,
-                                autoCloseContext?: boolean): Promise<boolean>;
+  put<Item extends NdbDocument>(type: Types, item: Item | Item[], options?: PutOptions): Promise<boolean>;
 
   /**
    * Remove the item from its data-store and remove references to this item.
@@ -106,20 +101,19 @@ export interface IDataStore<Types extends DataStoreTypes> {
    *
    * @param {Types} type
    * @param {Item|ValidKey} item
-   * @param {boolean} autoCloseContext
+   * @param {RemoveOptions} options
    * @returns {Promise<boolean>}
    * @throws {NotFoundError}
    */
-  remove<Item extends NdbDocument>(type: Types, item: Item | ValidKey, autoCloseContext?: boolean): Promise<boolean>;
+  remove<Item extends NdbDocument>(type: Types, item: Item | ValidKey, options?: RemoveOptions): Promise<boolean>;
 
   /**
    * Clear all items, optionally only these from a given type / some types. Note that references will not be updated
    * and hence could get into an invalid state!
    *
    * @param {string|string[]} type
-   * @param {boolean} includeLogs
-   * @param {boolean} autoCloseContext
+   * @param {ClearOptions} options
    * @returns {Promise<boolean>}
    */
-  clear(type: string | string[], includeLogs?: boolean, autoCloseContext?: boolean): Promise<boolean>;
+  clear(type: string | string[], options?: ClearOptions): Promise<boolean>;
 }
