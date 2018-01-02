@@ -12,6 +12,7 @@ export class IdbPutCommand<T extends NdbDocument> extends IdbBaseWriteCommand<T>
    * @param {T|T[]} data
    * @param {Parent} parent
    * @returns {Promise<boolean>}
+   * @throws {MissingKeyError}
    */
   public async execute(data: T | T[], parent?: Parent): Promise<boolean> {
     if (isNull(data)) {

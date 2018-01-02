@@ -7,6 +7,7 @@ export interface ClearCommand extends Command<void> {
    *
    * @param {string|string[]} type
    * @returns {Promise<boolean>}
+   * @throws {NotFoundError}
    */
   execute(type?: string | string[]): Promise<boolean>;
 }

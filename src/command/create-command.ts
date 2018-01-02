@@ -10,6 +10,7 @@ export interface CreateCommand<T extends NdbDocument> extends Command<T | T[]> {
    * @param {T|T[]} data
    * @param {Parent} parent
    * @returns {Promise<boolean>}
+   * @throws {MissingKeyError}
    */
   execute(data: T | T[], parent?: Parent): Promise<boolean>;
 }
