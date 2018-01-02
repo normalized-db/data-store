@@ -32,9 +32,9 @@
     "build-and-publish": "npm run clean-build && npm publish"
   },
   "dependencies": {
-    "@normalized-db/core": "^2.2.0",
-    "@normalized-db/denormalizer": "^2.2.0",
-    "@normalized-db/normalizer": "^2.2.0",
+    "@normalized-db/core": "2.2.0",
+    "@normalized-db/denormalizer": "2.2.0",
+    "@normalized-db/normalizer": "2.2.0",
     "idb": "2.0.3"
   },
   "devDependencies": {
