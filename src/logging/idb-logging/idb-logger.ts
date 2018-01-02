@@ -1,13 +1,14 @@
-import { ValidKey } from '@normalized-db/core';
-import { ObjectStore, UpgradeDB } from 'idb';
+import { UpgradeDB } from 'idb';
 import { IdbContext } from '../../context/idb-context/idb-context';
 import { BaseEvent } from '../../event/base-event';
 import { OnDataChanged } from '../../event/utility/on-data-changed';
 import { DataStoreTypes } from '../../model/data-store-types';
+import { ClearLogsOptions } from '../clear-command/clear-logs-options';
 import { Logger } from '../logger';
 import { LogEntry } from '../model/log-entry';
 import { LogQueryConfig } from '../query/log-query-config';
 import { LogQueryRunner } from '../query/log-query-runner';
+import { IdbClearLogsCommand } from './idb-clear-logs-command';
 import { IdbLogQueryRunner } from './idb-log-query-runner';
 
 export class IdbLogger<Types extends DataStoreTypes> extends Logger<Types, IdbContext<Types>> implements OnDataChanged {
@@ -39,91 +40,22 @@ export class IdbLogger<Types extends DataStoreTypes> extends Logger<Types, IdbCo
     return new IdbLogQueryRunner<Types>(this._context, config);
   }
 
-  // TODO auto-close context
+  // TODO auto-close context - other writing commands still could need the db-connection
   public async ndbOnDataChanged(event: BaseEvent<Types, any>): Promise<void> {
-    await (await this.getWritableObjectStore()).put(new LogEntry<Types>(event));
+    const transaction = await this._context.write(IdbLogger.OBJECT_STORE);
+    const logStore = transaction.objectStore(IdbLogger.OBJECT_STORE);
+    await logStore.put(new LogEntry<Types>(event));
   }
 
-  public async clear(autoCloseContext = true): Promise<boolean> {
-    let success = true;
-    try {
-      await (await this.getWritableObjectStore()).clear();
-    } catch (e) {
-      console.error('message' in e ? e.message : e);
-      success = false;
-    }
-
-    this.autoCloseContext(autoCloseContext);
+  public async clear(options?: ClearLogsOptions<Types>): Promise<boolean> {
+    const cmd = new IdbClearLogsCommand<Types>(this._context);
+    const success = cmd.execute(options);
+    this.autoCloseContext(options);
     return success;
   }
 
-  public async clearTypes(types: Types | Types[], autoCloseContext = true): Promise<boolean> {
-    let lower: Types, upper: Types, typeArr: Types[];
-    if (Array.isArray(types)) {
-      types = types.sort();
-      lower = types[0];
-      upper = types[types.length - 1];
-      typeArr = types;
-    } else {
-      lower = upper = types;
-      typeArr = [types];
-    }
-
-    let success = true;
-    try {
-      const typeIdx = (await this.getWritableObjectStore()).index(IdbLogger.IDX_TYPE);
-      const requests: Promise<void>[] = [];
-      let cursor = await typeIdx.openCursor(IDBKeyRange.bound(lower, upper));
-      while (cursor) {
-        if (cursor.value) {
-          const logEntry = cursor.value as LogEntry<Types>;
-          if (typeArr.indexOf(logEntry.type) >= 0) {
-            requests.push(cursor.delete());
-          }
-        }
-        cursor = await cursor.continue();
-      }
-      await Promise.all(requests);
-    } catch (e) {
-      console.error('message' in e ? e.message : e);
-      success = false;
-    }
-
-    this.autoCloseContext(autoCloseContext);
-    return success;
-  }
-
-  public async clearItem(type: Types, key: ValidKey, autoCloseContext = true): Promise<boolean> {
-    let success = true;
-    try {
-      const keyIdx = (await this.getWritableObjectStore()).index(IdbLogger.IDX_KEY);
-      const requests: Promise<void>[] = [];
-      let cursor = await keyIdx.openCursor(key);
-      while (cursor) {
-        if (cursor.value) {
-          const logEntry = cursor.value as LogEntry<Types>;
-          if (logEntry.type === type) {
-            requests.push(cursor.delete());
-          }
-        }
-        cursor = await cursor.continue();
-      }
-      await Promise.all(requests);
-    } catch (e) {
-      console.error('message' in e ? e.message : e);
-      success = false;
-    }
-
-    this.autoCloseContext(autoCloseContext);
-    return success;
-  }
-
-  private async getWritableObjectStore(): Promise<ObjectStore> {
-    return (await this._context.write(IdbLogger.OBJECT_STORE)).objectStore(IdbLogger.OBJECT_STORE);
-  }
-
-  private async autoCloseContext(autoCloseContext: boolean): Promise<void> {
-    if (autoCloseContext) {
+  private async autoCloseContext(options: ClearLogsOptions<Types>): Promise<void> {
+    if (options && options.autoCloseContext) {
       await this._context.close();
     }
   }
