@@ -85,7 +85,7 @@ export class SingleItemQuery<DbItem extends NdbDocument>
    * @throws {ChildNotFoundError} when no `defaultValue` is available and a `parent`-item was used
    */
   public async result(noCache = false): Promise<DbItem> {
-    const result = await this.orDefault(null, noCache);
+    const result = await this.orDefault(noCache);
     if (!result) {
       if (this._parent) {
         throw new ChildNotFoundError(this._parent, this._key);
@@ -100,18 +100,17 @@ export class SingleItemQuery<DbItem extends NdbDocument>
   /**
    * Fetch the query's result and return `defaultValue` if not item was found instead of throwing an error.
    *
-   * @param {DbItem|null} defaultValue
    * @param {boolean} noCache
    * @returns {Promise<DbItem | null>}
    */
-  public async orDefault(defaultValue: DbItem = null, noCache = false): Promise<DbItem | null> {
+  public async orDefault(noCache = false): Promise<DbItem | null> {
     if (this._cachedResult && !noCache) {
       return this._cachedResult;
     }
 
     const runner = this._context.queryRunnerFactory().singleItemQueryRunner<DbItem>(this.getQueryConfig());
     await this._context.open();
-    this._cachedResult = (await runner.execute()) || defaultValue;
+    this._cachedResult = (await runner.execute()) || this._default;
     this.autoClose();
     return this._cachedResult;
   }
