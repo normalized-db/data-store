@@ -17,7 +17,7 @@ export class CountQuery<DbItem extends NdbDocument> extends BaseQuery<number> im
    * @param {boolean} requiresDenormalization
    * @returns {CountQuery<DbItem>}
    */
-  public filter(predicate: Predicate<DbItem>, requiresDenormalization?: boolean): CountQuery<DbItem> {
+  public filter(predicate: Predicate<DbItem>, requiresDenormalization?: boolean): this {
     this._filter = new Filter<DbItem>(predicate, requiresDenormalization);
     return this;
   }
@@ -29,7 +29,7 @@ export class CountQuery<DbItem extends NdbDocument> extends BaseQuery<number> im
    * @param {number|Depth} depth
    * @returns {CountQuery<DbItem>}
    */
-  public depth(depth: number | Depth): CountQuery<DbItem> {
+  public depth(depth: number | Depth): this {
     this._depth = depth;
     return this;
   }

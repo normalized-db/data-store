@@ -6,7 +6,7 @@ export class CreateOptionsBuilder extends BaseOptionsBuilder<CreateOptions> {
 
   private _parent: Parent;
 
-  public parent(value: Parent): CreateOptionsBuilder {
+  public parent(value: Parent): this {
     this._parent = value;
     return this;
   }

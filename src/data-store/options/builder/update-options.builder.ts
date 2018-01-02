@@ -6,7 +6,7 @@ export class UpdateOptionsBuilder extends BaseOptionsBuilder<UpdateOptions> {
 
   private _isPartialUpdate: boolean;
 
-  public isPartialUpdate(value: boolean): UpdateOptionsBuilder {
+  public isPartialUpdate(value: boolean): this {
     this._isPartialUpdate = value;
     return this;
   }

@@ -30,7 +30,7 @@ export class SingleItemQuery<DbItem extends NdbDocument>
    * @param {string} field
    * @returns {SingleItemQuery<DbItem|null>}
    */
-  public nested(key: ValidKey, field: string): SingleItemQuery<DbItem | null> {
+  public nested(key: ValidKey, field: string): this {
     this._parent = new Parent(this._type, key, field);
     return this;
   }
@@ -43,7 +43,7 @@ export class SingleItemQuery<DbItem extends NdbDocument>
    * @returns {SingleItemQuery<DbItem|null>}
    * @throws {RefNotFoundError}
    */
-  public reverse(sourceItem: NdbDocument): SingleItemQuery<DbItem | null> {
+  public reverse(sourceItem: NdbDocument): this {
     if (!RefsUtility.hasKey(sourceItem, this._type, this._key)) {
       throw new RefNotFoundError(this._type, this._key);
     }
@@ -56,7 +56,7 @@ export class SingleItemQuery<DbItem extends NdbDocument>
    * @param {number|Depth} depth
    * @returns {SingleItemQuery<DbItem|null>}
    */
-  public depth(depth: number | Depth): SingleItemQuery<DbItem | null> {
+  public depth(depth: number | Depth): this {
     this._depth = depth;
     return this;
   }
@@ -67,7 +67,7 @@ export class SingleItemQuery<DbItem extends NdbDocument>
    * @param {DbItem} value
    * @returns {SingleItemQuery<DbItem|null>}
    */
-  public defaultValue(value: DbItem): SingleItemQuery<DbItem | null> {
+  public defaultValue(value: DbItem): this {
     this._default = value;
     return this;
   }

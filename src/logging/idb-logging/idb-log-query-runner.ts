@@ -39,7 +39,7 @@ export class IdbLogQueryRunner<Types extends DataStoreTypes> implements LogQuery
     return this.result;
   }
 
-  private async start() {
+  private async start(): Promise<void> {
     if (this.transaction) {
       throw new InvalidQueryRunnerStatusError('Log-Query is already running');
     }
@@ -48,7 +48,7 @@ export class IdbLogQueryRunner<Types extends DataStoreTypes> implements LogQuery
     this.logStore = this.transaction.objectStore(IdbLogger.OBJECT_STORE);
   }
 
-  private stop() {
+  private stop(): void {
     this.transaction = this.logStore = null;
   }
 

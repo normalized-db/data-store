@@ -29,7 +29,7 @@ export class Query<DbItem extends NdbDocument>
    * @param {number} offset
    * @returns {Query<DbItem>}
    */
-  public offset(offset: number): Query<DbItem> {
+  public offset(offset: number): this {
     this._offset = Math.max(offset, 0);
     return this;
   }
@@ -40,7 +40,7 @@ export class Query<DbItem extends NdbDocument>
    * @param {number} limit
    * @returns {Query<DbItem>}
    */
-  public limit(limit: number): Query<DbItem> {
+  public limit(limit: number): this {
     this._limit = limit;
     return this;
   }
@@ -51,7 +51,7 @@ export class Query<DbItem extends NdbDocument>
    * @param {ValidKey[]} keys
    * @returns {Query<DbItem>}
    */
-  public keys(keys: ValidKey[]): Query<DbItem> {
+  public keys(keys: ValidKey[]): this {
     this._keys = keys;
     return this;
   }
@@ -63,7 +63,7 @@ export class Query<DbItem extends NdbDocument>
    * @param {boolean} requiresDenormalization
    * @returns {Query<DbItem>}
    */
-  public filter(predicate: Predicate<DbItem>, requiresDenormalization?: boolean): Query<DbItem> {
+  public filter(predicate: Predicate<DbItem>, requiresDenormalization?: boolean): this {
     this._filter = new Filter<DbItem>(predicate, requiresDenormalization);
     return this;
   }
@@ -76,7 +76,7 @@ export class Query<DbItem extends NdbDocument>
    * @param {string} field
    * @returns {Query<DbItem>}
    */
-  public nested(key: ValidKey, field: string): Query<DbItem> {
+  public nested(key: ValidKey, field: string): this {
     this._parent = new Parent(this._type, key, field);
     return this;
   }
@@ -88,7 +88,7 @@ export class Query<DbItem extends NdbDocument>
    * @param {NdbDocument} sourceItem
    * @returns {Query<DbItem>}
    */
-  public reverse(sourceItem: NdbDocument): Query<DbItem> {
+  public reverse(sourceItem: NdbDocument): this {
     this._keys = RefsUtility.getAll(sourceItem, this._type);
     return this;
   }
@@ -99,7 +99,7 @@ export class Query<DbItem extends NdbDocument>
    * @param {number|Depth} depth
    * @returns {Query<DbItem>}
    */
-  public depth(depth: number | Depth): Query<DbItem> {
+  public depth(depth: number | Depth): this {
     this._depth = depth;
     return this;
   }

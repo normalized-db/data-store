@@ -4,7 +4,7 @@ export abstract class BaseOptionsBuilder<Options extends BaseOptions> {
 
   protected _autoCloseContext: boolean;
 
-  public autoCloseContext(value: boolean) {
+  public autoCloseContext(value: boolean): this {
     this._autoCloseContext = value;
     return this;
   }

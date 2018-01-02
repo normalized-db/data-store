@@ -12,7 +12,7 @@ export class Parent {
               public readonly field: string) {
   }
 
-  public equals(other: Parent) {
+  public equals(other: Parent): boolean {
     return other && this.key === other.key && this.field === other.field && this.type === other.type;
   }
 }

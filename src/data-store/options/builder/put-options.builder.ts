@@ -7,12 +7,12 @@ export class PutOptionsBuilder extends BaseOptionsBuilder<PutOptions> {
   private _parent: Parent;
   private _isPartialUpdate: boolean;
 
-  public parent(value: Parent): PutOptionsBuilder {
+  public parent(value: Parent): this {
     this._parent = value;
     return this;
   }
 
-  public isPartialUpdate(value: boolean): PutOptionsBuilder {
+  public isPartialUpdate(value: boolean): this {
     this._isPartialUpdate = value;
     return this;
   }

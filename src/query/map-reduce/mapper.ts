@@ -22,7 +22,8 @@ export class Mapper<QueryResult extends NdbDocument, Result> implements Queryabl
    * @param {Result} initialValue
    * @returns {Reducer<Result, ReducerResult>}
    */
-  public reduce<ReducerResult>(callback: ReducerFunc<Result, ReducerResult>, initialValue?: ReducerResult) {
+  public reduce<ReducerResult>(callback: ReducerFunc<Result, ReducerResult>,
+                               initialValue?: ReducerResult): Reducer<QueryResult, Result, ReducerResult> {
     return new Reducer<QueryResult, Result, ReducerResult>(this.query, this, callback, initialValue);
   }
 
@@ -39,11 +40,11 @@ export class Mapper<QueryResult extends NdbDocument, Result> implements Queryabl
 
     const parentResult = await this.query.result(noCache);
     return this._cachedResult = new ListResultBuilder<Result>()
-      .items(await Promise.all(parentResult.items.map(this._callback)))
-      .total(parentResult.total)
-      .offset(parentResult.offset)
-      .limit(parentResult.limit)
-      .build();
+        .items(await Promise.all(parentResult.items.map(this._callback)))
+        .total(parentResult.total)
+        .offset(parentResult.offset)
+        .limit(parentResult.limit)
+        .build();
   }
 
   /**

@@ -5,7 +5,7 @@ export class ClearOptionsBuilder extends BaseOptionsBuilder<ClearOptions> {
 
   private _includeLogs: boolean;
 
-  public includeLogs(value: boolean): ClearOptionsBuilder {
+  public includeLogs(value: boolean): this {
     this._includeLogs = value;
     return this;
   }

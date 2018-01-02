@@ -18,17 +18,17 @@ export class EventRegistrationBuilder<Types extends DataStoreTypes> {
     }
   }
 
-  public eventType(value: EventType | EventType[]): EventRegistrationBuilder<Types> {
+  public eventType(value: EventType | EventType[]): this {
     this._eventType = value;
     return this;
   }
 
-  public type(value: Types | Types[]): EventRegistrationBuilder<Types> {
+  public type(value: Types | Types[]): this {
     this._dataStoreType = value;
     return this;
   }
 
-  public itemKey(value: ValidKey | ValidKey[]): EventRegistrationBuilder<Types> {
+  public itemKey(value: ValidKey | ValidKey[]): this {
     this._itemKey = value;
     return this;
   }

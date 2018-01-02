@@ -29,7 +29,7 @@ export class LogQuery<Types extends DataStoreTypes> implements Queryable<LogEntr
    * @param {Date} time
    * @returns {LogQuery<Types extends DataStoreTypes>}
    */
-  public time(time: Date): LogQuery<Types> {
+  public time(time: Date): this {
     this._dateRange = IDBKeyRange.only(time);
     return this;
   }
@@ -42,7 +42,7 @@ export class LogQuery<Types extends DataStoreTypes> implements Queryable<LogEntr
    * @param {boolean} open
    * @returns {LogQuery<Types extends DataStoreTypes>}
    */
-  public after(lower: Date, open = false): LogQuery<Types> {
+  public after(lower: Date, open = false): this {
     this._dateRange = IDBKeyRange.lowerBound(lower, open);
     return this;
   }
@@ -55,7 +55,7 @@ export class LogQuery<Types extends DataStoreTypes> implements Queryable<LogEntr
    * @param {boolean} open
    * @returns {LogQuery<Types extends DataStoreTypes>}
    */
-  public before(upper: Date, open = false): LogQuery<Types> {
+  public before(upper: Date, open = false): this {
     this._dateRange = IDBKeyRange.upperBound(upper, open);
     return this;
   }
@@ -70,7 +70,7 @@ export class LogQuery<Types extends DataStoreTypes> implements Queryable<LogEntr
    * @param {boolean} upperOpen
    * @returns {LogQuery<Types extends DataStoreTypes>}
    */
-  public between(lower: Date, upper: Date, lowerOpen = false, upperOpen = false): LogQuery<Types> {
+  public between(lower: Date, upper: Date, lowerOpen = false, upperOpen = false): this {
     this._dateRange = IDBKeyRange.bound(lower, upper, lowerOpen, upperOpen);
     return this;
   }
@@ -81,7 +81,7 @@ export class LogQuery<Types extends DataStoreTypes> implements Queryable<LogEntr
    * @param {Types} type
    * @returns {LogQuery<Types extends DataStoreTypes>}
    */
-  public type(type: Types): LogQuery<Types> {
+  public type(type: Types): this {
     this._type = type;
     return this;
   }
@@ -92,7 +92,7 @@ export class LogQuery<Types extends DataStoreTypes> implements Queryable<LogEntr
    * @param {string} key
    * @returns {LogQuery<Types extends DataStoreTypes>}
    */
-  public key(key: ValidKey): LogQuery<Types> {
+  public key(key: ValidKey): this {
     this._key = key;
     return this;
   }
@@ -103,7 +103,7 @@ export class LogQuery<Types extends DataStoreTypes> implements Queryable<LogEntr
    * @param {LogAction} action
    * @returns {LogQuery<Types extends DataStoreTypes>}
    */
-  public action(action: LogAction): LogQuery<Types> {
+  public action(action: LogAction): this {
     this._action = action;
     return this;
   }
@@ -114,7 +114,7 @@ export class LogQuery<Types extends DataStoreTypes> implements Queryable<LogEntr
    * @param {Parent} parent
    * @returns {LogQuery<Types extends DataStoreTypes>}
    */
-  public parent(parent: Parent): LogQuery<Types> {
+  public parent(parent: Parent): this {
     this._parent = parent;
     return this;
   }
@@ -125,7 +125,7 @@ export class LogQuery<Types extends DataStoreTypes> implements Queryable<LogEntr
    * @param {Predicate<LogEntry<Types>>} callback
    * @returns {LogQuery<LogEntry<Types>>}
    */
-  public filter(callback: Predicate<LogEntry<Types>>): LogQuery<Types> {
+  public filter(callback: Predicate<LogEntry<Types>>): this {
     this._filter = callback;
     return this;
   }

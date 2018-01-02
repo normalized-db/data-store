@@ -27,7 +27,7 @@ export class IdbLogger<Types extends DataStoreTypes> extends Logger<Types, IdbCo
     super(idbContext);
   }
 
-  public onUpgradeNeeded(upgradeDb: UpgradeDB) {
+  public onUpgradeNeeded(upgradeDb: UpgradeDB): void {
     const logStore = upgradeDb.createObjectStore(IdbLogger.OBJECT_STORE, { keyPath: 'id', autoIncrement: true });
     logStore.createIndex(IdbLogger.IDX_TIME, 'time');
     logStore.createIndex(IdbLogger.IDX_ACTION, 'action');
