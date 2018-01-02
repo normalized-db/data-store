@@ -7,9 +7,10 @@ export interface UpdateCommand<T extends NdbDocument> extends Command<T | T[]> {
    * See `DataStore.update(…)`
    *
    * @param {T|T[]} data
+   * @param {boolean} isPartialUpdate
    * @returns {Promise<boolean>}
    * @throws {MissingKeyError}
    * @throws {NotFoundError}
    */
-  execute(data: T | T[]): Promise<boolean>;
+  execute(data: T | T[], isPartialUpdate?: boolean): Promise<boolean>;
 }

@@ -79,6 +79,7 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
    *
    * @param {Types} type
    * @param {Item|Item[]} item
+   * @param {boolean} isPartialUpdate
    * @param {boolean} autoCloseContext
    * @returns {Promise<boolean>}
    * @throws {MissingKeyError}
@@ -86,8 +87,26 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
    */
   public async update<Item extends NdbDocument>(type: Types,
                                                 item: Item | Item[],
+                                                isPartialUpdate = false,
                                                 autoCloseContext = false): Promise<boolean> {
     const cmd = this._context.commandFactory().updateCommand<Item>(type);
+    const success = await cmd.execute(item, isPartialUpdate);
+    this.autoClose(autoCloseContext);
+    return success;
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @param {Types} type
+   * @param {Data|Data[]} item
+   * @param {boolean} autoCloseContext
+   * @returns {Promise<boolean>}
+   * @throws {MissingKeyError}
+   * @throws {NotFoundError}
+   */
+  public async set<Data extends object>(type: Types, item: Data | Data[], autoCloseContext = false): Promise<boolean> {
+    const cmd = this._context.commandFactory().setCommand<Data>(type);
     const success = await cmd.execute(item);
     this.autoClose(autoCloseContext);
     return success;
@@ -97,17 +116,19 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
    * @inheritDoc
    *
    * @param {Types} type
-   * @param {Parent} parent
    * @param {Item|Item[]} item
+   * @param {Parent} parent
+   * @param {boolean} isPartialUpdate
    * @param {boolean} autoCloseContext
    * @returns {Promise<boolean>}
    */
   public async put<Item extends NdbDocument>(type: Types,
                                              item: Item | Item[],
                                              parent?: Parent,
+                                             isPartialUpdate = false,
                                              autoCloseContext = false): Promise<boolean> {
     const cmd = this._context.commandFactory().putCommand<Item>(type);
-    const success = await cmd.execute(item, parent);
+    const success = await cmd.execute(item, parent, isPartialUpdate);
     this.autoClose(autoCloseContext);
     return success;
   }

@@ -4,14 +4,9 @@ import { IdbContext } from '../../context/idb-context/idb-context';
 import { CreatedEvent } from '../../event/created-event';
 import { UpdatedEvent } from '../../event/updated-event';
 import { Parent } from '../../model/parent';
-import { CreateCommand } from '../create-command';
-import { PutCommand } from '../put-command';
-import { UpdateCommand } from '../update-command';
 import { IdbBaseCommand } from './idb-base-command';
 
-export abstract class IdbBaseWriteCommand<T extends NdbDocument> extends IdbBaseCommand<T | T[]> implements CreateCommand<T>,
-                                                                                                            UpdateCommand<T>,
-                                                                                                            PutCommand<T> {
+export abstract class IdbBaseWriteCommand<T extends NdbDocument> extends IdbBaseCommand<T | T[]> {
 
   constructor(context: IdbContext<any>, type: string) {
     super(context, type);
@@ -21,10 +16,11 @@ export abstract class IdbBaseWriteCommand<T extends NdbDocument> extends IdbBase
    * @inheritDoc
    *
    * @param {T|T[]} data
+   * @param {boolean} isPartialUpdate
    * @param {Parent} parent
    * @returns {Promise<boolean>}
    */
-  public async execute(data: T | T[], parent?: Parent): Promise<boolean> {
+  public async write(data: T | T[], parent?: Parent, isPartialUpdate?: boolean): Promise<boolean> {
     const normalizedData = this._context.normalizer().apply(this._type, data);
     const involvedTypes = this.getTypes(normalizedData);
     if (parent) {
@@ -46,7 +42,7 @@ export abstract class IdbBaseWriteCommand<T extends NdbDocument> extends IdbBase
           } else {
             const cursor = await objectStore.openCursor(key);
             if (cursor && cursor.value) {
-              const mergedItem = await this.updateCursor(cursor, item);
+              const mergedItem = await this.updateCursor(cursor, item, isPartialUpdate);
               this._eventQueue.enqueue(new UpdatedEvent(type, mergedItem, key));
             } else {
               await objectStore.put(item);
@@ -82,35 +78,42 @@ export abstract class IdbBaseWriteCommand<T extends NdbDocument> extends IdbBase
    * entire objects. Furthermore the `_refs`-field created during normalization must be merged.
    *
    * @param {Cursor} cursor
-   * @param newItem
+   * @param {NdbDocument} newItem
+   * @param {boolean} isPartialUpdate
    * @returns {Promise<object>}
    */
-  private async updateCursor(cursor: Cursor, newItem: NdbDocument): Promise<object> {
-    const mergedItem = cursor.value;
-    Object.keys(newItem)
-      .filter(field => field !== '_refs')
-      .forEach(field => {
-        mergedItem[field] = newItem[field];
-      });
-
-    const mergedRefs: { [type: string]: Set<ValidKey> } = cursor.value._refs || {};
-    if ('_refs' in newItem) {
-      Object.keys(newItem._refs)
-        .forEach(refType => {
-          if (refType in mergedRefs) {
-            const it: Iterator<ValidKey> = newItem._refs[refType].values();
-            let current = it.next();
-            while (!current.done) {
-              mergedRefs[refType].add(current.value);
-              current = it.next();
-            }
-          } else {
-            mergedRefs[refType] = newItem._refs[refType];
-          }
-        });
+  private async updateCursor(cursor: Cursor, newItem: NdbDocument, isPartialUpdate: boolean): Promise<object> {
+    let mergedItem: NdbDocument;
+    if (isPartialUpdate) {
+      mergedItem = cursor.value;
+      Object.keys(newItem)
+          .filter(field => field !== '_refs')
+          .forEach(field => mergedItem[field] = newItem[field]);
+    } else {
+      mergedItem = newItem;
     }
 
-    mergedItem._refs = mergedRefs;
+    if (Object.keys(cursor.value._refs).length > 0 || Object.keys(newItem._refs).length > 0) {
+      const mergedRefs: { [type: string]: Set<ValidKey> } = cursor.value._refs || {};
+      if (newItem._refs) {
+        Object.keys(newItem._refs)
+            .forEach(refType => {
+              if (refType in mergedRefs) {
+                const it: Iterator<ValidKey> = newItem._refs[refType].values();
+                let current = it.next();
+                while (!current.done) {
+                  mergedRefs[refType].add(current.value);
+                  current = it.next();
+                }
+              } else {
+                mergedRefs[refType] = newItem._refs[refType];
+              }
+            });
+      }
+
+      Object.assign(mergedItem, { _refs: mergedRefs });
+    }
+
     await cursor.update(mergedItem);
     return mergedItem;
   }
@@ -131,10 +134,10 @@ export abstract class IdbBaseWriteCommand<T extends NdbDocument> extends IdbBase
     }
 
     return await this.addKeysToParentsHelper(
-      transaction,
-      parent,
-      parentItem,
-      keys
+        transaction,
+        parent,
+        parentItem,
+        keys
     );
   }
 

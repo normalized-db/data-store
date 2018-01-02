@@ -5,11 +5,13 @@ import { CommandFactory } from '../command-factory';
 import { CreateCommand } from '../create-command';
 import { PutCommand } from '../put-command';
 import { RemoveCommand } from '../remove-command';
+import { SetCommand } from '../set-command';
 import { UpdateCommand } from '../update-command';
 import { IdbClearCommand } from './idb-clear-command';
 import { IdbCreateCommand } from './idb-create-command';
 import { IdbPutCommand } from './idb-put-command';
 import { IdbRemoveCommand } from './idb-remove-command';
+import { IdbSetCommand } from './idb-set-command';
 import { IdbUpdateCommand } from './idb-update-command';
 
 export class IdbCommandFactory implements CommandFactory {
@@ -28,19 +30,23 @@ export class IdbCommandFactory implements CommandFactory {
   }
 
   public createCommand<Item extends NdbDocument>(type: string): CreateCommand<Item> {
-    return new IdbCreateCommand(this._context, type);
+    return new IdbCreateCommand<Item>(this._context, type);
   }
 
   public updateCommand<Item extends NdbDocument>(type: string): UpdateCommand<Item> {
-    return new IdbUpdateCommand(this._context, type);
+    return new IdbUpdateCommand<Item>(this._context, type);
+  }
+
+  public setCommand<Data extends object>(type: string): SetCommand<Data> {
+    return new IdbSetCommand<Data>(this._context, type);
   }
 
   public putCommand<Item extends NdbDocument>(type: string): PutCommand<Item> {
-    return new IdbPutCommand(this._context, type);
+    return new IdbPutCommand<Item>(this._context, type);
   }
 
   public removeCommand<Item extends NdbDocument>(type: string): RemoveCommand<Item> {
-    return new IdbRemoveCommand(this._context, type);
+    return new IdbRemoveCommand<Item>(this._context, type);
   }
 
   public clearCommand(includeLogs?: boolean): ClearCommand {

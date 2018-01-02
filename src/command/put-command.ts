@@ -9,8 +9,9 @@ export interface PutCommand<T extends NdbDocument> extends Command<T | T[]> {
    *
    * @param {T|T[]} data
    * @param {Parent} parent
+   * @param {boolean} isPartialUpdate
    * @returns {Promise<boolean>}
    * @throws {MissingKeyError}
    */
-  execute(data: T | T[], parent?: Parent): Promise<boolean>;
+  execute(data: T | T[], parent?: Parent, isPartialUpdate?: boolean): Promise<boolean>;
 }

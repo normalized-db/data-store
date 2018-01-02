@@ -1,4 +1,5 @@
 import { isNull, MissingKeyError, NdbDocument } from '@normalized-db/core';
+import { IdbContext } from '../../context/idb-context/idb-context';
 import { EmptyInputError } from '../../error/empty-input-error';
 import { Parent } from '../../model/parent';
 import { PutCommand } from '../put-command';
@@ -6,26 +7,32 @@ import { IdbBaseWriteCommand } from './idb-base-write-command';
 
 export class IdbPutCommand<T extends NdbDocument> extends IdbBaseWriteCommand<T> implements PutCommand<T> {
 
+  constructor(context: IdbContext<any>, type: string) {
+    super(context, type);
+    this.setKey = this.setKey.bind(this);
+  }
+
   /**
    * @inheritDoc
    *
    * @param {T|T[]} data
    * @param {Parent} parent
+   * @param {boolean} isPartialUpdate
    * @returns {Promise<boolean>}
    * @throws {MissingKeyError}
    */
-  public async execute(data: T | T[], parent?: Parent): Promise<boolean> {
+  public async execute(data: T | T[], parent?: Parent, isPartialUpdate = false): Promise<boolean> {
     if (isNull(data)) {
       throw new EmptyInputError('put');
     }
 
     if (Array.isArray(data)) {
-      data.forEach(item => this.setKey(item));
+      data.forEach(this.setKey);
     } else {
       this.setKey(data);
     }
 
-    return await super.execute(data, parent);
+    return await super.write(data, parent);
   }
 
   private setKey(item: T): void {

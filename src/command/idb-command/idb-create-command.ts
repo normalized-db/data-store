@@ -1,10 +1,16 @@
 import { isNull, MissingKeyError, NdbDocument } from '@normalized-db/core';
+import { IdbContext } from '../../context/idb-context/idb-context';
 import { EmptyInputError } from '../../error/empty-input-error';
 import { Parent } from '../../model/parent';
 import { CreateCommand } from '../create-command';
 import { IdbBaseWriteCommand } from './idb-base-write-command';
 
 export class IdbCreateCommand<T extends NdbDocument> extends IdbBaseWriteCommand<T> implements CreateCommand<T> {
+
+  constructor(context: IdbContext<any>, type: string) {
+    super(context, type);
+    this.setKey = this.setKey.bind(this);
+  }
 
   /**
    * @inheritDoc
@@ -20,12 +26,12 @@ export class IdbCreateCommand<T extends NdbDocument> extends IdbBaseWriteCommand
     }
 
     if (Array.isArray(data)) {
-      data.forEach(item => this.setKey(item));
+      data.forEach(this.setKey);
     } else {
       this.setKey(data);
     }
 
-    return super.execute(data, parent);
+    return super.write(data, parent);
   }
 
   /**
