@@ -13,7 +13,6 @@ export class SingleItemQuery<DbItem extends NdbDocument>
 
   private _parent?: Parent;
   private _default?: DbItem = null;
-
   private _depth: number | Depth;
 
   constructor(_context: Context<any>,

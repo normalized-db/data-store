@@ -21,7 +21,6 @@ export class Query<DbItem extends NdbDocument>
   private _keys?: ValidKey[];
   private _filter?: Filter<DbItem>;
   private _parent?: Parent;
-
   private _depth: number | Depth;
 
   /**
