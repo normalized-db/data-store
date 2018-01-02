@@ -1,7 +1,8 @@
+import { NdbDocument } from '@normalized-db/core';
 import { Parent } from '../model/parent';
 import { Command } from './command';
 
-export interface CreateCommand<T> extends Command<T | T[]> {
+export interface CreateCommand<T extends NdbDocument> extends Command<T | T[]> {
 
   /**
    * See `DataStore.create(…)`

@@ -1,10 +1,10 @@
-import { isNull, MissingKeyError } from '@normalized-db/core';
+import { isNull, MissingKeyError, NdbDocument } from '@normalized-db/core';
 import { EmptyInputError } from '../../error/empty-input-error';
 import { Parent } from '../../model/parent';
 import { PutCommand } from '../put-command';
 import { IdbBaseWriteCommand } from './idb-base-write-command';
 
-export class IdbPutCommand<T> extends IdbBaseWriteCommand<T> implements PutCommand<T> {
+export class IdbPutCommand<T extends NdbDocument> extends IdbBaseWriteCommand<T> implements PutCommand<T> {
 
   /**
    * @inheritDoc

@@ -1,7 +1,7 @@
-import { ValidKey } from '@normalized-db/core';
+import { NdbDocument, ValidKey } from '@normalized-db/core';
 import { Command } from './command';
 
-export interface RemoveCommand<T> extends Command<T | ValidKey> {
+export interface RemoveCommand<T extends NdbDocument> extends Command<T | ValidKey> {
 
   /**
    * See `DataStore.remove(…)`

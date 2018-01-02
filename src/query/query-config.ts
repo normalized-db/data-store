@@ -1,4 +1,5 @@
 import { Depth, ValidKey } from '@normalized-db/core';
+import { NdbDocument } from '@normalized-db/core/lib/src/model/ndb-document';
 import { Parent } from '../model/parent';
 import { Filter } from './model/filter';
 
@@ -14,7 +15,7 @@ export class QueryConfig {
   public offset? = QueryConfig.DEFAULT_OFFSET;
   public limit? = QueryConfig.DEFAULT_LIMIT;
   public keys?: ValidKey[];
-  public filter?: Filter<any>;
+  public filter?: Filter<NdbDocument>;
   public parent?: Parent;
 
   public depth?: number | Depth;

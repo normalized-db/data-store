@@ -1,4 +1,4 @@
-import { ValidKey } from '@normalized-db/core';
+import { NdbDocument, ValidKey } from '@normalized-db/core';
 import { DataStoreTypes } from '../model/data-store-types';
 import { Parent } from '../model/parent';
 import { CountQuery } from '../query/count-query';
@@ -14,7 +14,7 @@ export interface IDataStore<Types extends DataStoreTypes> {
    * @param {boolean} autoCloseContext
    * @returns {CountQuery<Item>}
    */
-  count<Item>(type: Types, autoCloseContext?: boolean): CountQuery<Item>;
+  count<Item extends NdbDocument>(type: Types, autoCloseContext?: boolean): CountQuery<Item>;
 
   /**
    * Create a new `Query`.
@@ -24,7 +24,7 @@ export interface IDataStore<Types extends DataStoreTypes> {
    * @returns {Query<Result>}
    * @throws {InvalidTypeError}
    */
-  find<Result>(type: Types, autoCloseContext?: boolean): Query<Result>;
+  find<Result extends NdbDocument>(type: Types, autoCloseContext?: boolean): Query<Result>;
 
   /**
    * Create a new `SingleItemQuery`.
@@ -35,7 +35,9 @@ export interface IDataStore<Types extends DataStoreTypes> {
    * @returns {SingleItemQuery<Result>}
    * @throws {InvalidTypeError}
    */
-  findByKey<Result>(type: Types, key: ValidKey, autoCloseContext?: boolean): SingleItemQuery<Result>;
+  findByKey<Result extends NdbDocument>(type: Types,
+                                        key: ValidKey,
+                                        autoCloseContext?: boolean): SingleItemQuery<Result>;
 
   /**
    * Adds new items. If any item's primary key is set it still will be reassigned a new one if `autoKey` is `false`
@@ -49,7 +51,10 @@ export interface IDataStore<Types extends DataStoreTypes> {
    * @returns {Promise<boolean>}
    * @throws {MissingKeyError}
    */
-  create<Item>(type: Types, item: Item | Item[], parent?: Parent, autoCloseContext?: boolean): Promise<boolean>;
+  create<Item extends NdbDocument>(type: Types,
+                                   item: Item | Item[],
+                                   parent?: Parent,
+                                   autoCloseContext?: boolean): Promise<boolean>;
 
   /**
    * Update the items. If any of the items does not exist a `NotFoundError` will be thrown.
@@ -61,7 +66,7 @@ export interface IDataStore<Types extends DataStoreTypes> {
    * @throws {MissingKeyError}
    * @throws {NotFoundError}
    */
-  update<Item>(type: Types, item: Item | Item[], autoCloseContext?: boolean): Promise<boolean>;
+  update<Item extends NdbDocument>(type: Types, item: Item | Item[], autoCloseContext?: boolean): Promise<boolean>;
 
   /**
    * The item will be either created or updated. For details see `.create(…)` and `.update(…)` respectively.
@@ -72,7 +77,10 @@ export interface IDataStore<Types extends DataStoreTypes> {
    * @param {boolean} autoCloseContext
    * @returns {Promise<boolean>}
    */
-  put<Item>(type: Types, item: Item | Item[], parent?: Parent, autoCloseContext?: boolean): Promise<boolean>;
+  put<Item extends NdbDocument>(type: Types,
+                                item: Item | Item[],
+                                parent?: Parent,
+                                autoCloseContext?: boolean): Promise<boolean>;
 
   /**
    * Remove the item from its data-store and remove references to this item.
@@ -84,7 +92,7 @@ export interface IDataStore<Types extends DataStoreTypes> {
    * @returns {Promise<boolean>}
    * @throws {NotFoundError}
    */
-  remove<Item>(type: Types, item: Item | ValidKey, autoCloseContext?: boolean): Promise<boolean>;
+  remove<Item extends NdbDocument>(type: Types, item: Item | ValidKey, autoCloseContext?: boolean): Promise<boolean>;
 
   /**
    * Clear all items, optionally only these from a given type / some types. Note that references will not be updated

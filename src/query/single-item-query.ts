@@ -1,4 +1,4 @@
-import { Depth, isNull, NotFoundError, RefsUtility, ValidKey } from '@normalized-db/core';
+import { Depth, isNull, NdbDocument, NotFoundError, RefsUtility, ValidKey } from '@normalized-db/core';
 import { Context } from '../context/context';
 import { ChildNotFoundError } from '../error/child-not-found-error';
 import { RefNotFoundError } from '../error/ref-not-found-error';
@@ -7,7 +7,9 @@ import { BaseQuery } from './base-query';
 import { QueryConfig } from './query-config';
 import { Queryable } from './queryable';
 
-export class SingleItemQuery<DbItem> extends BaseQuery<DbItem | null> implements Queryable<DbItem | null> {
+export class SingleItemQuery<DbItem extends NdbDocument>
+    extends BaseQuery<DbItem | null>
+    implements Queryable<DbItem | null> {
 
   private _parent?: Parent;
   private _default?: DbItem = null;

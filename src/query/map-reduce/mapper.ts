@@ -1,3 +1,4 @@
+import { NdbDocument } from '@normalized-db/core';
 import { ListResult } from '../list-result/list-result';
 import { ListResultBuilder } from '../list-result/list-result.builder';
 import { Query } from '../query';
@@ -6,7 +7,7 @@ import { MapFunc } from './map-func';
 import { ReducerFunc } from './reduce-func';
 import { Reducer } from './reducer';
 
-export class Mapper<QueryResult, Result> implements Queryable<ListResult<Result>> {
+export class Mapper<QueryResult extends NdbDocument, Result> implements Queryable<ListResult<Result>> {
 
   private _cachedResult?: ListResult<Result>;
 

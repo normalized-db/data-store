@@ -1,11 +1,5 @@
 import {
-  InvalidTypeError,
-  ISchema,
-  isNull,
-  IStore,
-  IStoreConfig,
-  MissingKeyError,
-  NormalizedData,
+  InvalidTypeError, ISchema, isNull, IStore, IStoreConfig, MissingKeyError, NdbDocument, NormalizedData,
   ValidKey
 } from '@normalized-db/core';
 import { Context } from '../context/context';
@@ -35,11 +29,11 @@ export abstract class BaseCommand<T, Ctx extends Context<any>> implements Comman
     return this._context.schema();
   }
 
-  protected hasKey(item: any, config: IStoreConfig = this._typeConfig): boolean {
+  protected hasKey(item: NdbDocument, config: IStoreConfig = this._typeConfig): boolean {
     return config.key in item && !isNull(item[config.key]);
   }
 
-  protected getKey(item: any, config: IStoreConfig = this._typeConfig, isNullAllowed = false): ValidKey | null {
+  protected getKey(item: NdbDocument, config: IStoreConfig = this._typeConfig, isNullAllowed = false): ValidKey | null {
     if (!isNullAllowed && !this.hasKey(item, config)) {
       throw new MissingKeyError(this._type, config.key);
     }

@@ -1,4 +1,4 @@
-import { Depth, RefsUtility, ValidKey } from '@normalized-db/core';
+import { Depth, NdbDocument, RefsUtility, ValidKey } from '@normalized-db/core';
 import { EmptyResultError } from '../error/empty-result-error';
 import { Parent } from '../model/parent';
 import { Predicate } from '../model/predicate';
@@ -12,7 +12,9 @@ import { Filter } from './model/filter';
 import { QueryConfig } from './query-config';
 import { Queryable } from './queryable';
 
-export class Query<DbItem> extends BaseQuery<ListResult<DbItem>> implements Queryable<ListResult<DbItem>> {
+export class Query<DbItem extends NdbDocument>
+    extends BaseQuery<ListResult<DbItem>>
+    implements Queryable<ListResult<DbItem>> {
 
   private _offset?: number;
   private _limit?: number;
@@ -84,10 +86,10 @@ export class Query<DbItem> extends BaseQuery<ListResult<DbItem>> implements Quer
    * Filter by reverse keys set in `sourceItem._refs.{type}`. Uses the queries `keys`-filter hence `keys(…)` and
    * `reverse(…)` must not be used within in the same query.
    *
-   * @param sourceItem
+   * @param {NdbDocument} sourceItem
    * @returns {Query<DbItem>}
    */
-  public reverse(sourceItem: any): Query<DbItem> {
+  public reverse(sourceItem: NdbDocument): Query<DbItem> {
     this._keys = RefsUtility.getAll(sourceItem, this._type);
     return this;
   }

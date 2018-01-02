@@ -1,7 +1,8 @@
+import { NdbDocument } from '@normalized-db/core';
 import { Parent } from '../model/parent';
 import { Command } from './command';
 
-export interface PutCommand<T> extends Command<T | T[]> {
+export interface PutCommand<T extends NdbDocument> extends Command<T | T[]> {
 
   /**
    * See `DataStore.put(…)`

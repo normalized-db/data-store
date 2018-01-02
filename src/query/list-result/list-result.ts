@@ -1,11 +1,11 @@
-import { isNull } from '@normalized-db/core';
+import { isNull, NdbDocument } from '@normalized-db/core';
 
-export class ListResult<Result> {
+export class ListResult<DbItem extends NdbDocument> {
 
   public static readonly DEFAULT_OFFSET = 0;
   public static readonly DEFAULT_LIMIT = Infinity;
 
-  constructor(private readonly _items?: Result[],
+  constructor(private readonly _items?: DbItem[],
               private _total?: number,
               private readonly _offset?: number,
               private readonly _limit?: number) {
@@ -26,11 +26,11 @@ export class ListResult<Result> {
     }
   }
 
-  public get items(): Result[] {
+  public get items(): DbItem[] {
     return this._items;
   }
 
-  public get first(): Result | null {
+  public get first(): DbItem | null {
     return this.isEmpty ? null : this._items[0];
   }
 
@@ -58,17 +58,17 @@ export class ListResult<Result> {
     return this._offset > 0 || this._limit < Infinity;
   }
 
-  public push(item: Result): void {
+  public push(item: DbItem): void {
     this._items.push(item);
     this._total++;
   }
 
-  public unshift(item: Result): void {
+  public unshift(item: DbItem): void {
     this._items.unshift(item);
     this._total++;
   }
 
-  public remove(item: Result): void {
+  public remove(item: DbItem): void {
     const index = this._items.indexOf(item);
     if (index >= 0) {
       this._items.splice(index, 1);

@@ -1,10 +1,10 @@
-import { isNull, MissingKeyError, NotFoundError } from '@normalized-db/core';
+import { isNull, MissingKeyError, NdbDocument, NotFoundError } from '@normalized-db/core';
 import { ObjectStore } from 'idb';
 import { EmptyInputError } from '../../error/empty-input-error';
 import { UpdateCommand } from '../update-command';
 import { IdbBaseWriteCommand } from './idb-base-write-command';
 
-export class IdbUpdateCommand<T> extends IdbBaseWriteCommand<T> implements UpdateCommand<T> {
+export class IdbUpdateCommand<T extends NdbDocument> extends IdbBaseWriteCommand<T> implements UpdateCommand<T> {
 
   /**
    * @inheritDoc

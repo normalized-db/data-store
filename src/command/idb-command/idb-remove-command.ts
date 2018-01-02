@@ -1,4 +1,4 @@
-import { isNull, IStore, IStoreTarget, NotFoundError, ValidKey } from '@normalized-db/core';
+import { isNull, IStore, IStoreTarget, NdbDocument, NotFoundError, ValidKey } from '@normalized-db/core';
 import { ObjectStore, Transaction } from 'idb';
 import { IdbContext } from '../../context/idb-context/idb-context';
 import { EmptyInputError } from '../../error/empty-input-error';
@@ -8,7 +8,7 @@ import { isValidKey } from '../../utility/valid-key';
 import { RemoveCommand } from '../remove-command';
 import { IdbBaseCommand } from './idb-base-command';
 
-export class IdbRemoveCommand<T> extends IdbBaseCommand<T | ValidKey> implements RemoveCommand<T> {
+export class IdbRemoveCommand<T extends NdbDocument> extends IdbBaseCommand<T | ValidKey> implements RemoveCommand<T> {
 
   constructor(context: IdbContext<any>, type: string) {
     super(context, type);
@@ -26,7 +26,7 @@ export class IdbRemoveCommand<T> extends IdbBaseCommand<T | ValidKey> implements
       throw new EmptyInputError('remove');
     }
 
-    const key = isValidKey(data) ? data as ValidKey : this.getKey(data);
+    const key = isValidKey(data) ? data as ValidKey : this.getKey(data as NdbDocument);
     const transaction = await this._context.write();
     const oldItem = await transaction.objectStore(this._type).get(key);
     if (isNull(oldItem)) {
@@ -50,7 +50,7 @@ export class IdbRemoveCommand<T> extends IdbBaseCommand<T | ValidKey> implements
   }
 
   private async executeRecursive(type: string,
-                                 item: any,
+                                 item: NdbDocument,
                                  transaction: Transaction,
                                  objectStore: ObjectStore): Promise<void> {
     const config = this.schema.getConfig(type);
@@ -111,7 +111,7 @@ export class IdbRemoveCommand<T> extends IdbBaseCommand<T | ValidKey> implements
 
   // region update parents
 
-  private async updateParents(transaction: Transaction, oldItemType: string, oldItem: any): Promise<void> {
+  private async updateParents(transaction: Transaction, oldItemType: string, oldItem: NdbDocument): Promise<void> {
     if ('_refs' in oldItem) {
       const oldItemKey = this.getKey(oldItem, this.schema.getConfig(oldItemType));
       await Promise.all(Object.keys(oldItem['_refs']).map(async refType => {
@@ -125,12 +125,12 @@ export class IdbRemoveCommand<T> extends IdbBaseCommand<T | ValidKey> implements
         let current = it.next();
         while (!current.done) {
           requests.push(this.removeFromParent(
-              oldItemType,
-              oldItem,
-              oldItemKey,
-              objectStore,
-              current.value,
-              parentFields
+            oldItemType,
+            oldItem,
+            oldItemKey,
+            objectStore,
+            current.value,
+            parentFields
           ));
           current = it.next();
         }
@@ -152,7 +152,7 @@ export class IdbRemoveCommand<T> extends IdbBaseCommand<T | ValidKey> implements
   }
 
   private async removeFromParent(oldItemType: string,
-                                 oldItem: any,
+                                 oldItem: NdbDocument,
                                  oldItemKey: ValidKey,
                                  parentObjectStore: ObjectStore,
                                  parentKey: ValidKey,
@@ -160,10 +160,10 @@ export class IdbRemoveCommand<T> extends IdbBaseCommand<T | ValidKey> implements
     const parentCursor = await parentObjectStore.openCursor(parentKey);
     if (!isNull(parentCursor)) {
       const enqueueRemovedEvent = (field: string) => this._eventQueue.enqueue(new RemovedEvent(
-          oldItemType,
-          oldItem,
-          oldItemKey,
-          new Parent(parentObjectStore.name, parentKey, field)
+        oldItemType,
+        oldItem,
+        oldItemKey,
+        new Parent(parentObjectStore.name, parentKey, field)
       ));
 
       let parentChanged = false;

@@ -1,3 +1,4 @@
+import { NdbDocument } from '@normalized-db/core';
 import { IdbContext } from '../../context/idb-context/idb-context';
 import { ClearCommand } from '../clear-command';
 import { CommandFactory } from '../command-factory';
@@ -26,19 +27,19 @@ export class IdbCommandFactory implements CommandFactory {
   private constructor(private readonly _context: IdbContext<any>) {
   }
 
-  public createCommand<Item>(type: string): CreateCommand<Item> {
+  public createCommand<Item extends NdbDocument>(type: string): CreateCommand<Item> {
     return new IdbCreateCommand(this._context, type);
   }
 
-  public updateCommand<Item>(type: string): UpdateCommand<Item> {
+  public updateCommand<Item extends NdbDocument>(type: string): UpdateCommand<Item> {
     return new IdbUpdateCommand(this._context, type);
   }
 
-  public putCommand<Item>(type: string): PutCommand<Item> {
+  public putCommand<Item extends NdbDocument>(type: string): PutCommand<Item> {
     return new IdbPutCommand(this._context, type);
   }
 
-  public removeCommand<Item>(type: string): RemoveCommand<Item> {
+  public removeCommand<Item extends NdbDocument>(type: string): RemoveCommand<Item> {
     return new IdbRemoveCommand(this._context, type);
   }
 

@@ -1,4 +1,4 @@
-import { ValidKey } from '@normalized-db/core/lib/src/model/valid-key';
+import { ValidKey } from '@normalized-db/core';
 import { DataStoreTypes } from '../model/data-store-types';
 import { EventType } from './utility/event-type';
 
