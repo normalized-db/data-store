@@ -93,7 +93,8 @@ export abstract class IdbBaseWriteCommand<T extends NdbDocument> extends IdbBase
       mergedItem = newItem;
     }
 
-    if (Object.keys(cursor.value._refs).length > 0 || Object.keys(newItem._refs).length > 0) {
+    if ((cursor.value._refs && Object.keys(cursor.value._refs).length > 0) ||
+        (newItem._refs && Object.keys(newItem._refs).length > 0)) {
       const mergedRefs: { [type: string]: Set<ValidKey> } = cursor.value._refs || {};
       if (newItem._refs) {
         Object.keys(newItem._refs)
