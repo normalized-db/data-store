@@ -109,9 +109,9 @@ export class SingleItemQuery<DbItem extends NdbDocument>
       return this._cachedResult;
     }
 
-    const runner = this._context.queryRunner<DbItem>(this.getQueryConfig());
+    const runner = this._context.queryRunnerFactory().singleItemQueryRunner<DbItem>(this.getQueryConfig());
     await this._context.open();
-    this._cachedResult = (await runner.singleExecute()) || defaultValue;
+    this._cachedResult = (await runner.execute()) || defaultValue;
     this.autoClose();
     return this._cachedResult;
   }

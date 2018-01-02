@@ -7,9 +7,8 @@ import { IdbCommandFactory } from '../../command/idb-command/idb-command-factory
 import { IdbLogger } from '../../logging/idb-logging/idb-logger';
 import { Logger } from '../../logging/logger';
 import { DataStoreTypes } from '../../model/data-store-types';
-import { QueryConfig } from '../../query/query-config';
-import { IdbQueryRunner } from '../../query/runner/idb-query-runner';
-import { QueryRunner } from '../../query/runner/query-runner';
+import { IdbQueryRunnerFactory } from '../../query/runner/idb-runner/idb-query-runner-factory';
+import { QueryRunnerFactory } from '../../query/runner/query-runner-factory';
 import { Context } from '../context';
 import { IdbConfig } from './idb-config';
 
@@ -34,9 +33,9 @@ export class IdbContext<Types extends DataStoreTypes> extends Context<Types> {
   public async open(): Promise<void> {
     if (!this.isReady()) {
       this._db = await DBFactory.open(
-        this.dbConfig.name,
-        this.dbConfig.version,
-        this.dbConfig.upgrade || this.onUpgradeNeeded
+          this.dbConfig.name,
+          this.dbConfig.version,
+          this.dbConfig.upgrade || this.onUpgradeNeeded
       );
     }
   }
@@ -48,8 +47,8 @@ export class IdbContext<Types extends DataStoreTypes> extends Context<Types> {
     }
   }
 
-  public queryRunner<Result>(config: QueryConfig): QueryRunner<Result> {
-    return new IdbQueryRunner<Result>(this, config);
+  public queryRunnerFactory(): QueryRunnerFactory {
+    return IdbQueryRunnerFactory.instance(this);
   }
 
   public commandFactory(): CommandFactory {

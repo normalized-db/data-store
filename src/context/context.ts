@@ -6,8 +6,7 @@ import { CommandFactory } from '../command/command-factory';
 import { EventPipe } from '../event/utility/event-pipe';
 import { Logger } from '../logging/logger';
 import { DataStoreTypes } from '../model/data-store-types';
-import { QueryConfig } from '../query/query-config';
-import { QueryRunner } from '../query/runner/query-runner';
+import { QueryRunnerFactory } from '../query/runner/query-runner-factory';
 
 export abstract class Context<Types extends DataStoreTypes> {
 
@@ -45,7 +44,7 @@ export abstract class Context<Types extends DataStoreTypes> {
     return this._uniqueKeyCallback ? this._uniqueKeyCallback(type) : null;
   }
 
-  public abstract queryRunner<Result>(config: QueryConfig): QueryRunner<Result>;
+  public abstract queryRunnerFactory(): QueryRunnerFactory;
 
   public abstract commandFactory(): CommandFactory;
 

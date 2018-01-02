@@ -1,13 +1,7 @@
+import { NdbDocument } from '@normalized-db/core';
 import { ListResult } from '../list-result/list-result';
 
-export interface QueryRunner<Result> {
-
-  /**
-   * Returns the total count of items in the given type. Any other configuration is ignored.
-   *
-   * @returns {Promise<number>}
-   */
-  count(): Promise<number>;
+export interface QueryRunner<Result extends NdbDocument> {
 
   /**
    * Run the query based on a `QueryConfig`-object built by a `Query`.
@@ -15,11 +9,4 @@ export interface QueryRunner<Result> {
    * @returns {Promise<ListResult<Result>>}
    */
   execute(): Promise<ListResult<Result>>;
-
-  /**
-   * Run the query based on a `QueryConfig`-object built by a `SingleItemQuery`.
-   *
-   * @returns {Promise<Result>}
-   */
-  singleExecute(): Promise<Result>;
 }
