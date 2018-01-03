@@ -41,9 +41,9 @@ export class IdbCountQueryRunner extends IdbBaseQueryRunner implements IdbCountQ
     let isValid: boolean;
     if (this._config.filter.requiresDenormalization) {
       const denormalizedData = await this._denormalizer.apply<any>(this._config.type, value, this._config.depth);
-      isValid = this._config.filter.test(denormalizedData);
+      isValid = await this._config.filter.test(denormalizedData);
     } else {
-      isValid = this._config.filter.test(value);
+      isValid = await this._config.filter.test(value);
     }
 
     if (isValid) {

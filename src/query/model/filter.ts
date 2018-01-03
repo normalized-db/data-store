@@ -7,7 +7,7 @@ export class Filter<DbItem extends NdbDocument> {
               public readonly requiresDenormalization: boolean = false) {
   }
 
-  public test(item: DbItem): boolean {
+  public test(item: DbItem): boolean | Promise<boolean> {
     return this._predicate(item);
   }
 }

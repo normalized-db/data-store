@@ -68,9 +68,9 @@ export class IdbQueryRunner<Result extends NdbDocument>
         if (hasFilter) {
           if (this._config.filter.requiresDenormalization) {
             denormalizedData = await this._denormalizer.apply<Result>(type, cursor.value, this._config.depth);
-            isValid = this._config.filter.test(denormalizedData);
+            isValid = await this._config.filter.test(denormalizedData);
           } else {
-            isValid = this._config.filter.test(cursor.value);
+            isValid = await this._config.filter.test(cursor.value);
           }
         }
 
