@@ -1,9 +1,9 @@
 {
   "name": "@normalized-db/data-store",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "author": "Sandro Schmid <saseb.schmid@gmail.com>",
   "license": "MIT",
-  "description": "`JavaScript` data stores for in-memory data and as `IndexedDB`-wrapper using normalized data (implemented with `TypeScript`).",
+  "description": "`JavaScript` data stores for `IndexedDB` using normalized data (implemented with `TypeScript`).",
   "keywords": [
     "TypeScript",
     "JavaScript",
