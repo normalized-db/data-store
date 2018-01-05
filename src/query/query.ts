@@ -82,7 +82,7 @@ export class Query<DbItem extends NdbDocument>
   }
 
   /**
-   * Filter by reverse keys set in `sourceItem._refs.{type}`. Uses the queries `keys`-filter hence `keys(…)` and
+   * Filter by reverse keys set in `sourceItem._refs[type]`. Uses the queries `keys`-filter hence `keys(…)` and
    * `reverse(…)` must not be used within in the same query.
    *
    * @param {NdbDocument} sourceItem
