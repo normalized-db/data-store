@@ -1,14 +1,16 @@
+import { ValidKey } from '@normalized-db/core';
 import { Command } from './command';
 
-export interface SetCommand<T extends object> extends Command<T | T[]> {
+export interface SetCommand<T extends object> extends Command<T> {
 
   /**
    * See `DataStore.set(…)`
    *
-   * @param {T|T[]} data
+   * @param {ValidKey} key
+   * @param {T} data
    * @returns {Promise<boolean>}
    * @throws {MissingKeyError}
    * @throws {NotFoundError}
    */
-  execute(data: T | T[]): Promise<boolean>;
+  execute(key: ValidKey, data: T): Promise<boolean>;
 }
