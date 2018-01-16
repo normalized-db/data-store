@@ -47,11 +47,11 @@ export class ListResult<DbItem extends NdbDocument> {
   }
 
   public get isEmpty(): boolean {
-    return this._total <= 0;
+    return !this.hasItems;
   }
 
   public get hasItems(): boolean {
-    return this._total > 0;
+    return this._total > 0 && this._offset < this._total;
   }
 
   public get hasBoundaries(): boolean {
