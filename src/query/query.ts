@@ -9,7 +9,8 @@ import { Mapper } from './map-reduce/mapper';
 import { ReducerFunc } from './map-reduce/reduce-func';
 import { Reducer } from './map-reduce/reducer';
 import { Filter } from './model/filter';
-import { QueryConfig } from './query-config';
+import { OrderBy } from './model/order-by';
+import { QueryConfig } from './model/query-config';
 import { Queryable } from './queryable';
 
 export class Query<DbItem extends NdbDocument>
@@ -20,6 +21,7 @@ export class Query<DbItem extends NdbDocument>
   private _limit?: number;
   private _keys?: ValidKey[];
   private _filter?: Filter<DbItem>;
+  private _orderBy?: OrderBy;
   private _parent?: Parent;
   private _depth: number | Depth;
 
@@ -65,6 +67,20 @@ export class Query<DbItem extends NdbDocument>
    */
   public filter(predicate: Predicate<DbItem>, requiresDenormalization?: boolean): this {
     this._filter = new Filter<DbItem>(predicate, requiresDenormalization);
+    return this;
+  }
+
+  /**
+   * Define sort orders for the items in the result. Each key of `orderBy` must equal the name of a field of `DbItem`.
+   * Sorting by nested documents is also possible by separating the fields by a dot,
+   * e.g. `{ subDocument.foo: ORDER_ASC }`, which would sort the outer documents by the `foo`-field of `subDocument`.
+   * If the key points to an array, then the items will be sorted by the length of that array.
+   *
+   * @param {OrderBy} orderBy
+   * @returns {this}
+   */
+  public orderBy(orderBy: OrderBy): this {
+    this._orderBy = orderBy;
     return this;
   }
 
@@ -198,6 +214,7 @@ export class Query<DbItem extends NdbDocument>
       limit: this._limit || QueryConfig.DEFAULT_LIMIT,
       keys: this._keys,
       filter: this._filter,
+      orderBy: this._orderBy,
       parent: this._parent,
       depth: this._depth
     }, super.getQueryConfig());

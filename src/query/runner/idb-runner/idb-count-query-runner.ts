@@ -1,6 +1,6 @@
 import { IdbContext } from '../../../context/idb-context/index';
 import { InvalidQueryRunnerStatusError } from '../../../error/index';
-import { QueryConfig } from '../../query-config';
+import { QueryConfig } from '../../model/query-config';
 import { IdbBaseQueryRunner } from './idb-base-query-runner';
 
 export class IdbCountQueryRunner extends IdbBaseQueryRunner implements IdbCountQueryRunner {

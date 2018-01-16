@@ -1,6 +1,6 @@
 import { NdbDocument } from '@normalized-db/core';
 import { IdbContext } from '../../../context/idb-context/idb-context';
-import { QueryConfig } from '../../query-config';
+import { QueryConfig } from '../../model/query-config';
 import { CountQueryRunner } from '../count-query-runner';
 import { QueryRunner } from '../query-runner';
 import { QueryRunnerFactory } from '../query-runner-factory';
