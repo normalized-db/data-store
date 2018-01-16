@@ -2,7 +2,7 @@ import { Depth, NdbDocument } from '@normalized-db/core';
 import { Predicate } from '../model/predicate';
 import { BaseQuery } from './base-query';
 import { Filter } from './model/filter';
-import { QueryConfig } from './query-config';
+import { QueryConfig } from './model/query-config';
 import { Queryable } from './queryable';
 
 export class CountQuery<DbItem extends NdbDocument> extends BaseQuery<number> implements Queryable<number> {

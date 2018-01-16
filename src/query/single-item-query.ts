@@ -4,7 +4,7 @@ import { ChildNotFoundError } from '../error/child-not-found-error';
 import { RefNotFoundError } from '../error/ref-not-found-error';
 import { Parent } from '../model/parent';
 import { BaseQuery } from './base-query';
-import { QueryConfig } from './query-config';
+import { QueryConfig } from './model/query-config';
 import { Queryable } from './queryable';
 
 export class SingleItemQuery<DbItem extends NdbDocument>

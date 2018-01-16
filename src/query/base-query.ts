@@ -1,6 +1,6 @@
 import { InvalidTypeError, ISchema } from '@normalized-db/core';
 import { Context } from '../context/context';
-import { QueryConfig } from './query-config';
+import { QueryConfig } from './model/query-config';
 import { Queryable } from './queryable';
 
 export abstract class BaseQuery<Result> implements Queryable<Result> {

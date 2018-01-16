@@ -2,7 +2,7 @@ import { ISchema, ValidKey } from '@normalized-db/core';
 import { IDenormalizer } from '@normalized-db/denormalizer';
 import { IdbContext } from '../../../context/idb-context/index';
 import { InvalidQueryRunnerStatusError } from '../../../error/index';
-import { QueryConfig } from '../../query-config';
+import { QueryConfig } from '../../model/query-config';
 
 export abstract class IdbBaseQueryRunner {
 

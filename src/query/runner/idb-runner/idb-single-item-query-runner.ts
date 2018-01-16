@@ -1,7 +1,7 @@
 import { IdbContext } from '../../../context/idb-context/idb-context';
 import { InvalidQueryConfigError } from '../../../error/invalid-query-config-error';
 import { InvalidQueryRunnerStatusError } from '../../../error/invalid-query-runner-status-error';
-import { QueryConfig } from '../../query-config';
+import { QueryConfig } from '../../model/query-config';
 import { SingleItemQueryRunner } from '../single-item-query-runner';
 import { IdbBaseDocumentQueryRunner } from './idb-base-document-query-runner';
 
