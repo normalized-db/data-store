@@ -47,7 +47,7 @@ export class ListResult<DbItem extends NdbDocument> {
   }
 
   public get isEmpty(): boolean {
-    return this._total <= 0;
+    return !this.hasItems;
   }
 
   public get hasItems(): boolean {
