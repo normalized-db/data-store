@@ -16,11 +16,11 @@ export class IdbCreateCommand<T extends NdbDocument> extends IdbBaseWriteCommand
    * @inheritDoc
    *
    * @param {T|T[]} data
-   * @param {Parent} parent
+   * @param {Parent|Parent[]} parent
    * @returns {Promise<boolean>}
    * @throws {MissingKeyError}
    */
-  public async execute(data: T | T[], parent?: Parent): Promise<boolean> {
+  public async execute(data: T | T[], parent?: Parent | Parent[]): Promise<boolean> {
     if (isNull(data)) {
       throw new EmptyInputError('create');
     }

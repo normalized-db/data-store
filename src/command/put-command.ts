@@ -8,10 +8,10 @@ export interface PutCommand<T extends NdbDocument> extends Command<T | T[]> {
    * See `DataStore.put(…)`
    *
    * @param {T|T[]} data
-   * @param {Parent} parent
+   * @param {Parent|Parent[]} parent
    * @param {boolean} isPartialUpdate
    * @returns {Promise<boolean>}
    * @throws {MissingKeyError}
    */
-  execute(data: T | T[], parent?: Parent, isPartialUpdate?: boolean): Promise<boolean>;
+  execute(data: T | T[], parent?: Parent | Parent[], isPartialUpdate?: boolean): Promise<boolean>;
 }

@@ -17,14 +17,18 @@ export abstract class IdbBaseWriteCommand<T extends NdbDocument> extends IdbBase
    *
    * @param {T|T[]} data
    * @param {boolean} isPartialUpdate
-   * @param {Parent} parent
+   * @param {Parent|Parent[]} parent
    * @returns {Promise<boolean>}
    */
-  public async write(data: T | T[], parent?: Parent, isPartialUpdate?: boolean): Promise<boolean> {
+  public async write(data: T | T[], parent?: Parent | Parent[], isPartialUpdate?: boolean): Promise<boolean> {
     const normalizedData = this._context.normalizer().apply(this._type, data);
-    const involvedTypes = this.getTypes(normalizedData);
+    const involvedTypes = [...this.getTypes(normalizedData), ...this.getTypes(normalizedData)];
     if (parent) {
-      involvedTypes.push(parent.type);
+      if (Array.isArray(parent)) {
+        parent.forEach(p => involvedTypes.push(p.type));
+      } else {
+        involvedTypes.push(parent.type);
+      }
     }
 
     const transaction = await this._context.write(involvedTypes);
@@ -57,7 +61,7 @@ export abstract class IdbBaseWriteCommand<T extends NdbDocument> extends IdbBase
       }));
 
       if (parent) {
-        await this.addToParent(transaction, parent, newItemKeys);
+        await this.addToParents(transaction, parent, newItemKeys);
       }
     } catch (e) {
       console.error(e);
@@ -117,6 +121,14 @@ export abstract class IdbBaseWriteCommand<T extends NdbDocument> extends IdbBase
 
     await cursor.update(mergedItem);
     return mergedItem;
+  }
+
+  private async addToParents(transaction: Transaction, parent: Parent | Parent[], keys: ValidKey[]): Promise<void> {
+    if (Array.isArray(parent)) {
+      await Promise.all(parent.map(p => this.addToParent(transaction, p, keys)));
+    } else {
+      await this.addToParent(transaction, parent, keys);
+    }
   }
 
   private async addToParent(transaction: Transaction, parent: Parent, keys: ValidKey[]): Promise<void> {
