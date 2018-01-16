@@ -104,15 +104,16 @@ export class DataStore<Types extends DataStoreTypes> implements IDataStore<Types
    * @inheritDoc
    *
    * @param {Types} type
-   * @param {Data|Data[]} item
+   * @param {ValidKey} key
+   * @param {Data} data
    * @param {SetOptions} options
    * @returns {Promise<boolean>}
    * @throws {MissingKeyError}
    * @throws {NotFoundError}
    */
-  public async set<Data extends object>(type: Types, item: Data | Data[], options?: SetOptions): Promise<boolean> {
+  public async set<Data extends object>(type: Types, key: ValidKey, data: Data, options?: SetOptions): Promise<boolean> {
     const cmd = this._context.commandFactory().setCommand<Data>(type);
-    const success = await cmd.execute(item);
+    const success = await cmd.execute(key, data);
     this.autoClose(options);
     return success;
   }

@@ -74,16 +74,17 @@ export interface IDataStore<Types extends DataStoreTypes> {
   update<Item extends NdbDocument>(type: Types, item: Item | Item[], options?: UpdateOptions): Promise<boolean>;
 
   /**
-   * Update the items partially. If any of the items does not exist a `NotFoundError` will be thrown.
+   * Update the items partially. If the item does not exist a `NotFoundError` will be thrown.
    *
    * @param {Types} type
-   * @param {Data|Data[]} item
+   * @param {ValidKey} key
+   * @param {Data} data
    * @param {SetOptions} options
    * @returns {Promise<boolean>}
    * @throws {MissingKeyError}
    * @throws {NotFoundError}
    */
-  set<Data extends object>(type: Types, item: Data | Data[], options?: SetOptions): Promise<boolean>;
+  set<Data extends object>(type: Types, key: ValidKey, data: Data, options?: SetOptions): Promise<boolean>;
 
   /**
    * The item will be either created or updated. For details see `.create(…)` and `.update(…)` respectively.
