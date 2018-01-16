@@ -24,7 +24,7 @@ export class IdbClearCommand extends IdbBaseCommand<IdbContext<any>> implements 
     if (type) {
       involvedTypes = Array.isArray(type) ? type : [type];
     } else {
-      involvedTypes = this._context.objectStoreNames();
+      involvedTypes = await this._context.objectStoreNames(false);
     }
 
     if (!this._includeLogs) {

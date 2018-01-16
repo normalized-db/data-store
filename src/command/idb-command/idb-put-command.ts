@@ -16,12 +16,12 @@ export class IdbPutCommand<T extends NdbDocument> extends IdbBaseWriteCommand<T>
    * @inheritDoc
    *
    * @param {T|T[]} data
-   * @param {Parent} parent
+   * @param {Parent|Parent[]} parent
    * @param {boolean} isPartialUpdate
    * @returns {Promise<boolean>}
    * @throws {MissingKeyError}
    */
-  public async execute(data: T | T[], parent?: Parent, isPartialUpdate = false): Promise<boolean> {
+  public async execute(data: T | T[], parent?: Parent | Parent[], isPartialUpdate = false): Promise<boolean> {
     if (isNull(data)) {
       throw new EmptyInputError('put');
     }

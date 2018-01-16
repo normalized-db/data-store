@@ -81,6 +81,12 @@ export class Sorter<Item extends NdbDocument> {
         result = value1 - value2;
         break;
 
+      case 'boolean':
+        const b1 = value1 ? 2 : 0;
+        const b2 = value2 ? 1 : 0;
+        result = b1 - b2;
+        break;
+
       case 'object':
         if (value1 instanceof Date && value2 instanceof Date) {
           result = value1.getTime() - value2.getTime();

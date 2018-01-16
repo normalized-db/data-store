@@ -59,12 +59,18 @@ export class IdbContext<Types extends DataStoreTypes> extends Context<Types> {
     return this._logger;
   }
 
-  public objectStoreNames(): string[] {
+  public async objectStoreNames(autoCloseContext = false): Promise<string[]> {
+    await this.open();
     const osnList = this._db.objectStoreNames;
     const osnArray: string[] = [];
     for (let i = 0; i < osnList.length; i++) {
       osnArray.push(osnList.item(i));
     }
+
+    if (autoCloseContext) {
+      this.close();
+    }
+
     return osnArray;
   }
 

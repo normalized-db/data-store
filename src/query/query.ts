@@ -71,7 +71,8 @@ export class Query<DbItem extends NdbDocument>
   }
 
   /**
-   * Define sort orders for the items in the result. Each key of `orderBy` must equal the name of a field of `DbItem`.
+   * Define sort orders for the items in the result. Each key of `orderBy` must equal the name of a field of `DbItem`,
+   * allowed values are numbers, booleans, strings, Dates and Arrays.
    * Sorting by nested documents is also possible by separating the fields by a dot,
    * e.g. `{ subDocument.foo: ORDER_ASC }`, which would sort the outer documents by the `foo`-field of `subDocument`.
    * If the key points to an array, then the items will be sorted by the length of that array.
