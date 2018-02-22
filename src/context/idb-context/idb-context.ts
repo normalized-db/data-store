@@ -33,9 +33,9 @@ export class IdbContext<Types extends DataStoreTypes> extends Context<Types> {
   public async open(): Promise<void> {
     if (!this.isReady()) {
       this._db = await DBFactory.open(
-          this.dbConfig.name,
-          this.dbConfig.version,
-          this.dbConfig.upgrade || this.onUpgradeNeeded
+        this.dbConfig.name,
+        this.dbConfig.version,
+        this.dbConfig.upgrade || this.onUpgradeNeeded
       );
     }
   }
@@ -86,9 +86,11 @@ export class IdbContext<Types extends DataStoreTypes> extends Context<Types> {
 
   private onUpgradeNeeded(upgradeDb: UpgradeDB) {
     this._logger.onUpgradeNeeded(upgradeDb);
-    this._schema.getTypes().forEach(type => {
-      const config = this._schema.getConfig(type);
-      upgradeDb.createObjectStore(type, { keyPath: config.key });
-    });
+    this._schema.getTypes()
+      .filter(type => !upgradeDb.objectStoreNames.contains(type))
+      .forEach(type => {
+        const config = this._schema.getConfig(type);
+        upgradeDb.createObjectStore(type, { keyPath: config.key });
+      });
   }
 }
