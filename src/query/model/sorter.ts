@@ -82,9 +82,13 @@ export class Sorter<Item extends NdbDocument> {
         break;
 
       case 'boolean':
-        const b1 = value1 ? 2 : 0;
-        const b2 = value2 ? 1 : 0;
-        result = b1 - b2;
+        if (value1 === value2) {
+          result = 0;
+        } else {
+          const b1 = value1 ? 2 : 0;
+          const b2 = value2 ? 1 : 0;
+          result = b1 - b2;
+        }
         break;
 
       case 'object':

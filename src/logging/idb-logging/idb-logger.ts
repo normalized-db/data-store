@@ -29,11 +29,13 @@ export class IdbLogger<Types extends DataStoreTypes> extends Logger<Types, IdbCo
   }
 
   public onUpgradeNeeded(upgradeDb: UpgradeDB): void {
-    const logStore = upgradeDb.createObjectStore(IdbLogger.OBJECT_STORE, { keyPath: 'id', autoIncrement: true });
-    logStore.createIndex(IdbLogger.IDX_TIME, 'time');
-    logStore.createIndex(IdbLogger.IDX_ACTION, 'action');
-    logStore.createIndex(IdbLogger.IDX_TYPE, 'type');
-    logStore.createIndex(IdbLogger.IDX_KEY, 'key');
+    if (!upgradeDb.objectStoreNames.contains(IdbLogger.OBJECT_STORE)) {
+      const logStore = upgradeDb.createObjectStore(IdbLogger.OBJECT_STORE, { keyPath: 'id', autoIncrement: true });
+      logStore.createIndex(IdbLogger.IDX_TIME, 'time');
+      logStore.createIndex(IdbLogger.IDX_ACTION, 'action');
+      logStore.createIndex(IdbLogger.IDX_TYPE, 'type');
+      logStore.createIndex(IdbLogger.IDX_KEY, 'key');
+    }
   }
 
   public queryRunner(config: LogQueryConfig): LogQueryRunner<Types> {

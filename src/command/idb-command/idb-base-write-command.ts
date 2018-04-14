@@ -4,6 +4,7 @@ import { IdbContext } from '../../context/idb-context/idb-context';
 import { CreatedEvent } from '../../event/created-event';
 import { UpdatedEvent } from '../../event/updated-event';
 import { Parent } from '../../model/parent';
+import { RefsWriteUtility } from '../../utility/refs-write';
 import { IdbBaseCommand } from './idb-base-command';
 
 export abstract class IdbBaseWriteCommand<T extends NdbDocument> extends IdbBaseCommand<T | T[]> {
@@ -16,8 +17,8 @@ export abstract class IdbBaseWriteCommand<T extends NdbDocument> extends IdbBase
    * @inheritDoc
    *
    * @param {T|T[]} data
-   * @param {boolean} isPartialUpdate
    * @param {Parent|Parent[]} parent
+   * @param {boolean} isPartialUpdate
    * @returns {Promise<boolean>}
    */
   public async write(data: T | T[], parent?: Parent | Parent[], isPartialUpdate?: boolean): Promise<boolean> {
@@ -38,6 +39,10 @@ export abstract class IdbBaseWriteCommand<T extends NdbDocument> extends IdbBase
         const config = this.schema.getConfig(type);
         const objectStore = transaction.objectStore(type);
         await Promise.all(normalizedData[type].map(async item => {
+          if (parent) {
+            RefsWriteUtility.add(item, parent);
+          }
+
           let key = this.getKey(item, config, true);
           if (isNull(key)) {
             await objectStore.put(item);
