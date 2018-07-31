@@ -15,7 +15,7 @@ export abstract class Context<Types extends DataStoreTypes> {
   private readonly _normalizer: INormalizer;
   private readonly _uniqueKeyCallback: UniqueKeyCallback;
 
-  constructor(protected readonly _schema: ISchema,
+  protected constructor(protected readonly _schema: ISchema,
               protected readonly _normalizerBuilder: INormalizerBuilder,
               protected readonly _denormalizerBuilder: IDenormalizerBuilder) {
     this._normalizer = _normalizerBuilder.build();

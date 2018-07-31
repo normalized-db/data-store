@@ -15,13 +15,18 @@ export class LogEntry<Types extends DataStoreTypes> {
   public readonly type: Types;
   public readonly key: ValidKey;
 
+  public readonly item?: any;
   public readonly parent?: Parent;
 
-  constructor(event: BaseEvent<Types, any>) {
+  constructor(event: BaseEvent<Types, any>, includeData = false) {
     this.time = event.time;
     this.action = event.eventType;
     this.type = event.dataStoreType;
     this.key = event.itemKey;
+
+    if (includeData) {
+      this.item = event.item;
+    }
 
     if (event instanceof CreatedEvent || event instanceof RemovedEvent) {
       this.parent = (event as any).parent;

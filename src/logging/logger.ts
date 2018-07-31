@@ -12,6 +12,8 @@ import { LogQueryRunner } from './query/log-query-runner';
 
 export abstract class Logger<Types extends DataStoreTypes, Ctx extends Context<Types>> implements OnDataChanged {
 
+  protected _config: LogConfig<Types>;
+
   private readonly _eventPipe: EventPipe<Types>;
 
   constructor(protected readonly _context: Ctx) {
@@ -19,6 +21,7 @@ export abstract class Logger<Types extends DataStoreTypes, Ctx extends Context<T
   }
 
   public enable(logConfig?: LogConfig<Types>): EventRegistration<Types> {
+    this._config = logConfig;
     const eventRegistrationBuilder = this._eventPipe.register(this);
     if (logConfig) {
       eventRegistrationBuilder.eventType(logConfig.eventType)
@@ -30,6 +33,7 @@ export abstract class Logger<Types extends DataStoreTypes, Ctx extends Context<T
   }
 
   public disable(): void {
+    this._config = undefined;
     this._eventPipe.unregister(this);
   }
 

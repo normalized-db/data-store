@@ -46,7 +46,7 @@ export class IdbLogger<Types extends DataStoreTypes> extends Logger<Types, IdbCo
   public async ndbOnDataChanged(event: BaseEvent<Types, any>): Promise<void> {
     const transaction = await this._context.write(IdbLogger.OBJECT_STORE);
     const logStore = transaction.objectStore(IdbLogger.OBJECT_STORE);
-    await logStore.put(new LogEntry<Types>(event));
+    await logStore.put(new LogEntry<Types>(event, this._config && this._config.includeData));
   }
 
   public async clear(options?: ClearLogsOptions<Types>): Promise<boolean> {

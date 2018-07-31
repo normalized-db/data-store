@@ -8,6 +8,7 @@ export class LogConfigBuilder<Types extends DataStoreTypes> {
   private _eventType: EventType | EventType[];
   private _dataStoreType: Types | Types[];
   private _itemKey: ValidKey | ValidKey[];
+  private _includeData: boolean;
 
   public eventType(value: EventType | EventType[]): this {
     this._eventType = value;
@@ -24,7 +25,12 @@ export class LogConfigBuilder<Types extends DataStoreTypes> {
     return this;
   }
 
+  public includeData(value: boolean): this {
+    this._includeData = value;
+    return this;
+  }
+
   public build(): LogConfig<Types> {
-    return new LogConfig<Types>(this._eventType, this._dataStoreType, this._itemKey);
+    return new LogConfig<Types>(this._eventType, this._dataStoreType, this._itemKey, this._includeData);
   }
 }

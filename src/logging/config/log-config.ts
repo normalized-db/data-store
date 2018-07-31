@@ -6,6 +6,7 @@ export class LogConfig<Types extends DataStoreTypes> {
 
   constructor(public readonly eventType?: EventType | EventType[],
               public readonly dataStoreType?: Types | Types[],
-              public readonly itemKey?: ValidKey | ValidKey[]) {
+              public readonly itemKey?: ValidKey | ValidKey[],
+              public readonly includeData?: boolean) {
   }
 }

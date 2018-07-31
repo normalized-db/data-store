@@ -1,6 +1,7 @@
 import { ISchema, ISchemaConfig, Schema } from '@normalized-db/core';
 import { IDenormalizerBuilder } from '@normalized-db/denormalizer';
 import { INormalizerBuilder } from '@normalized-db/normalizer';
+import { LogConfig } from '../logging/config/log-config';
 import { DataStoreTypes } from '../model/data-store-types';
 import { Context } from './context';
 
@@ -9,7 +10,7 @@ export abstract class ContextBuilder<Types extends DataStoreTypes, Ctx extends C
   protected _schema: ISchema;
   protected _normalizerBuilder: INormalizerBuilder;
   protected _denormalizerBuilder: IDenormalizerBuilder;
-  protected _isLoggingEnabled = false;
+  protected _isLoggingEnabled: boolean | LogConfig<Types>;
 
   public schema(value: ISchema): this {
     this._schema = value;
@@ -31,7 +32,7 @@ export abstract class ContextBuilder<Types extends DataStoreTypes, Ctx extends C
     return this;
   }
 
-  public enableLogging(value: boolean): this {
+  public enableLogging(value: boolean | LogConfig<Types>): this {
     this._isLoggingEnabled = value;
     return this;
   }
