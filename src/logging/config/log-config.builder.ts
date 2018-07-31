@@ -1,6 +1,7 @@
 import { ValidKey } from '@normalized-db/core';
 import { EventType } from '../../event/utility/event-type';
 import { DataStoreTypes } from '../../model/data-store-types';
+import { LogMode } from '../model/log-mode';
 import { LogConfig } from './log-config';
 
 export class LogConfigBuilder<Types extends DataStoreTypes> {
@@ -8,7 +9,7 @@ export class LogConfigBuilder<Types extends DataStoreTypes> {
   private _eventType: EventType | EventType[];
   private _dataStoreType: Types | Types[];
   private _itemKey: ValidKey | ValidKey[];
-  private _includeData: boolean;
+  private _mode: LogMode;
 
   public eventType(value: EventType | EventType[]): this {
     this._eventType = value;
@@ -25,12 +26,12 @@ export class LogConfigBuilder<Types extends DataStoreTypes> {
     return this;
   }
 
-  public includeData(value: boolean): this {
-    this._includeData = value;
+  public mode(value: LogMode): this {
+    this._mode = value;
     return this;
   }
 
   public build(): LogConfig<Types> {
-    return new LogConfig<Types>(this._eventType, this._dataStoreType, this._itemKey, this._includeData);
+    return new LogConfig<Types>(this._eventType, this._dataStoreType, this._itemKey, this._mode);
   }
 }
