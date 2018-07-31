@@ -52,7 +52,7 @@ export class IdbLogger<Types extends DataStoreTypes> extends Logger<Types, IdbCo
 
   public async clear(options?: ClearLogsOptions<Types>): Promise<boolean> {
     const cmd = new IdbClearLogsCommand<Types>(this._context);
-    const success = cmd.execute(options);
+    const success = await cmd.execute(options);
     this.autoCloseContext(options);
     return success;
   }
