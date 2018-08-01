@@ -1,4 +1,4 @@
-import { isNull, LogMode } from '@normalized-db/core';
+import { isNull } from '@normalized-db/core';
 import { DataStoreTypes } from '../../model/data-store-types';
 import { ContextBuilder } from '../context.builder';
 import { IdbConfig } from './idb-config';
@@ -40,9 +40,7 @@ export class IdbContextBuilder<Types extends DataStoreTypes> extends ContextBuil
     const context = new IdbContext<Types>(this._schema, this._normalizerBuilder, this._denormalizerBuilder, config);
     if (this._enableLogging) {
       const logConfig = typeof this._enableLogging === 'object' ? this._enableLogging : undefined;
-      if (logConfig === undefined || logConfig.mode !== LogMode.Disabled) {
-        context.logger().enable(logConfig);
-      }
+      context.logger().enable(logConfig);
     }
 
     return context;

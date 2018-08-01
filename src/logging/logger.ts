@@ -14,10 +14,10 @@ import { LogQueryRunner } from './query/log-query-runner';
 
 export abstract class Logger<Types extends DataStoreTypes, Ctx extends Context<Types>> implements OnDataChanged {
 
-  protected _config: LogConfig<Types>;
-
   private readonly _eventPipe: EventPipe<Types>;
   private readonly _schemaLogConfig: SchemaLogConfig;
+
+  private _config: LogConfig<Types>;
 
   constructor(protected readonly _context: Ctx) {
     this._eventPipe = this._context.eventPipe;
@@ -29,21 +29,17 @@ export abstract class Logger<Types extends DataStoreTypes, Ctx extends Context<T
    * @param enable
    */
   public enable(enable?: boolean | LogConfig<Types>): EventRegistration<Types> | undefined {
-    this._config = typeof enable === 'object' ? enable : undefined;
-
-    let registration: EventRegistration<Types>;
-    if (enable && (!this._config || this._config.mode !== LogMode.Disabled)) {
-      const eventRegistrationBuilder = this._eventPipe.register(this);
-      if (this._config) {
-        eventRegistrationBuilder.eventType(this._config.eventType)
-            .type(this._config.dataStoreType)
-            .itemKey(this._config.itemKey);
-      }
-
-      registration = eventRegistrationBuilder.build();
+    if (enable) {
+      this._config = typeof enable === 'object' ? enable : undefined;
+      /*
+       * TODO register only for those events needed to log all entities with logging enabled
+       * (consider both, _config and _schemaLogConfig, simplify `isLoggingEnabled` / `getLogMode` and their usages)
+       */
+      return this._eventPipe.register(this).build();
+    } else {
+      this.disable();
+      return undefined;
     }
-
-    return registration;
   }
 
   public disable(): void {
@@ -62,6 +58,13 @@ export abstract class Logger<Types extends DataStoreTypes, Ctx extends Context<T
   public abstract clear(options?: ClearLogsOptions<Types>): Promise<boolean>;
 
   protected isLoggingEnabled(type: Types, eventType: EventType): boolean {
-    return this._schemaLogConfig.isLoggingEnabled(type, eventType);
+    return (this._config && this._config.isLoggingEnabled(type, eventType)) ||
+        this._schemaLogConfig.isLoggingEnabled(type, eventType);
+  }
+
+  protected getLogMode(type: Types): LogMode {
+    return this._config
+        ? this._config.getLogMode(type)
+        : this._schemaLogConfig.getLogMode(type);
   }
 }

@@ -48,7 +48,8 @@ export class IdbLogger<Types extends DataStoreTypes> extends Logger<Types, IdbCo
     if (this.isLoggingEnabled(event.dataStoreType, event.eventType)) {
       const transaction = await this._context.write(IdbLogger.OBJECT_STORE);
       const logStore = transaction.objectStore(IdbLogger.OBJECT_STORE);
-      await logStore.put(new LogEntry<Types>(event, this._config && this._config.mode === LogMode.Full));
+      const includeData = this.getLogMode(event.dataStoreType) === LogMode.Full;
+      await logStore.put(new LogEntry<Types>(event, includeData));
     }
   }
 
