@@ -1,3 +1,4 @@
+import { LogMode } from '@normalized-db/core';
 import { UpgradeDB } from 'idb';
 import { IdbContext } from '../../context/idb-context/idb-context';
 import { BaseEvent } from '../../event/base-event';
@@ -44,14 +45,17 @@ export class IdbLogger<Types extends DataStoreTypes> extends Logger<Types, IdbCo
 
   // TODO auto-close context - other writing commands still could need the db-connection
   public async ndbOnDataChanged(event: BaseEvent<Types, any>): Promise<void> {
-    const transaction = await this._context.write(IdbLogger.OBJECT_STORE);
-    const logStore = transaction.objectStore(IdbLogger.OBJECT_STORE);
-    await logStore.put(new LogEntry<Types>(event));
+    if (this.isLoggingEnabled(event.dataStoreType, event.eventType)) {
+      const transaction = await this._context.write(IdbLogger.OBJECT_STORE);
+      const logStore = transaction.objectStore(IdbLogger.OBJECT_STORE);
+      const includeData = this.getLogMode(event.dataStoreType) === LogMode.Full;
+      await logStore.put(new LogEntry<Types>(event, includeData));
+    }
   }
 
   public async clear(options?: ClearLogsOptions<Types>): Promise<boolean> {
     const cmd = new IdbClearLogsCommand<Types>(this._context);
-    const success = cmd.execute(options);
+    const success = await cmd.execute(options);
     this.autoCloseContext(options);
     return success;
   }

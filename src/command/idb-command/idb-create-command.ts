@@ -26,9 +26,11 @@ export class IdbCreateCommand<T extends NdbDocument> extends IdbBaseWriteCommand
     }
 
     if (Array.isArray(data)) {
-      data.forEach(this.setKey);
+      for (let i = 0; i < data.length; i++) {
+        await this.setKey(data[i]);
+      }
     } else {
-      this.setKey(data);
+      await this.setKey(data);
     }
 
     return super.write(data, parent);
@@ -39,11 +41,11 @@ export class IdbCreateCommand<T extends NdbDocument> extends IdbBaseWriteCommand
    *
    * @param {T} item
    */
-  private setKey(item: T): void {
+  private async setKey(item: T): Promise<void> {
     if (this._typeConfig.autoKey) {
       delete item[this._typeConfig.key];
     } else {
-      const newKey = this._context.newKey(this._type);
+      const newKey = await this._context.newKey(this._type);
       if (isNull(newKey)) {
         throw new MissingKeyError(this._type, this._typeConfig.key);
       }

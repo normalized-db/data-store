@@ -22,7 +22,7 @@ export abstract class IdbBaseWriteCommand<T extends NdbDocument> extends IdbBase
    * @returns {Promise<boolean>}
    */
   public async write(data: T | T[], parent?: Parent | Parent[], isPartialUpdate?: boolean): Promise<boolean> {
-    const normalizedData = this._context.normalizer().apply(this._type, data);
+    const normalizedData = await this._context.normalizer().apply(this._type, data);
     const involvedTypes = [...this.getTypes(normalizedData), ...this.getTypes(normalizedData)];
     if (parent) {
       if (Array.isArray(parent)) {
