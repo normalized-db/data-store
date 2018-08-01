@@ -27,7 +27,7 @@ export class LogConfigBuilder<Types extends DataStoreTypes> {
     return this;
   }
 
-  public build(): LogConfig<Types> { // TODO `: ILogConfig
+  public build(): LogConfig<Types> {
     return new LogConfig<Types>(this._types, this._defaultConfig);
   }
 }

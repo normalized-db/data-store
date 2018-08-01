@@ -1,4 +1,4 @@
-import { EventType, LogMode } from '@normalized-db/core';
+import { LogMode } from '@normalized-db/core';
 import { SchemaLogConfig } from '@normalized-db/core/lib/src/schema/schema-log-config';
 import { Context } from '../context/context';
 import { BaseEvent } from '../event/base-event';
@@ -29,7 +29,7 @@ export abstract class Logger<Types extends DataStoreTypes, Ctx extends Context<T
    * @param enable
    */
   public enable(enable?: boolean | LogConfig<Types>): EventRegistration<Types> | undefined {
-    if (enable) {
+    if (enable !== false) {
       this._config = typeof enable === 'object' ? enable : undefined;
       /*
        * TODO register only for those events needed to log all entities with logging enabled
@@ -57,9 +57,9 @@ export abstract class Logger<Types extends DataStoreTypes, Ctx extends Context<T
 
   public abstract clear(options?: ClearLogsOptions<Types>): Promise<boolean>;
 
-  protected isLoggingEnabled(type: Types, eventType: EventType): boolean {
-    return (this._config && this._config.isLoggingEnabled(type, eventType)) ||
-        this._schemaLogConfig.isLoggingEnabled(type, eventType);
+  protected isLoggingEnabled(type: Types, event: BaseEvent<Types, any>): boolean {
+    return (this._config && this._config.isLoggingEnabled(type, event.eventType, event.itemKey)) ||
+        this._schemaLogConfig.isLoggingEnabled(type, event.eventType, event.itemKey);
   }
 
   protected getLogMode(type: Types): LogMode {

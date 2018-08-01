@@ -1,7 +1,7 @@
-import { EventType, IStoreLogConfig, LogMode, StoreLogBuilder } from '@normalized-db/core';
+import { EventType, ILogConfig, IStoreLogConfig, LogMode, StoreLogBuilder, ValidKey } from '@normalized-db/core';
 import { DataStoreTypes } from '../../model/data-store-types';
 
-export class LogConfig<Types extends DataStoreTypes> { // TODO `implements ILogConfig`
+export class LogConfig<Types extends DataStoreTypes> implements ILogConfig {
 
   private readonly _defaultConfig: IStoreLogConfig;
   private readonly _types = new Map<Types, IStoreLogConfig>();
@@ -34,13 +34,26 @@ export class LogConfig<Types extends DataStoreTypes> { // TODO `implements ILogC
     return types;
   }
 
-  public isLoggingEnabled(type: Types, eventType?: EventType): boolean {
+  public getKeys(type: Types, orDefault?: ValidKey[]): ValidKey[] {
+    let keys: ValidKey[];
     const config = this.getConfig(type);
-    let isEnabled = config && config.mode !== LogMode.Disabled;
-    if (isEnabled && eventType) {
-      isEnabled = Array.isArray(config.eventSelection)
-          ? config.eventSelection.indexOf(eventType) >= 0
-          : config.eventSelection === eventType;
+    if (config) {
+      keys = config.keys;
+    }
+    return keys && keys.length > 0 ? keys : orDefault;
+  }
+
+  public isLoggingEnabled(type: Types, eventType?: EventType, key?: ValidKey): boolean {
+    const logConfig = this.getConfig(type);
+    let isEnabled = logConfig && logConfig.mode !== LogMode.Disabled;
+    if (isEnabled && eventType && logConfig.eventSelection) {
+      isEnabled = Array.isArray(logConfig.eventSelection)
+          ? logConfig.eventSelection.length === 0 || logConfig.eventSelection.indexOf(eventType) >= 0
+          : logConfig.eventSelection === eventType;
+    }
+
+    if (isEnabled && key && logConfig.keys && logConfig.keys.length > 0) {
+      isEnabled = logConfig.keys.indexOf(key) >= 0;
     }
 
     return isEnabled;
