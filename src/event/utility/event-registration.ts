@@ -1,36 +1,35 @@
-import { isNull, ValidKey } from '@normalized-db/core';
+import { EventSelection, EventType, isNull, ValidKey } from '@normalized-db/core';
 import { DataStoreTypes } from '../../model/data-store-types';
 import { BaseEvent } from '../base-event';
-import { EventType } from './event-type';
 import { OnDataChanged } from './on-data-changed';
 
 export class EventRegistration<Types extends DataStoreTypes> {
 
   constructor(private readonly _listener: OnDataChanged,
-              private _eventType?: EventType | EventType[],
+              private _eventSelection?: EventSelection,
               private _dataStoreType?: Types | Types[],
               private _itemKey?: ValidKey | ValidKey[]) {
   }
 
   public addEventType(type: EventType): void {
-    if (!this._eventType) {
-      this._eventType = type;
-    } else if (Array.isArray(this._eventType)) {
-      this._eventType.push(type);
+    if (!this._eventSelection) {
+      this._eventSelection = type;
+    } else if (Array.isArray(this._eventSelection)) {
+      this._eventSelection.push(type);
     } else {
-      this._eventType = [this._eventType, type];
+      this._eventSelection = [this._eventSelection, type];
     }
   }
 
   public removeEventType(type: EventType): void {
-    if (this._eventType) {
-      if (Array.isArray(this._eventType)) {
-        const index = this._eventType.indexOf(type);
+    if (this._eventSelection) {
+      if (Array.isArray(this._eventSelection)) {
+        const index = this._eventSelection.indexOf(type);
         if (index >= 0) {
-          this._eventType.splice(index, 1);
+          this._eventSelection.splice(index, 1);
         }
-      } else if (this._eventType === type) {
-        this._eventType = null;
+      } else if (this._eventSelection === type) {
+        this._eventSelection = undefined;
       }
     }
   }
@@ -53,7 +52,7 @@ export class EventRegistration<Types extends DataStoreTypes> {
           this._dataStoreType.splice(index, 1);
         }
       } else if (this._dataStoreType === type) {
-        this._dataStoreType = null;
+        this._dataStoreType = undefined;
       }
     }
   }
@@ -76,7 +75,7 @@ export class EventRegistration<Types extends DataStoreTypes> {
           this._itemKey.splice(index, 1);
         }
       } else if (this._itemKey === key) {
-        this._itemKey = null;
+        this._itemKey = undefined;
       }
     }
   }
@@ -92,12 +91,12 @@ export class EventRegistration<Types extends DataStoreTypes> {
       }
     }
 
-    if (this._eventType) {
-      if (Array.isArray(this._eventType)) {
-        if (this._eventType.indexOf(event.eventType) < 0) {
+    if (this._eventSelection) {
+      if (Array.isArray(this._eventSelection)) {
+        if (this._eventSelection.indexOf(event.eventType) < 0) {
           return false;
         }
-      } else if (this._eventType !== event.eventType) {
+      } else if (this._eventSelection !== event.eventType) {
         return false;
       }
     }

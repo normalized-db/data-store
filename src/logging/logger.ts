@@ -1,3 +1,5 @@
+import { EventType, LogMode } from '@normalized-db/core';
+import { SchemaLogConfig } from '@normalized-db/core/lib/src/schema/schema-log-config';
 import { Context } from '../context/context';
 import { BaseEvent } from '../event/base-event';
 import { EventPipe } from '../event/utility/event-pipe';
@@ -13,23 +15,35 @@ import { LogQueryRunner } from './query/log-query-runner';
 export abstract class Logger<Types extends DataStoreTypes, Ctx extends Context<Types>> implements OnDataChanged {
 
   private readonly _eventPipe: EventPipe<Types>;
+  private readonly _schemaLogConfig: SchemaLogConfig;
+
+  private _config: LogConfig<Types>;
 
   constructor(protected readonly _context: Ctx) {
     this._eventPipe = this._context.eventPipe;
+    this._schemaLogConfig = this._context.schema().getLogConfig();
   }
 
-  public enable(logConfig?: LogConfig<Types>): EventRegistration<Types> {
-    const eventRegistrationBuilder = this._eventPipe.register(this);
-    if (logConfig) {
-      eventRegistrationBuilder.eventType(logConfig.eventType)
-          .type(logConfig.dataStoreType)
-          .itemKey(logConfig.itemKey);
+  /**
+   *
+   * @param enable
+   */
+  public enable(enable?: boolean | LogConfig<Types>): EventRegistration<Types> | undefined {
+    if (enable) {
+      this._config = typeof enable === 'object' ? enable : undefined;
+      /*
+       * TODO register only for those events needed to log all entities with logging enabled
+       * (consider both, _config and _schemaLogConfig, simplify `isLoggingEnabled` / `getLogMode` and their usages)
+       */
+      return this._eventPipe.register(this).build();
+    } else {
+      this.disable();
+      return undefined;
     }
-
-    return eventRegistrationBuilder.build();
   }
 
   public disable(): void {
+    this._config = undefined;
     this._eventPipe.unregister(this);
   }
 
@@ -42,4 +56,15 @@ export abstract class Logger<Types extends DataStoreTypes, Ctx extends Context<T
   public abstract ndbOnDataChanged(event: BaseEvent<Types, any>): void | Promise<void>;
 
   public abstract clear(options?: ClearLogsOptions<Types>): Promise<boolean>;
+
+  protected isLoggingEnabled(type: Types, eventType: EventType): boolean {
+    return (this._config && this._config.isLoggingEnabled(type, eventType)) ||
+        this._schemaLogConfig.isLoggingEnabled(type, eventType);
+  }
+
+  protected getLogMode(type: Types): LogMode {
+    return this._config
+        ? this._config.getLogMode(type)
+        : this._schemaLogConfig.getLogMode(type);
+  }
 }

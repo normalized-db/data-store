@@ -38,8 +38,9 @@ export class IdbContextBuilder<Types extends DataStoreTypes> extends ContextBuil
     };
 
     const context = new IdbContext<Types>(this._schema, this._normalizerBuilder, this._denormalizerBuilder, config);
-    if (this._isLoggingEnabled) {
-      context.logger().enable();
+    if (this._enableLogging) {
+      const logConfig = typeof this._enableLogging === 'object' ? this._enableLogging : undefined;
+      context.logger().enable(logConfig);
     }
 
     return context;

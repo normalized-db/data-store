@@ -1,30 +1,33 @@
-import { ValidKey } from '@normalized-db/core';
-import { EventType } from '../../event/utility/event-type';
+import { IStoreLogConfig } from '@normalized-db/core';
 import { DataStoreTypes } from '../../model/data-store-types';
 import { LogConfig } from './log-config';
 
 export class LogConfigBuilder<Types extends DataStoreTypes> {
 
-  private _eventType: EventType | EventType[];
-  private _dataStoreType: Types | Types[];
-  private _itemKey: ValidKey | ValidKey[];
+  private readonly _types = new Map<Types, IStoreLogConfig>();
 
-  public eventType(value: EventType | EventType[]): this {
-    this._eventType = value;
+  private _defaultConfig: IStoreLogConfig;
+
+  public setDefault(config: IStoreLogConfig): this {
+    this._defaultConfig = config;
     return this;
   }
 
-  public type(value: Types | Types[]): this {
-    this._dataStoreType = value;
+  public hasType(type: Types): boolean {
+    return this._types.has(type);
+  }
+
+  public setType(type: Types, config: IStoreLogConfig): this {
+    this._types.set(type, config);
     return this;
   }
 
-  public itemKey(value: ValidKey | ValidKey[]): this {
-    this._itemKey = value;
+  public removeType(type: Types): this {
+    this._types.delete(type);
     return this;
   }
 
-  public build(): LogConfig<Types> {
-    return new LogConfig<Types>(this._eventType, this._dataStoreType, this._itemKey);
+  public build(): LogConfig<Types> { // TODO `: ILogConfig
+    return new LogConfig<Types>(this._types, this._defaultConfig);
   }
 }
