@@ -1,4 +1,4 @@
-import { ISchema, ISchemaConfig, Schema } from '@normalized-db/core';
+import { ISchema, ISchemaConfig, isNull, Schema } from '@normalized-db/core';
 import { IDenormalizerBuilder } from '@normalized-db/denormalizer';
 import { INormalizerBuilder } from '@normalized-db/normalizer';
 import { LogConfig } from '../logging/config/log-config';
@@ -33,7 +33,7 @@ export abstract class ContextBuilder<Types extends DataStoreTypes, Ctx extends C
   }
 
   public enableLogging(value?: boolean | LogConfig<Types>): this {
-    this._enableLogging = value;
+    this._enableLogging = isNull(value) ? true : value;
     return this;
   }
 

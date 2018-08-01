@@ -58,8 +58,9 @@ export abstract class Logger<Types extends DataStoreTypes, Ctx extends Context<T
   public abstract clear(options?: ClearLogsOptions<Types>): Promise<boolean>;
 
   protected isLoggingEnabled(type: Types, event: BaseEvent<Types, any>): boolean {
-    return (this._config && this._config.isLoggingEnabled(type, event.eventType, event.itemKey)) ||
-        this._schemaLogConfig.isLoggingEnabled(type, event.eventType, event.itemKey);
+    return this._config
+        ? this._config.isLoggingEnabled(type, event.eventType, event.itemKey)
+        : this._schemaLogConfig.isLoggingEnabled(type, event.eventType, event.itemKey);
   }
 
   protected getLogMode(type: Types): LogMode {

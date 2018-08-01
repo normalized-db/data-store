@@ -44,6 +44,7 @@ export class IdbClearCommand extends IdbBaseCommand<IdbContext<any>> implements 
 
     try {
       involvedTypes.forEach(osn => transaction.objectStore(osn).clear());
+      await transaction.complete;
     } catch (e) {
       try {
         transaction.abort();
@@ -54,7 +55,9 @@ export class IdbClearCommand extends IdbBaseCommand<IdbContext<any>> implements 
       return false;
     }
 
-    this._eventQueue.enqueue(new ClearedEvent(involvedTypes.join(';')));
+    involvedTypes.forEach(involvedType =>
+        this._eventQueue.enqueue(new ClearedEvent(involvedType)));
+
     this.onSuccess();
     return true;
   }

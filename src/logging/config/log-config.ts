@@ -1,4 +1,12 @@
-import { EventType, ILogConfig, IStoreLogConfig, LogMode, StoreLogBuilder, ValidKey } from '@normalized-db/core';
+import {
+  EventType,
+  ILogConfig,
+  isNull,
+  IStoreLogConfig,
+  LogMode,
+  StoreLogBuilder,
+  ValidKey
+} from '@normalized-db/core';
 import { DataStoreTypes } from '../../model/data-store-types';
 
 export class LogConfig<Types extends DataStoreTypes> implements ILogConfig {
@@ -9,6 +17,21 @@ export class LogConfig<Types extends DataStoreTypes> implements ILogConfig {
   public constructor(types: Map<Types, IStoreLogConfig>, defaultConfig?: IStoreLogConfig) {
     this._types = types;
     this._defaultConfig = defaultConfig || new StoreLogBuilder().build();
+
+    this._types.forEach(config => {
+      if (isNull(config.mode)) {
+        config.mode = this._defaultConfig.mode;
+      }
+
+      if ((!config.eventSelection || (Array.isArray(config.eventSelection) && config.eventSelection.length === 0)) &&
+          this._defaultConfig.eventSelection) {
+        config.eventSelection = this._defaultConfig.eventSelection;
+      }
+
+      if ((!config.keys || config.keys.length === 0) && this._defaultConfig.keys) {
+        config.keys = this._defaultConfig.keys;
+      }
+    });
   }
 
   public hasType(type: Types): boolean {
@@ -52,7 +75,7 @@ export class LogConfig<Types extends DataStoreTypes> implements ILogConfig {
           : logConfig.eventSelection === eventType;
     }
 
-    if (isEnabled && key && logConfig.keys && logConfig.keys.length > 0) {
+    if (isEnabled && !isNull(key) && logConfig.keys && logConfig.keys.length > 0) {
       isEnabled = logConfig.keys.indexOf(key) >= 0;
     }
 
