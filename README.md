@@ -3,7 +3,7 @@
 `JavaScript` data stores for `IndexedDB`-wrapper using normalized data (implemented with `TypeScript`).
 
  - **Author**: Sandro Schmid ([saseb.schmid@gmail.com](<mailto:saseb.schmid@gmail.com>))
- - **Version**: 2.5.0-beta.2
+ - **Version**: 2.5.0-beta.3
 
 ## Versioning
 
