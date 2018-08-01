@@ -40,8 +40,8 @@ export abstract class Context<Types extends DataStoreTypes> {
     return this._denormalizerBuilder;
   }
 
-  public newKey(type: string): ValidKey | null {
-    return this._uniqueKeyCallback ? this._uniqueKeyCallback(type) : null;
+  public newKey(type: string): ValidKey | Promise<ValidKey> | undefined {
+    return this._uniqueKeyCallback ? this._uniqueKeyCallback(type) : undefined;
   }
 
   public abstract queryRunnerFactory(): QueryRunnerFactory;
