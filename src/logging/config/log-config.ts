@@ -75,7 +75,7 @@ export class LogConfig<Types extends DataStoreTypes> implements ILogConfig {
           : logConfig.eventSelection === eventType;
     }
 
-    if (isEnabled && key && logConfig.keys && logConfig.keys.length > 0) {
+    if (isEnabled && !isNull(key) && logConfig.keys && logConfig.keys.length > 0) {
       isEnabled = logConfig.keys.indexOf(key) >= 0;
     }
 
