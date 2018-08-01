@@ -10,7 +10,7 @@ export abstract class ContextBuilder<Types extends DataStoreTypes, Ctx extends C
   protected _schema: ISchema;
   protected _normalizerBuilder: INormalizerBuilder;
   protected _denormalizerBuilder: IDenormalizerBuilder;
-  protected _logConfig: boolean | LogConfig<Types>;
+  protected _enableLogging?: boolean | LogConfig<Types>;
 
   public schema(value: ISchema): this {
     this._schema = value;
@@ -32,8 +32,8 @@ export abstract class ContextBuilder<Types extends DataStoreTypes, Ctx extends C
     return this;
   }
 
-  public enableLogging(value: boolean | LogConfig<Types>): this {
-    this._logConfig = value;
+  public enableLogging(value?: boolean | LogConfig<Types>): this {
+    this._enableLogging = value;
     return this;
   }
 

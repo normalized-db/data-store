@@ -1,6 +1,5 @@
-import { ValidKey } from '@normalized-db/core';
+import { EventType, ValidKey } from '@normalized-db/core';
 import { DataStoreTypes } from '../model/data-store-types';
-import { EventType } from './utility/event-type';
 
 export abstract class BaseEvent<Types extends DataStoreTypes, T> {
 

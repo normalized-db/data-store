@@ -1,18 +1,16 @@
-import { ValidKey } from '@normalized-db/core';
-import { EventType } from '../../event/utility/event-type';
+import { EventSelection, LogMode, ValidKey } from '@normalized-db/core';
 import { DataStoreTypes } from '../../model/data-store-types';
-import { LogMode } from '../model/log-mode';
 import { LogConfig } from './log-config';
 
 export class LogConfigBuilder<Types extends DataStoreTypes> {
 
-  private _eventType: EventType | EventType[];
+  private _eventSelection: EventSelection;
   private _dataStoreType: Types | Types[];
   private _itemKey: ValidKey | ValidKey[];
   private _mode: LogMode;
 
-  public eventType(value: EventType | EventType[]): this {
-    this._eventType = value;
+  public eventType(value: EventSelection): this {
+    this._eventSelection = value;
     return this;
   }
 
@@ -32,6 +30,6 @@ export class LogConfigBuilder<Types extends DataStoreTypes> {
   }
 
   public build(): LogConfig<Types> {
-    return new LogConfig<Types>(this._eventType, this._dataStoreType, this._itemKey, this._mode);
+    return new LogConfig<Types>(this._eventSelection, this._dataStoreType, this._itemKey, this._mode);
   }
 }

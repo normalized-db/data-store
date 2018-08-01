@@ -1,3 +1,4 @@
+import { LogMode } from '@normalized-db/core';
 import { UpgradeDB } from 'idb';
 import { IdbContext } from '../../context/idb-context/idb-context';
 import { BaseEvent } from '../../event/base-event';
@@ -6,7 +7,6 @@ import { DataStoreTypes } from '../../model/data-store-types';
 import { ClearLogsOptions } from '../clear-command/clear-logs-options';
 import { Logger } from '../logger';
 import { LogEntry } from '../model/log-entry';
-import { LogMode } from '../model/log-mode';
 import { LogQueryConfig } from '../query/log-query-config';
 import { LogQueryRunner } from '../query/log-query-runner';
 import { IdbClearLogsCommand } from './idb-clear-logs-command';
@@ -45,9 +45,11 @@ export class IdbLogger<Types extends DataStoreTypes> extends Logger<Types, IdbCo
 
   // TODO auto-close context - other writing commands still could need the db-connection
   public async ndbOnDataChanged(event: BaseEvent<Types, any>): Promise<void> {
-    const transaction = await this._context.write(IdbLogger.OBJECT_STORE);
-    const logStore = transaction.objectStore(IdbLogger.OBJECT_STORE);
-    await logStore.put(new LogEntry<Types>(event, this._config && this._config.mode === LogMode.Full));
+    if (this.isLoggingEnabled(event.dataStoreType, event.eventType)) {
+      const transaction = await this._context.write(IdbLogger.OBJECT_STORE);
+      const logStore = transaction.objectStore(IdbLogger.OBJECT_STORE);
+      await logStore.put(new LogEntry<Types>(event, this._config && this._config.mode === LogMode.Full));
+    }
   }
 
   public async clear(options?: ClearLogsOptions<Types>): Promise<boolean> {
