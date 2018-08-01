@@ -45,7 +45,7 @@ export class IdbLogger<Types extends DataStoreTypes> extends Logger<Types, IdbCo
 
   // TODO auto-close context - other writing commands still could need the db-connection
   public async ndbOnDataChanged(event: BaseEvent<Types, any>): Promise<void> {
-    if (this.isLoggingEnabled(event.dataStoreType, event.eventType)) {
+    if (this.isLoggingEnabled(event.dataStoreType, event)) {
       const transaction = await this._context.write(IdbLogger.OBJECT_STORE);
       const logStore = transaction.objectStore(IdbLogger.OBJECT_STORE);
       const includeData = this.getLogMode(event.dataStoreType) === LogMode.Full;
