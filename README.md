@@ -1,5 +1,8 @@
 # @normalized-db/data-store
 
+> [!WARNING]  
+> This project has been deprecated in favor of [@normalized-db/ndb](https://github.com/normalized-db/ndb).
+
 `JavaScript` data stores for `IndexedDB`-wrapper using normalized data (implemented with `TypeScript`).
 
  - **Author**: Sandro Schmid ([saseb.schmid@gmail.com](<mailto:saseb.schmid@gmail.com>))
